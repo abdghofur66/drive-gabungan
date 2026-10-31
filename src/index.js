@@ -767,6 +767,23 @@ async function route(req, env) {
       return json({ ok: true, id, url: url.origin + '/s/' + id });
     }
     if (m === 'DELETE') { await env.DB.prepare('DELETE FROM links WHERE id=?').bind(qp('id')).run(); return json({ ok: true }); }
+    if (m === 'PATCH') {
+      const b = await body(req);
+      const L = await env.DB.prepare('SELECT * FROM links WHERE id=?').bind(b.id).first();
+      if (!L) throw new HttpError(404, 'Link tidak ditemukan');
+      let { expires, pw_salt, pw_hash, max_dl, dl, mode, id } = L;
+      if (b.minutes !== undefined) expires = Number(b.minutes) > 0 ? Date.now() + Number(b.minutes) * 60000 : null;
+      if (b.mode) mode = b.mode === 'view' ? 'view' : 'download';
+      if (b.max !== undefined) max_dl = Number(b.max) > 0 ? Number(b.max) : null;
+      if (b.password === null) { pw_salt = null; pw_hash = null; }
+      else if (typeof b.password === 'string' && b.password) { pw_salt = randHex(16); pw_hash = await hashPw(b.password, pw_salt); }
+      if (b.reset) dl = 0;
+      if (b.regen) id = b64u(crypto.getRandomValues(new Uint8Array(6)));
+      await env.DB.prepare('UPDATE links SET id=?, expires=?, pw_salt=?, pw_hash=?, max_dl=?, dl=?, mode=? WHERE id=?')
+        .bind(id, expires, pw_salt, pw_hash, max_dl, dl, mode, b.id).run();
+      await logAct(env, 'link', 'Link diperbarui: ' + L.name, L.acc_id);
+      return json({ ok: true, id, url: url.origin + '/s/' + id });
+    }
     const r = (await env.DB.prepare('SELECT id,acc_id,file_id,name,mime,size,expires,max_dl,dl,created,mode, pw_hash IS NOT NULL AS locked FROM links ORDER BY created DESC').all()).results || [];
     return json({ links: r.map((x) => ({ ...x, url: url.origin + '/s/' + x.id, active: !((x.expires && x.expires < Date.now()) || (x.max_dl && x.dl >= x.max_dl)) })) });
   }

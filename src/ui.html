@@ -201,6 +201,15 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sh-p .r{font-size:12.5px;color:var(--ink2)}
 .dialog.wide{max-width:540px}
+.newtag{display:inline-flex;align-items:center;margin-left:8px;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(90deg,#2f6bff,#17a36b);border-radius:99px;padding:2px 7px;vertical-align:middle}
+.menu .newtag{margin-left:auto}
+.nav button .newtag{margin-left:auto}
+.chip .newtag{margin-left:6px}
+.newdot{position:absolute;top:8px;left:8px;width:8px;height:8px;border-radius:50%;background:#17a36b;box-shadow:0 0 0 2px var(--bg)}
+.infobox{display:flex;gap:10px;align-items:flex-start;background:var(--pri-soft);border-radius:12px;padding:12px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.infobox svg{color:var(--pri);width:18px;height:18px;flex-shrink:0;margin-top:1px}
+.infobox b:first-child{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+.hangus{color:var(--danger)}
 .qk{display:flex;gap:6px;flex-wrap:wrap;margin-top:-2px}
 .qk .chip{height:30px;font-size:12px}
 .bell{position:relative}
@@ -643,8 +652,8 @@ footer img{width:18px;height:18px}
       <button id="navShared" data-sp="shared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
       <button id="navStarred" data-sp="starred"><svg class="i"><use href="#i-star"/></svg>Berbintang</button>
       <button id="navTrash" data-sp="trash"><svg class="i"><use href="#i-trash"/></svg>Sampah</button>
-      <button id="navLinks"><svg class="i"><use href="#i-link"/></svg>Link berbagi</button>
-      <button id="navBackup"><svg class="i"><use href="#i-backup"/></svg>Cadangan</button>
+      <button id="navLinks"><svg class="i"><use href="#i-link"/></svg>Link berbagi<span class="newtag" data-new="links">Baru</span></button>
+      <button id="navBackup"><svg class="i"><use href="#i-backup"/></svg>Cadangan<span class="newtag" data-new="backup">Baru</span></button>
     </nav>
 
     <section class="store" aria-label="Penyimpanan gabungan">
@@ -678,7 +687,7 @@ footer img{width:18px;height:18px}
         <kbd id="qk">/</kbd>
         <button class="icon-btn x hidden" id="qx" aria-label="Hapus pencarian" title="Hapus pencarian"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
-      <button class="icon-btn bell" id="bellBtn" aria-label="Notifikasi"><svg class="i"><use href="#i-bell"/></svg><span class="badge hidden" id="bellN"></span></button>
+      <button class="icon-btn bell" id="bellBtn" aria-label="Notifikasi"><svg class="i"><use href="#i-bell"/></svg><span class="badge hidden" id="bellN"></span><span class="newdot" data-new="bell"></span></button>
       <button class="icon-btn" id="moreBtn" aria-label="Menu akun"><svg class="i"><use href="#i-dots"/></svg></button>
       <button class="btn pri" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>Baru</button>
       <input type="file" id="fileIn" multiple class="hidden">
@@ -704,7 +713,7 @@ footer img{width:18px;height:18px}
       </div>
       <div class="chips" id="chips"></div>
       <div class="sfilt hidden" id="sfilt">
-        <button class="chip" id="fContent">Cari juga di isi file</button>
+        <button class="chip" id="fContent">Cari juga di isi file<span class="newtag" data-new="search">Baru</span></button>
         <select class="sort" id="fWhen" aria-label="Waktu diubah"><option value="">Kapan saja</option><option value="1">Hari ini</option><option value="7">7 hari terakhir</option><option value="30">30 hari terakhir</option><option value="365">Setahun terakhir</option></select>
         <select class="sort" id="fSize" aria-label="Ukuran"><option value="">Semua ukuran</option><option value="10">Lebih dari 10 MB</option><option value="100">Lebih dari 100 MB</option><option value="1024">Lebih dari 1 GB</option></select>
         <select class="sort" id="fOwner" aria-label="Pemilik"><option value="">Pemilik siapa saja</option><option value="me">Milik saya</option><option value="others">Milik orang lain</option></select>
@@ -766,6 +775,11 @@ function avatar(a, size = 28, ring = true) {
     ? `<img class="avt" src="${esc(a.photo)}" alt="" referrerpolicy="no-referrer" style="${st}" title="${esc(a.email)}" onerror="this.outerHTML='<span class=&quot;avt&quot; style=&quot;${st};background:${a.color}&quot;>${esc(a.email[0].toUpperCase())}</span>'">`
     : `<span class="avt" style="${st};background:${a.color};font-size:${Math.round(size * 0.45)}px" title="${esc(a.email)}">${esc(a.email[0].toUpperCase())}</span>`;
 }
+// tanda "Baru" untuk fitur baru; hilang setelah fitur dicoba
+const NEWF = ['links', 'backup', 'pins', 'bell', 'search', 'transfer', 'details'];
+const isNew = (k) => NEWF.includes(k) && !store('seen_' + k);
+const newTag = (k) => (isNew(k) ? '<span class="newtag">Baru</span>' : '');
+function seen(k) { if (!isNew(k)) return; store('seen_' + k, 1); document.querySelectorAll(`[data-new="${k}"]`).forEach((x) => x.remove()); }
 const dur = (ms) => { if (!ms) return ''; const t = Math.round(ms / 1000), h = Math.floor(t / 3600), m2 = Math.floor((t % 3600) / 60), s2 = String(t % 60).padStart(2, '0'); return h ? `${h}:${String(m2).padStart(2, '0')}:${s2}` : `${m2}:${s2}`; };
 async function api(path, opt = {}) {
   const r = await fetch(path, { credentials: 'same-origin', ...opt });
@@ -1467,9 +1481,9 @@ function popMenu(items, anchor, x, y, head) {
   closeMenu();
   const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu');
   if (head) m.innerHTML = `<div class="hd">${head}</div>`;
-  items.filter(Boolean).forEach(([icon, t, fn, cls]) => {
+  items.filter(Boolean).forEach(([icon, t, fn, cls, nk]) => {
     const b = document.createElement('button'); b.setAttribute('role', 'menuitem');
-    if (cls) b.className = cls; b.innerHTML = ic(icon) + esc(t);
+    if (cls) b.className = cls; b.innerHTML = ic(icon) + esc(t) + (nk ? newTag(nk) : '');
     b.onclick = (e) => { e.stopPropagation(); closeMenu(); fn(); }; m.appendChild(b);
   });
   m.onclick = (e) => e.stopPropagation();
@@ -1498,12 +1512,12 @@ function showMenu(f, anchor, x, y) {
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
     ['share', 'Bagikan', () => share(f)],
     ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
-    !isF && ['link', 'Buat link berbagi', () => createLink(f)],
-    isF && [ 'pin', S.pins.some((x) => x.id === f.id) ? 'Lepas dari sidebar' : 'Sematkan di sidebar', () => togglePin(f)],
-    isF && S.accounts.filter((a) => !a.error).length > 1 && ['backup', 'Cadangkan folder ini', () => newBackup(f)],
+    !isF && ['link', 'Buat link berbagi', () => createLink(f), '', 'links'],
+    isF && ['pin', S.pins.some((x) => x.id === f.id) ? 'Lepas dari sidebar' : 'Sematkan di sidebar', () => { seen('pins'); togglePin(f); }, '', 'pins'],
+    isF && S.accounts.filter((a) => !a.error).length > 1 && ['backup', 'Cadangkan folder ini', () => newBackup(f), '', 'backup'],
     ['check', 'Pilih', () => toggleSel(f)],
-    ['info', 'Detail', () => details(f)],
-    S.accounts.filter((a) => !a.error).length > 1 && ['swap', 'Pindah/salin ke akun lain', () => transferDialog([f])],
+    ['info', 'Detail', () => { seen('details'); details(f); }, '', 'details'],
+    S.accounts.filter((a) => !a.error).length > 1 && ['swap', 'Pindah/salin ke akun lain', () => { seen('transfer'); transferDialog([f]); }, '', 'transfer'],
     ['edit', 'Ganti nama', () => rename(f)],
     ['move', 'Pindahkan', () => move(f)],
     ['trash', 'Pindahkan ke sampah', () => trash(f), 'danger'],
@@ -2105,7 +2119,7 @@ function syncFilters() {
   $('#fContent').classList.toggle('on', S.f.content);
   $('#fWhen').value = S.f.when; $('#fSize').value = S.f.size; $('#fOwner').value = S.f.owner;
 }
-$('#fContent').onclick = () => { S.f.content = !S.f.content; syncFilters(); load(); };
+$('#fContent').onclick = () => { seen('search'); S.f.content = !S.f.content; syncFilters(); load(); };
 $('#fWhen').onchange = () => { S.f.when = $('#fWhen').value; load(); };
 $('#fSize').onchange = () => { S.f.size = $('#fSize').value; render(); };
 $('#fOwner').onchange = () => { S.f.owner = $('#fOwner').value; load(); };
@@ -2134,7 +2148,8 @@ $('#pins').addEventListener('click', (e) => {
 function createLink(f) {
   const md = dialog({
     title: 'Buat link berbagi', desc: `"${f.name}" bisa dibuka siapa pun yang punya link, tanpa perlu akun Google.`,
-    body: `<label class="lbl">Jenis akses</label>
+    body: `<div class="infobox">${ic('info')}<div><b>Ini fitur Drive Gabungan, bukan Google Drive</b>Link dibuat dan diatur oleh aplikasimu sendiri. Izin berbagi di Google Drive tidak berubah, file tetap privat di sana, dan link bisa diubah atau dicabut kapan saja di menu <b>Link berbagi</b>. Untuk berbagi lewat akun Google, pakai menu <b>Bagikan</b>.</div></div>
+      <label class="lbl">Jenis akses</label>
       <div class="seg2"><label><input type="radio" name="lm" value="download" checked> Bisa diunduh<small>Penerima mendapat file aslinya</small></label>
         <label><input type="radio" name="lm" value="view"> Hanya lihat<small>Pratinjau di halaman, tanpa tombol unduh</small></label></div>
       <label class="lbl">Berlaku selama</label>
@@ -2147,7 +2162,7 @@ function createLink(f) {
       const u = Number(b.querySelector('[data-u]').value), n = Number(b.querySelector('[data-n]').value);
       if (u && !(n > 0)) throw new Error('Isi durasi lebih dari 0');
       const r = await post('/api/links', { acc: f.acc, id: f.id, minutes: u ? n * u : 0, mode: b.querySelector('input[name=lm]:checked').value, password: b.querySelector('[data-pw]').value.trim(), max: b.querySelector('[data-max]').value });
-      setTimeout(() => showLink(r.url, f.name), 50);
+      seen('links'); setTimeout(() => showLink(r.url, f.name), 50);
     },
   });
   const b = md.querySelector('.body');
@@ -2169,24 +2184,70 @@ function showLink(link, name) {
   md.querySelector('[data-sh]')?.addEventListener('click', () => navigator.share({ title: name, url: link }).catch(() => {}));
 }
 async function manageLinks() {
-  const md = dialog({ title: 'Link berbagi', desc: 'Link unduhan yang kamu buat. Buat link baru dari menu ⋮ pada file.', cancel: 'Tutup', body: '<div class="sk" style="height:140px"></div>' });
+  const md = dialog({ title: 'Link berbagi', desc: 'Link buatan Drive Gabungan (bukan link Google Drive). Buat link baru dari menu ⋮ pada file.', cancel: 'Tutup', body: '<div class="sk" style="height:140px"></div>' });
   md.querySelector('.dialog').classList.add('wide');
   const b = md.querySelector('.body');
   async function draw() {
     const { links } = await api('/api/links');
     b.innerHTML = links.length ? `<div class="lk-l">${links.map((l, i) => { const a = accOf(l.acc_id); return `<div class="lk ${l.active ? '' : 'off'}">
-      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.mode === 'view' ? 'Hanya lihat' : 'Unduh'} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''}x ${l.mode === 'view' ? 'dibuka' : 'diunduh'} · ${l.active ? (l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas waktu') : 'tidak aktif'}${l.locked ? ' · berpassword' : ''}</span></div>
-      ${l.active ? `<button type="button" class="icon-btn" data-c="${i}" title="Salin link">${ic('copy')}</button>` : ''}<button type="button" class="icon-btn" data-x="${i}" title="Cabut link">${ic('trash')}</button></div>`; }).join('')}</div>`
+      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.mode === 'view' ? 'Hanya lihat' : 'Unduh'} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''}x ${l.mode === 'view' ? 'dibuka' : 'diunduh'} · ${l.active ? (l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas waktu') : '<b class="hangus">hangus</b>'}${l.locked ? ' · berpassword' : ''}</span></div>
+      ${l.active ? `<button type="button" class="icon-btn" data-c="${i}" title="Salin link">${ic('copy')}</button>` : ''}
+      <button type="button" class="icon-btn" data-e="${i}" title="Edit / perbarui">${ic('edit')}</button>
+      <button type="button" class="icon-btn" data-x="${i}" title="Cabut link">${ic('trash')}</button></div>`; }).join('')}</div>`
       : `<div class="empty" style="padding:20px 0"><div><div class="art">${ic('link')}</div><h3>Belum ada link</h3><p>Buka menu ⋮ pada file, lalu pilih "Buat link berbagi".</p></div></div>`;
-    b.onclick = async (e) => {
-      const c = e.target.closest('[data-c]'), x = e.target.closest('[data-x]');
+    b.onclick = (e) => {
+      const c = e.target.closest('[data-c]'), x = e.target.closest('[data-x]'), ed = e.target.closest('[data-e]');
       if (c) navigator.clipboard.writeText(links[c.dataset.c].url).then(() => toast('Link disalin'));
-      if (x) { await api('/api/links?id=' + links[x.dataset.x].id, { method: 'DELETE' }); toast('Link dicabut. Orang lain tidak bisa mengunduh lewat link itu lagi.'); draw(); }
+      if (x) { const l = links[x.dataset.x]; dialog({ title: 'Cabut link ini?', desc: `Link untuk "${l.name}" langsung tidak bisa dibuka lagi. File di Google Drive tidak terhapus.`, ok: 'Cabut link', danger: true, run: async () => { await api('/api/links?id=' + l.id, { method: 'DELETE' }); toast('Link dicabut'); draw(); } }); }
+      if (ed) editLink(links[ed.dataset.e], draw);
     };
   }
   draw().catch((e) => (b.innerHTML = `<div class="err">${esc(e.message)}</div>`));
 }
-$('#navLinks').onclick = () => { closeSide(); manageLinks(); };
+function editLink(l, done) {
+  const view = l.mode === 'view';
+  const md = dialog({
+    title: 'Edit link berbagi', desc: `"${l.name}" · ${l.dl}x ${view ? 'dibuka' : 'diunduh'}${l.active ? '' : ' · saat ini hangus'}`,
+    body: `<label class="lbl">Jenis akses</label>
+      <div class="seg2"><label><input type="radio" name="lm" value="download" ${view ? '' : 'checked'}> Bisa diunduh<small>Penerima mendapat file aslinya</small></label>
+        <label><input type="radio" name="lm" value="view" ${view ? 'checked' : ''}> Hanya lihat<small>Pratinjau, hangus setelah batas dibuka</small></label></div>
+      <label class="lbl">Masa berlaku</label>
+      <select class="field" data-keep><option value="keep">Tetap (${l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas'})</option><option value="new">Atur ulang mulai sekarang</option></select>
+      <div class="sh-row hidden" data-dur><input class="field" type="number" min="1" value="1" data-n style="flex:1"><select class="field" data-u style="width:130px"><option value="1">menit</option><option value="60">jam</option><option value="1440" selected>hari</option><option value="0">tanpa batas</option></select></div>
+      <label class="lbl" data-maxl>${view ? 'Batas berapa kali dibuka' : 'Batas unduhan'} (kosongkan = tanpa batas)</label><input class="field" type="number" min="1" data-max value="${l.max_dl || ''}">
+      <label class="sh-ck"><input type="checkbox" data-reset ${l.active ? '' : 'checked'}> Mulai ulang hitungan ${view ? 'dibuka' : 'unduhan'} dari 0</label>
+      <label class="lbl">Password</label>
+      <select class="field" data-pwm><option value="keep">${l.locked ? 'Tetap pakai password lama' : 'Tetap tanpa password'}</option><option value="set">${l.locked ? 'Ganti password' : 'Pasang password'}</option>${l.locked ? '<option value="off">Hapus password</option>' : ''}</select>
+      <input class="field hidden" type="text" data-pw placeholder="Password baru" autocomplete="off">
+      <label class="sh-ck"><input type="checkbox" data-regen> Ganti alamat link (link lama langsung tidak berlaku)</label>`,
+    ok: 'Simpan perubahan',
+    run: async (b) => {
+      const p = { id: l.id, mode: b.querySelector('input[name=lm]:checked').value, max: b.querySelector('[data-max]').value || 0 };
+      if (b.querySelector('[data-keep]').value === 'new') { const u = Number(b.querySelector('[data-u]').value), n = Number(b.querySelector('[data-n]').value); if (u && !(n > 0)) throw new Error('Isi durasi lebih dari 0'); p.minutes = u ? n * u : 0; }
+      const pm = b.querySelector('[data-pwm]').value;
+      if (pm === 'off') p.password = null;
+      if (pm === 'set') { p.password = b.querySelector('[data-pw]').value.trim(); if (!p.password) throw new Error('Isi password baru'); }
+      if (b.querySelector('[data-reset]').checked) p.reset = true;
+      if (b.querySelector('[data-regen]').checked) p.regen = true;
+      const ch = [p.regen && 'alamat link diganti (link lama mati)', p.reset && 'hitungan diulang dari 0', p.minutes !== undefined && 'masa berlaku diatur ulang', pm === 'off' && 'password dihapus', pm === 'set' && 'password baru'].filter(Boolean);
+      let yes = false;
+      await new Promise((ok, no) => dialog({
+        title: 'Simpan perubahan link?', desc: ch.length ? 'Perubahan: ' + ch.join(', ') + '.' : 'Pengaturan link akan diperbarui.',
+        ok: 'Ya, simpan', danger: !!p.regen, run: async () => { yes = true; ok(); },
+        after: (m2) => { const ob = new MutationObserver(() => { if (!document.body.contains(m2)) { ob.disconnect(); if (!yes) no(new Error('Perubahan belum disimpan')); } }); ob.observe(document.body, { childList: true }); },
+      }));
+      const r = await api('/api/links', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(p) });
+      toast(p.regen ? 'Link diperbarui dengan alamat baru' : 'Link diperbarui');
+      done?.();
+      if (p.regen) setTimeout(() => showLink(r.url, l.name), 50);
+    },
+  });
+  const b = md.querySelector('.body');
+  b.querySelector('[data-keep]').onchange = (e) => b.querySelector('[data-dur]').classList.toggle('hidden', e.target.value !== 'new');
+  b.querySelector('[data-pwm]').onchange = (e) => b.querySelector('[data-pw]').classList.toggle('hidden', e.target.value !== 'set');
+  b.querySelectorAll('input[name=lm]').forEach((x) => (x.onchange = () => { b.querySelector('[data-maxl]').textContent = (x.value === 'view' ? 'Batas berapa kali dibuka' : 'Batas unduhan') + ' (kosongkan = tanpa batas)'; }));
+}
+$('#navLinks').onclick = () => { seen('links'); closeSide(); manageLinks(); };
 
 // ---------- notifikasi ----------
 async function loadAlerts(check) {
@@ -2216,7 +2277,7 @@ async function togglePush() {
   toast('Notifikasi aktif. Pesan uji coba dikirim.');
 }
 $('#bellBtn').onclick = async (e) => {
-  e.stopPropagation(); closeMenu();
+  e.stopPropagation(); closeMenu(); seen('bell');
   const m = document.createElement('div'); m.className = 'menu bellm'; m.onclick = (ev) => ev.stopPropagation();
   const st = await pushState().catch(() => 'unsupported');
   const al = S.alerts || [];
@@ -2309,7 +2370,7 @@ async function manageBackups() {
   }
   draw().catch((e) => (b.innerHTML = `<div class="err">${esc(e.message)}</div>`));
 }
-$('#navBackup').onclick = () => { closeSide(); manageBackups(); };
+$('#navBackup').onclick = () => { seen('backup'); closeSide(); manageBackups(); };
 
 // ---------- terima file dari tombol Bagikan di HP ----------
 async function takeShared() {
@@ -2336,6 +2397,7 @@ async function startApp() {
   if (pg) history.replaceState(null, '', '/');
   go(pg === 'files' ? 'files' : 'home');
   refreshInstallUI(); armLock();
+  document.querySelectorAll('[data-new]').forEach((x) => { if (!isNew(x.dataset.new)) x.remove(); });
   loadPins(); loadAlerts(true); setInterval(() => loadAlerts(), 5 * 60000); takeShared();
   if (isIOS()) setTimeout(installBanner, 4000);
   if (!S.state.configured) googleSetup();
