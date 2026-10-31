@@ -63,6 +63,9 @@ code{font-weight:600;white-space:normal;word-break:break-all}
 .m-strip{display:flex;height:10px;gap:2px;border-radius:99px;overflow:hidden;margin:8px 0}
 .m-acc{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12.5px}
 .m-acc s{width:10px;height:10px;border-radius:3px;display:inline-block}
+.opt{display:inline-block;vertical-align:middle;font-size:12px;font-weight:700;color:var(--ink2);border:1px solid var(--line);border-radius:99px;padding:1px 9px;margin-left:6px}
+.num.opt-n{background:var(--surface);color:var(--pri);border:2px dashed var(--pri)}
+h3.sub{font-size:16px;margin:18px 0 8px}
 .faq h3{font-size:16px;margin:22px 0 4px}
 .faq p{margin:0;color:var(--ink2)}
 footer{padding:36px 0 10px;text-align:center;color:var(--ink3);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -89,6 +92,7 @@ footer img{width:18px;height:18px}
       <li><a href="#google">Siapkan Google Cloud</a></li>
       <li><a href="#client">Tempel Client ID dan Secret</a></li>
       <li><a href="#akun">Hubungkan akun Google Drive</a></li>
+      <li><a href="#domain">Pakai domain sendiri</a> <span class="opt">opsional</span></li>
     </ol>
   </nav>
 
@@ -216,6 +220,49 @@ footer img{width:18px;height:18px}
     </div>
   </section>
 
+  <section class="step" id="domain">
+    <div class="num opt-n">6</div>
+    <div class="body">
+      <h2>Pakai domain sendiri <span class="opt">opsional</span></h2>
+      <p class="when">±5 menit. Lewati langkah ini kalau alamat <code>.workers.dev</code> sudah cukup.</p>
+      <p>Punya domain, misalnya <code>sekolahku.sch.id</code> atau <code>namaku.com</code>? Aplikasimu bisa dibuka dari alamat yang lebih mudah diingat, seperti <code>drive.namaku.com</code>.</p>
+      <div class="tip">Syaratnya, domain itu sudah <b>dikelola di Cloudflare</b> (nameserver-nya mengarah ke Cloudflare). Belum punya domain? Bisa dibeli langsung di Cloudflare, lihat <a href="https://outsiderdev.com/artikel/cara-beli-domain-di-cloudflare" target="_blank" rel="noopener">cara beli domain di Cloudflare</a>.</div>
+      <h3 class="sub">A. Pasang domain di Cloudflare</h3>
+      <ol>
+        <li>Buka <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages" target="_blank" rel="noopener">Workers &amp; Pages</a>, pilih project aplikasimu (misalnya <code>drive-saya</code>).</li>
+        <li>Buka tab <b>Domains</b> (atau <b>Settings → Domains &amp; Routes</b>), lalu klik <b>Add Domain</b>.</li>
+        <li>Pilih domainmu, isi <b>Subdomain</b> misalnya <code>drive</code>, lalu klik <b>Add domain</b>.</li>
+        <li>Tunggu beberapa menit sampai alamat baru bisa dibuka. Sertifikat HTTPS (gembok) dibuat otomatis.</li>
+      </ol>
+      <p class="cap">Penjelasan lebih rinci dengan gambar: <a href="https://outsiderdev.com/artikel/cara-membuat-subdomain-cloudflare-worker" target="_blank" rel="noopener">cara membuat subdomain untuk Cloudflare Worker</a>.</p>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>dash.cloudflare.com · Connect to namaku.com</span></div>
+        <div class="in">
+          <div class="m-label">Subdomain (optional)</div>
+          <div class="m-row"><div class="m-field fill hl" style="flex:1">drive</div><span style="color:var(--ink2)">.namaku.com</span></div>
+          <div class="m-btn">Add domain</div>
+        </div>
+      </div>
+      <h3 class="sub">B. Daftarkan alamat baru di Google Cloud</h3>
+      <p>Supaya akun Google tetap bisa dihubungkan dari alamat baru:</p>
+      <ol>
+        <li>Buka <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Auth Platform → Clients</a>, lalu klik client yang dibuat di langkah 3.</li>
+        <li>Di <b>Authorized redirect URIs</b> klik <b>Add URI</b>, lalu isi <code>https://drive.namaku.com/oauth/callback</code> (sesuaikan dengan alamatmu).</li>
+        <li>Klik <b>Save</b>. Alamat lama boleh tetap dibiarkan, jadi keduanya bisa dipakai.</li>
+      </ol>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>console.cloud.google.com · Client ID for Web application</span></div>
+        <div class="in">
+          <div class="m-label">Authorized redirect URIs</div>
+          <div class="m-field fill">https://drive-saya.namamu.workers.dev/oauth/callback</div>
+          <div class="m-field fill hl">https://drive.namaku.com/oauth/callback</div>
+          <div class="m-btn">Save</div>
+        </div>
+      </div>
+      <div class="tip">Setelah pindah alamat: <b>masuk lagi sekali</b> di alamat baru, karena login tersimpan per alamat. Jika memakai <b>sidik jari/wajah</b> atau sudah <b>memasang aplikasi</b> di HP, ulangi juga di alamat baru. Link berbagi yang dibuat nanti otomatis memakai alamat baru, sedangkan link lama tetap berfungsi.</div>
+    </div>
+  </section>
+
   <div class="faq">
     <h2 style="font-size:22px;letter-spacing:-.02em">Pertanyaan umum</h2>
     <h3>Apakah data saya bisa dilihat orang lain?</h3>
@@ -223,7 +270,7 @@ footer img{width:18px;height:18px}
     <h3>Upload masuk ke akun mana?</h3>
     <p>Kamu memilih sendiri akun dan folder tujuan setiap kali upload. Pilihan awalnya sudah diisikan otomatis: folder yang sedang dibuka, atau akun yang paling lega kalau kamu berada di halaman utama. Akun yang ruangnya tidak cukup tidak bisa dipilih.</p>
     <h3>Muncul "redirect_uri_mismatch" saat menghubungkan akun.</h3>
-    <p>Redirect URI di Google Cloud belum sama persis dengan alamat aplikasimu. Salin ulang dari jendela "Hubungkan ke Google Cloud", atau tunggu 5–10 menit setelah menyimpan.</p>
+    <p>Jika baru memasang domain sendiri, pastikan alamat barunya sudah ditambahkan di Google Cloud (langkah 6B). Redirect URI di Google Cloud belum sama persis dengan alamat aplikasimu. Salin ulang dari jendela "Hubungkan ke Google Cloud", atau tunggu 5–10 menit setelah menyimpan.</p>
     <h3>Akun tertulis "Perlu dihubungkan ulang".</h3>
     <p>Izin dicabut atau status aplikasi masih Testing. Pastikan statusnya In production, lalu klik Hubungkan akun Google dan pilih akun yang sama.</p>
     <h3>Lupa password pemilik.</h3>

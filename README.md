@@ -46,6 +46,12 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 6. **Audience → Publish app** → status **In production**.
    ⚠️ Jangan biarkan di *Testing*: token kedaluwarsa tiap 7 hari. Tidak perlu mengajukan verifikasi.
 
+### Domain sendiri (opsional)
+Jika domainmu sudah dikelola di Cloudflare:
+1. **Workers & Pages → project-mu → Domains → Add Domain** → pilih domain → isi subdomain (mis. `drive`) → **Add domain**.
+2. **Google Auth Platform → Clients → client-mu → Authorized redirect URIs → Add URI**: `https://drive.domainmu.com/oauth/callback` → **Save** (tunggu 5–10 menit).
+3. Masuk lagi di alamat baru (login, passkey, dan aplikasi terpasang tersimpan per alamat). Alamat `.workers.dev` tetap berfungsi.
+
 ### Cara manual (tanpa tombol)
 ```bash
 npm install && npx wrangler login && npx wrangler deploy
