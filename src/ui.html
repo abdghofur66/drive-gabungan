@@ -948,7 +948,7 @@ async function loadDash() {
 
   // donut
   const C = 2 * Math.PI * 70; let off = 0;
-  const tot = unl ? use || 1 : lim || 1;
+  const tot = use || 1; // donut = pembagian ruang terpakai antar akun
   const labels = [];
   const segs = ok.map((a) => {
     const len = (a.usage / tot) * C;
@@ -961,11 +961,7 @@ async function loadDash() {
     }
     off += len; return s;
   }).join('');
-  const freeShare = unl ? 0 : Math.max(0, (tot - use) / tot);
-  if (freeShare >= 0.06) {
-    const ang = ((use / tot + freeShare / 2) * 2 * Math.PI) - Math.PI / 2;
-    labels.push(`<text class="pl" style="fill:var(--ink2);stroke:none" x="${95 + 70 * Math.cos(ang)}" y="${95 + 70 * Math.sin(ang)}" text-anchor="middle" dominant-baseline="central">${Math.round(freeShare * 100)}%</text>`);
-  }
+
   const maxBig = Math.max(1, ...d.largest.map((f) => Number(f.size || 0)));
   S.dashFiles = [...d.recent, ...d.largest];
 
@@ -978,9 +974,9 @@ async function loadDash() {
     <div class="card kpi"><span class="k">Di sampah</span><span class="v">${fmt(trash).replace(' ', '<small>')}</small></span><span class="h">${trash ? 'bisa dikosongkan dari Google Drive' : 'sampah sudah bersih'}</span>${trash ? '<a class="act" href="https://drive.google.com/drive/trash" target="_blank" rel="noopener">Buka sampah Drive</a>' : ''}</div>
     <div class="card kpi"><span class="k">Akun terhubung</span><span class="v">${acc.length}</span><span class="h">${bad ? bad + ' bermasalah' : 'semua aktif'}</span><button class="act" data-add>+ Tambah akun</button></div>
 
-    <div class="card c-donut"><h3>Ruang per akun</h3><p class="sub">Terpakai dan sisa ruang di setiap akun.</p>
+    <div class="card c-donut"><h3>Ruang per akun</h3><p class="sub">Donut: porsi tiap akun dari total terpakai. Daftar: terpakai dari kapasitas akun.</p>
       <div class="donut-wrap"><div class="donut"><svg viewBox="0 0 190 190"><g transform="rotate(-90 95 95)"><circle r="70" cx="95" cy="95" stroke="var(--sunk)" style="cursor:default"></circle>${segs}</g>${labels.join('')}</svg>
-        <div class="mid"><div><b data-mv>${pct}%</b><span data-ml>${unl ? fmt(use) : 'terpakai'}</span></div></div></div>
+        <div class="mid"><div><b data-mv>${fmt(use)}</b><span data-ml>${unl ? 'terpakai' : pct + '% dari ' + fmt(lim)}</span></div></div></div>
       <div class="legend">${ok.map((a) => { const p3 = a.limit ? Math.round((a.usage / a.limit) * 100) : 0; return `<button data-a="${a.id}">${avatar(a, 26)}<div class="lg"><div class="lt"><span class="l">${esc(a.email)}</span><span class="r">${p3}%</span></div>
         <div class="lb"><i style="width:${p3}%;background:${a.color}"></i></div>
         <div class="ls">${fmt(a.usage)} terpakai${a.limit ? ' · ' + fmt(Math.max(0, a.limit - a.usage)) + ' kosong' : ''}</div></div></button>`; }).join('')}</div></div></div>
@@ -1029,8 +1025,8 @@ function hiAcc(id) {
   document.querySelectorAll('#dash .donut circle[data-a]').forEach((c) => { c.classList.toggle('hi', c.dataset.a == id); c.classList.toggle('dim', !!id && c.dataset.a != id); });
   document.querySelectorAll('#dash .legend button').forEach((b) => b.classList.toggle('hi', b.dataset.a == id));
   const mv = $('#dash [data-mv]'), ml = $('#dash [data-ml]'); if (!mv) return;
-  if (a) { mv.textContent = fmt(a.usage); ml.textContent = a.email; }
-  else { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0), l = ok.reduce((s, x) => s + (x.limit || 0), 0); mv.textContent = l ? Math.round((u / l) * 100) + '%' : fmt(u); ml.textContent = 'terpakai'; }
+  if (a) { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0) || 1; mv.textContent = Math.round((a.usage / u) * 100) + '%'; ml.textContent = a.email; }
+  else { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0), l = ok.reduce((s, x) => s + (x.limit || 0), 0); mv.textContent = fmt(u); ml.textContent = l ? Math.round((u / l) * 100) + '% dari ' + fmt(l) : 'terpakai'; }
 }
 $('#dash').addEventListener('pointerover', (e) => { const t = e.target.closest('[data-a]'); if (t && t.closest('.donut,.legend')) hiAcc(t.dataset.a); });
 $('#dash').addEventListener('pointerout', (e) => { if (e.target.closest('.donut,.legend') && !e.relatedTarget?.closest?.('.donut,.legend')) hiAcc(null); });
