@@ -313,7 +313,8 @@ body.dragging #side .acc[data-id]:not([data-id="all"]){outline:1.5px dashed var(
 kbd{font:700 12px/1 inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:3px 7px;background:var(--sunk)}
 #pkBtn{height:46px;justify-content:center}
 @media (max-width:1100px){.c-tips,.c-act{grid-column:1/-1}}
-.dialog{max-height:calc(100dvh - 32px);overflow:auto;z-index:1;animation:dlg .18s var(--ease)}
+.dialog .desc,.dialog h3{overflow-wrap:anywhere}
+.dialog{max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;z-index:1;animation:dlg .18s var(--ease)}
 .modal>.scrim{z-index:0}
 @keyframes dlg{from{opacity:0;transform:translateY(10px)}}
 body:has(.selbar) .fab{display:none!important}
