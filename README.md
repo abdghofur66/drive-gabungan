@@ -9,7 +9,7 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 - Tampilan "Semua akun" atau per akun, navigasi folder
 - Pencarian lintas akun (tombol ✕ untuk menghapus isi pencarian) + filter jenis file
 - Pratinjau gambar, video, audio, PDF, Google Docs/Sheets/Slides
-- Upload (tombol atau seret-lepas), otomatis masuk ke akun yang paling lega; file besar dikirim per potongan 8 MB
+- Upload (tombol atau seret-lepas) dengan pilihan akun & folder tujuan (akun paling lega terpilih otomatis); file besar dikirim per potongan 8 MB
 - Tombol **Baru**: folder, upload file/folder, Google Dokumen/Spreadsheet/Slide/Formulir, dengan pilihan akun & folder tujuan
 - Menu **Dibagikan ke saya**, **Berbintang**, **Sampah** (pulihkan, hapus selamanya, kosongkan) dengan pilihan akun
 - Bagikan file/folder, pilih banyak, unduh sebagai ZIP, ganti nama, pindah, hapus
