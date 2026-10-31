@@ -200,7 +200,32 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .sh-p .n b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sh-p .r{font-size:12.5px;color:var(--ink2)}
-.dialog.wide{max-width:520px}
+.dialog.wide{max-width:540px}
+.bell{position:relative}
+.badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:99px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
+.bellm{width:340px;max-width:calc(100vw - 16px)}
+.bl{max-height:360px;overflow:auto}
+.br{display:flex;gap:10px;padding:10px;border-radius:10px}
+.br.new{background:var(--pri-soft)}
+.br .n{min-width:0}.br .n b{display:block;font-size:13.5px}.br .n span{display:block;font-size:12.5px;color:var(--ink2)}.br .n small{font-size:11.5px;color:var(--ink3)}
+.sfilt{display:flex;gap:6px;flex-wrap:wrap;margin:-6px 0 14px}
+.sfilt .sort{height:34px;font-size:12.5px}
+.pins{display:flex;flex-direction:column;gap:2px}
+.acc.pin .ft{flex-shrink:0}
+.lk-l{display:flex;flex-direction:column;gap:4px}
+.lk{display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--line);border-radius:12px}
+.lk.off{opacity:.55}
+.lk .n{flex:1;min-width:0}
+.lk .n b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk .n span{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.bk{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.bk-h{display:flex;align-items:center;gap:8px}.bk-h svg{color:var(--pri);width:18px;height:18px}
+.bk-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.bk-r svg.i{width:14px;height:14px}
+.bk-a{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.bk-a .field.sm{width:auto;flex:1;min-width:150px}
+.bk-a .btn{height:40px;font-size:13px}
+.seg2.three{grid-template-columns:1fr}
 .avt{border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-grid;place-items:center;color:#fff;font-weight:800;line-height:1}
 .files .th .tag{background:none!important;box-shadow:none!important;width:auto!important;height:auto!important;display:inline-flex}
 .files.grid .th .tag{left:8px;bottom:8px}
@@ -554,6 +579,9 @@ footer img{width:18px;height:18px}
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-backup" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.92A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17.5 18H7z"/><path d="M12 15v-5m0 0-2 2m2-2 2 2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
   <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></symbol>
   <symbol id="i-finger" viewBox="0 0 24 24"><path d="M12 11v3a8 8 0 0 1-1.5 4.6M8.5 7.5A5 5 0 0 1 17 11v1.5M7 12.5c0 2-.4 3.6-1.3 5M12 4a7 7 0 0 1 7 7v2M5 9.5A7 7 0 0 1 8.5 5M15.5 15.5c-.3 1.6-.9 3-1.7 4.3"/></symbol>
@@ -597,7 +625,7 @@ footer img{width:18px;height:18px}
       <button class="btn ghost hidden" id="pkBtn" type="button"><svg class="i"><use href="#i-finger"/></svg>Masuk dengan sidik jari / wajah</button>
       <div class="err" id="authErr"></div>
     </form>
-    <p class="small muted" style="margin-top:14px">Ingin memasang Drive Gabungan sendiri? <a href="/panduan" style="color:var(--pri);font-weight:600;text-decoration:none">Lihat panduan</a></p>
+    <p class="small muted" style="margin-top:14px">Ingin memasang Drive Gabungan sendiri? <a href="/tentang" style="color:var(--pri);font-weight:600;text-decoration:none">Kenali fiturnya</a> · <a href="/panduan" style="color:var(--pri);font-weight:600;text-decoration:none">Panduan</a></p>
     <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
   </div>
 </div>
@@ -613,6 +641,8 @@ footer img{width:18px;height:18px}
       <button id="navShared" data-sp="shared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
       <button id="navStarred" data-sp="starred"><svg class="i"><use href="#i-star"/></svg>Berbintang</button>
       <button id="navTrash" data-sp="trash"><svg class="i"><use href="#i-trash"/></svg>Sampah</button>
+      <button id="navLinks"><svg class="i"><use href="#i-link"/></svg>Link berbagi</button>
+      <button id="navBackup"><svg class="i"><use href="#i-backup"/></svg>Cadangan</button>
     </nav>
 
     <section class="store" aria-label="Penyimpanan gabungan">
@@ -624,6 +654,7 @@ footer img{width:18px;height:18px}
       <div class="store-foot"><span id="stFree"></span><span id="stCount"></span></div>
     </section>
 
+    <div id="pinsBox" class="hidden"><div class="side-h" style="margin-bottom:6px">Disematkan</div><div class="pins" id="pins"></div></div>
     <div class="side-h">Akun</div>
     <div class="acc-list" id="accList"></div>
     <button class="add-acc" id="addAcc"><svg class="i"><use href="#i-plus"/></svg>Hubungkan akun Google</button>
@@ -645,6 +676,7 @@ footer img{width:18px;height:18px}
         <kbd id="qk">/</kbd>
         <button class="icon-btn x hidden" id="qx" aria-label="Hapus pencarian" title="Hapus pencarian"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
+      <button class="icon-btn bell" id="bellBtn" aria-label="Notifikasi"><svg class="i"><use href="#i-bell"/></svg><span class="badge hidden" id="bellN"></span></button>
       <button class="icon-btn" id="moreBtn" aria-label="Menu akun"><svg class="i"><use href="#i-dots"/></svg></button>
       <button class="btn pri" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>Baru</button>
       <input type="file" id="fileIn" multiple class="hidden">
@@ -669,6 +701,12 @@ footer img{width:18px;height:18px}
         </div>
       </div>
       <div class="chips" id="chips"></div>
+      <div class="sfilt hidden" id="sfilt">
+        <button class="chip" id="fContent">Cari juga di isi file</button>
+        <select class="sort" id="fWhen" aria-label="Waktu diubah"><option value="">Kapan saja</option><option value="1">Hari ini</option><option value="7">7 hari terakhir</option><option value="30">30 hari terakhir</option><option value="365">Setahun terakhir</option></select>
+        <select class="sort" id="fSize" aria-label="Ukuran"><option value="">Semua ukuran</option><option value="10">Lebih dari 10 MB</option><option value="100">Lebih dari 100 MB</option><option value="1024">Lebih dari 1 GB</option></select>
+        <select class="sort" id="fOwner" aria-label="Pemilik"><option value="">Pemilik siapa saja</option><option value="me">Milik saya</option><option value="others">Milik orang lain</option></select>
+      </div>
       <div id="notes"></div>
       <div class="files grid" id="files"></div>
       <div class="empty hidden" id="empty"></div>
@@ -686,7 +724,7 @@ footer img{width:18px;height:18px}
 const $ = (s) => document.querySelector(s);
 const FOLDER = 'application/vnd.google-apps.folder';
 const CHUNK = 8 * 1024 * 1024;
-const S = { special: null, sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
+const S = { f: { content: false, when: '', size: '', owner: '' }, pins: [], special: null, sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
   view: store('view') || 'grid', state: null };
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
@@ -1071,6 +1109,12 @@ async function load() {
   const typeQ = S.type === 'doc' ? 'doc' : S.type;
   specialBar();
   const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : (S.special || 'root'), q: S.q, type: typeQ });
+  $('#sfilt').classList.toggle('hidden', !S.q);
+  if (S.q) {
+    if (S.f.content) p.set('content', '1');
+    if (S.f.when) p.set('after', String(Date.now() - Number(S.f.when) * 864e5));
+    if (S.f.owner) p.set('owner', S.f.owner);
+  }
   try {
     const d = await api('/api/files?' + p);
     if (my !== seq) return;
@@ -1082,7 +1126,7 @@ async function load() {
   }
 }
 function sorted() {
-  const f = [...S.files];
+  const f = S.q && S.f.size ? S.files.filter((x) => Number(x.size || 0) >= Number(S.f.size) * 1024 * 1024) : [...S.files];
   const isF = (x) => (x.mimeType === FOLDER ? 0 : 1);
   if (S.sort === 'new') f.sort((a, b) => isF(a) - isF(b) || new Date(b.modifiedTime) - new Date(a.modifiedTime));
   else if (S.sort === 'big') f.sort((a, b) => isF(a) - isF(b) || (b.size || 0) - (a.size || 0));
@@ -1452,6 +1496,9 @@ function showMenu(f, anchor, x, y) {
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
     ['share', 'Bagikan', () => share(f)],
     ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
+    !isF && ['link', 'Buat link berbagi', () => createLink(f)],
+    isF && [ 'pin', S.pins.some((x) => x.id === f.id) ? 'Lepas dari sidebar' : 'Sematkan di sidebar', () => togglePin(f)],
+    isF && S.accounts.filter((a) => !a.error).length > 1 && ['backup', 'Cadangkan folder ini', () => newBackup(f)],
     ['check', 'Pilih', () => toggleSel(f)],
     ['info', 'Detail', () => details(f)],
     S.accounts.filter((a) => !a.error).length > 1 && ['swap', 'Pindah/salin ke akun lain', () => transferDialog([f])],
@@ -1731,6 +1778,8 @@ $('#moreBtn').onclick = (e) => {
   popMenu([
     canInstall() && ['down', 'Pasang sebagai aplikasi', install],
     ['moon', dark ? 'Mode terang' : 'Mode gelap', toggleTheme],
+    ['link', 'Link berbagi', manageLinks],
+    ['backup', 'Cadangan', manageBackups],
     ['key', 'Keamanan', () => security()],
     ['kbd', 'Pintasan keyboard', () => shortcuts()],
     ['out', 'Keluar', () => $('#logout').click(), 'danger'],
@@ -2049,6 +2098,216 @@ addEventListener('keydown', (e) => {
   if (Date.now() - gPrefix < 900) { if (e.key === 'h') go('home'); if (e.key === 'f') $('#navFiles').click(); gPrefix = 0; }
 });
 
+// ---------- filter pencarian ----------
+function syncFilters() {
+  $('#fContent').classList.toggle('on', S.f.content);
+  $('#fWhen').value = S.f.when; $('#fSize').value = S.f.size; $('#fOwner').value = S.f.owner;
+}
+$('#fContent').onclick = () => { S.f.content = !S.f.content; syncFilters(); load(); };
+$('#fWhen').onchange = () => { S.f.when = $('#fWhen').value; load(); };
+$('#fSize').onchange = () => { S.f.size = $('#fSize').value; render(); };
+$('#fOwner').onchange = () => { S.f.owner = $('#fOwner').value; load(); };
+
+// ---------- sematan sidebar ----------
+async function loadPins() { try { S.pins = (await api('/api/pins')).pins; } catch (e) { S.pins = []; } renderPins(); }
+function renderPins() {
+  $('#pinsBox').classList.toggle('hidden', !S.pins.length);
+  $('#pins').innerHTML = S.pins.map((p, i) => `<div class="acc pin" data-pin="${i}" tabindex="0" role="button"><svg class="ft" viewBox="0 0 48 48" style="width:20px;height:20px"><use href="#t-folder"/></svg><div class="meta"><div class="em">${esc(p.name)}</div><div class="sub">${esc((accOf(p.acc).email || '').split('@')[0])}</div></div><button class="icon-btn rm" data-unpin="${i}" title="Lepas">${ic('x')}</button></div>`).join('');
+}
+async function togglePin(f) {
+  const i = S.pins.findIndex((x) => x.id === f.id);
+  if (i >= 0) S.pins.splice(i, 1); else S.pins.push({ id: f.id, name: f.name, acc: f.acc });
+  renderPins();
+  try { await post('/api/pins', { pins: S.pins }); toast(i >= 0 ? 'Dilepas dari sidebar' : 'Disematkan di sidebar'); } catch (e) { toast(e.message); }
+}
+$('#pins').addEventListener('click', (e) => {
+  const un = e.target.closest('[data-unpin]');
+  if (un) { e.stopPropagation(); return togglePin(S.pins[un.dataset.unpin]); }
+  const it = e.target.closest('[data-pin]'); if (!it) return;
+  const p = S.pins[it.dataset.pin];
+  S.special = null; S.acc = p.acc; S.path = [{ id: p.id, name: p.name, acc: p.acc }]; clearSearch(false); go('files');
+}, true);
+
+// ---------- link berbagi ----------
+function createLink(f) {
+  dialog({
+    title: 'Buat link berbagi', desc: `"${f.name}" bisa diunduh siapa pun yang punya link, tanpa perlu akun Google.`,
+    body: `<label class="lbl">Berlaku</label><select class="field" data-days><option value="1">1 hari</option><option value="7" selected>7 hari</option><option value="30">30 hari</option><option value="0">Tanpa batas waktu</option></select>
+      <label class="lbl">Password (opsional)</label><input class="field" type="text" data-pw placeholder="Kosongkan jika tanpa password" autocomplete="off">
+      <label class="lbl">Batas unduhan (opsional)</label><input class="field" type="number" min="1" data-max placeholder="Tanpa batas">`,
+    ok: 'Buat link',
+    run: async (b) => {
+      const r = await post('/api/links', { acc: f.acc, id: f.id, days: b.querySelector('[data-days]').value, password: b.querySelector('[data-pw]').value.trim(), max: b.querySelector('[data-max]').value });
+      setTimeout(() => showLink(r.url, f.name), 50);
+    },
+  });
+}
+function showLink(link, name) {
+  const md = dialog({
+    title: 'Link siap dibagikan', desc: name, cancel: 'Selesai',
+    body: `<div class="copyrow"><input class="field" readonly value="${esc(link)}"><button type="button" class="btn pri" data-cp>${ic('copy')}Salin</button></div>
+      ${navigator.share ? `<button type="button" class="btn ghost" data-sh>${ic('share')}Kirim lewat aplikasi lain</button>` : ''}`,
+  });
+  md.querySelector('[data-cp]').onclick = (e) => navigator.clipboard.writeText(link).then(() => { e.currentTarget.lastChild.textContent = 'Tersalin'; });
+  md.querySelector('[data-sh]')?.addEventListener('click', () => navigator.share({ title: name, url: link }).catch(() => {}));
+}
+async function manageLinks() {
+  const md = dialog({ title: 'Link berbagi', desc: 'Link unduhan yang kamu buat. Buat link baru dari menu ⋮ pada file.', cancel: 'Tutup', body: '<div class="sk" style="height:140px"></div>' });
+  md.querySelector('.dialog').classList.add('wide');
+  const b = md.querySelector('.body');
+  async function draw() {
+    const { links } = await api('/api/links');
+    b.innerHTML = links.length ? `<div class="lk-l">${links.map((l, i) => { const a = accOf(l.acc_id); return `<div class="lk ${l.active ? '' : 'off'}">
+      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''} unduhan · ${l.active ? (l.expires ? 'berlaku sampai ' + dshort(l.expires) : 'tanpa batas waktu') : 'tidak aktif'}${l.locked ? ' · berpassword' : ''}</span></div>
+      ${l.active ? `<button type="button" class="icon-btn" data-c="${i}" title="Salin link">${ic('copy')}</button>` : ''}<button type="button" class="icon-btn" data-x="${i}" title="Cabut link">${ic('trash')}</button></div>`; }).join('')}</div>`
+      : `<div class="empty" style="padding:20px 0"><div><div class="art">${ic('link')}</div><h3>Belum ada link</h3><p>Buka menu ⋮ pada file, lalu pilih "Buat link berbagi".</p></div></div>`;
+    b.onclick = async (e) => {
+      const c = e.target.closest('[data-c]'), x = e.target.closest('[data-x]');
+      if (c) navigator.clipboard.writeText(links[c.dataset.c].url).then(() => toast('Link disalin'));
+      if (x) { await api('/api/links?id=' + links[x.dataset.x].id, { method: 'DELETE' }); toast('Link dicabut. Orang lain tidak bisa mengunduh lewat link itu lagi.'); draw(); }
+    };
+  }
+  draw().catch((e) => (b.innerHTML = `<div class="err">${esc(e.message)}</div>`));
+}
+$('#navLinks').onclick = () => { closeSide(); manageLinks(); };
+
+// ---------- notifikasi ----------
+async function loadAlerts(check) {
+  try {
+    const d = await api('/api/alerts' + (check ? '?check=1' : ''));
+    S.alerts = d.alerts;
+    $('#bellN').textContent = d.unseen > 9 ? '9+' : d.unseen;
+    $('#bellN').classList.toggle('hidden', !d.unseen);
+  } catch (e) {}
+}
+async function pushState() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  return sub ? 'on' : Notification.permission === 'denied' ? 'denied' : 'off';
+}
+async function togglePush() {
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub) { await post('/api/push/unsubscribe', { endpoint: sub.endpoint }); await sub.unsubscribe(); toast('Notifikasi di perangkat ini dimatikan'); return; }
+  if (await Notification.requestPermission() !== 'granted') return toast('Izin notifikasi ditolak. Aktifkan lewat pengaturan situs di browser.');
+  const { key } = await api('/api/push/key');
+  const raw = Uint8Array.from(atob(key.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(key.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
+  const s2 = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
+  await post('/api/push/subscribe', { endpoint: s2.endpoint });
+  await post('/api/push/test', {});
+  toast('Notifikasi aktif. Pesan uji coba dikirim.');
+}
+$('#bellBtn').onclick = async (e) => {
+  e.stopPropagation(); closeMenu();
+  const m = document.createElement('div'); m.className = 'menu bellm'; m.onclick = (ev) => ev.stopPropagation();
+  const st = await pushState().catch(() => 'unsupported');
+  const al = S.alerts || [];
+  const icn = { full: 'bolt', error: 'unlink', backup: 'backup', test: 'bell' };
+  m.innerHTML = `<div class="hd"><span>Notifikasi</span></div>
+    <div class="bl">${al.map((a) => `<div class="br ${a.seen ? '' : 'new'}"><span class="ai">${ic(icn[a.kind] || 'info')}</span><div class="n"><b>${esc(a.title)}</b><span>${esc(a.body)}</span><small>${ago(a.ts)}</small></div></div>`).join('') || '<p class="small muted" style="padding:10px">Belum ada notifikasi.</p>'}</div>
+    ${st === 'unsupported' ? '<p class="small muted" style="padding:8px 10px">Pasang sebagai aplikasi agar notifikasi bisa muncul di perangkat ini.</p>'
+      : st === 'denied' ? '<p class="small muted" style="padding:8px 10px">Notifikasi diblokir di browser ini.</p>'
+      : `<button data-push>${ic('bell')}${st === 'on' ? 'Matikan notifikasi di perangkat ini' : 'Aktifkan notifikasi di perangkat ini'}</button>`}`;
+  m.querySelector('[data-push]')?.addEventListener('click', () => { closeMenu(); togglePush().catch((er) => toast(er.message)); });
+  if (mobile()) { const sc = document.createElement('div'); sc.className = 'scrim on menu-s'; sc.onclick = closeMenu; document.body.appendChild(sc); m.classList.add('sheet'); document.body.appendChild(m); }
+  else { document.body.appendChild(m); const r = e.currentTarget.getBoundingClientRect(); m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px'; m.style.top = r.bottom + 6 + 'px'; }
+  if (al.some((a) => !a.seen)) { post('/api/alerts', {}).then(() => loadAlerts()); }
+};
+
+// ---------- cadangan ----------
+async function newBackup(folder) {
+  let src = folder ? { acc: folder.acc, folder: folder.id, folderName: folder.name } : null;
+  if (!src) {
+    const prev = [S.acc, S.special, S.path]; S.special = null; S.path = [];
+    src = await destDialog({ title: 'Pilih folder yang dicadangkan', desc: 'Pilih akun dan folder sumber. Seluruh isinya akan disalin ke akun lain.', ok: 'Pilih folder ini' });
+    [S.acc, S.special, S.path] = prev;
+    if (!src) return;
+  }
+  const others = S.accounts.filter((a) => !a.error && a.id != src.acc);
+  if (!others.length) return toast('Hubungkan minimal dua akun untuk membuat cadangan');
+  const best = [...others].sort((x, y) => freeOf(y) - freeOf(x))[0];
+  dialog({
+    title: `Cadangkan "${src.folderName}"`, desc: `Dari ${accOf(src.acc).email}. Salinan disimpan di folder "Cadangan - ${src.folderName}" pada akun tujuan.`,
+    body: `<label class="lbl">Simpan cadangan di</label><select class="field" data-dst>${others.map((a) => `<option value="${a.id}" ${a.id === best.id ? 'selected' : ''}>${esc(a.email)} · ${freeOf(a) === Infinity ? 'tak terbatas' : fmt(freeOf(a)) + ' kosong'}</option>`).join('')}</select>
+      <label class="lbl">Cara menjalankan</label>
+      <div class="seg2 three"><label><input type="radio" name="bm" value="auto-weekly" checked> Otomatis mingguan<small>Dicek tiap minggu, hanya file baru/berubah</small></label>
+        <label><input type="radio" name="bm" value="auto-daily"> Otomatis harian<small>Dicek setiap hari</small></label>
+        <label><input type="radio" name="bm" value="manual"> Manual<small>Hanya saat kamu menekan "Cadangkan sekarang"</small></label></div>`,
+    ok: 'Buat cadangan',
+    run: async (b) => {
+      const v = b.querySelector('input[name=bm]:checked').value;
+      const r = await post('/api/backups', { name: src.folderName, src_acc: src.acc, src_folder: src.folder, dst_acc: b.querySelector('[data-dst]').value, mode: v === 'manual' ? 'manual' : 'auto', freq: v === 'auto-daily' ? 'daily' : 'weekly' });
+      toast('Cadangan dibuat. Proses pertama dimulai.');
+      setTimeout(() => { manageBackups(); runBackup(r.id, src.folderName); }, 100);
+    },
+  });
+}
+const running = new Set();
+async function runBackup(id, name) {
+  if (running.has(id)) return; running.add(id);
+  const t = getTray(); t.querySelector('[data-h]').textContent = 'Mencadangkan';
+  const row = document.createElement('div'); row.className = 'up';
+  row.innerHTML = `<div class="n">Cadangan: ${esc(name)}</div><div class="s">Mendata isi folder…</div><div class="b"><i></i></div>`;
+  t.querySelector('.rows').prepend(row);
+  const st = row.querySelector('.s'), bar = row.querySelector('.b i');
+  try {
+    for (let i = 0; i < 2000; i++) {
+      const r = await post('/api/backups/step', { id });
+      if (r.done) { row.classList.add('ok'); bar.style.width = '100%'; st.textContent = r.status; break; }
+      if (r.scanning) st.textContent = 'Mendata isi folder…';
+      else { st.textContent = `Menyalin ${r.total - r.remaining} dari ${r.total} file`; bar.style.width = ((r.total - r.remaining) / r.total) * 100 + '%'; }
+      document.querySelectorAll(`[data-bst="${id}"]`).forEach((x) => (x.textContent = st.textContent));
+    }
+  } catch (e) { row.classList.add('bad'); st.textContent = e.message; }
+  running.delete(id); t.querySelector('[data-h]').textContent = 'Selesai'; loadAccounts();
+}
+async function manageBackups() {
+  const md = dialog({ title: 'Cadangan', desc: 'Salin folder penting ke akun lain, otomatis atau manual. Hanya file baru atau yang berubah yang disalin ulang.', cancel: 'Tutup', body: '<div class="sk" style="height:140px"></div>' });
+  md.querySelector('.dialog').classList.add('wide');
+  const b = md.querySelector('.body');
+  async function draw() {
+    const { backups } = await api('/api/backups');
+    b.innerHTML = `${backups.map((k) => { const s1 = accOf(k.src_acc), d1 = accOf(k.dst_acc); const val = k.mode === 'manual' ? 'manual' : 'auto-' + k.freq; return `<div class="bk">
+      <div class="bk-h">${ic('backup')}<b>${esc(k.name)}</b></div>
+      <div class="bk-r">${avatar(s1, 18, false)}<span>${esc(s1.email || '?')}</span>${ic('right')}${avatar(d1, 18, false)}<span>${esc(d1.email || '?')}</span></div>
+      <div class="small muted" data-bst="${k.id}">${running.has(k.id) ? 'Sedang berjalan…' : esc(k.last_status || 'Belum pernah dijalankan')}${k.last_run ? ' · ' + ago(k.last_run) : ''}</div>
+      <div class="bk-a"><select class="field sm" data-mode="${k.id}">${[['auto-weekly', 'Otomatis mingguan'], ['auto-daily', 'Otomatis harian'], ['manual', 'Manual']].map(([v2, l]) => `<option value="${v2}" ${v2 === val ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <button type="button" class="btn pri" data-run="${k.id}" data-n="${esc(k.name)}">Cadangkan sekarang</button>
+        <a class="btn ghost" href="https://drive.google.com/drive/folders/${encodeURIComponent(k.dst_folder)}" target="_blank" rel="noopener">${ic('ext')}Buka</a>
+        <button type="button" class="icon-btn" data-del="${k.id}" title="Hapus jadwal">${ic('trash')}</button></div></div>`; }).join('')}
+      <button type="button" class="add-acc" data-new>${ic('plus')}Tambah cadangan</button>
+      <p class="small muted">Cadangan otomatis berjalan di server Cloudflare sedikit demi sedikit (tiap 10 menit), jadi tetap jalan walau aplikasi ditutup.</p>`;
+    b.onclick = async (e) => {
+      if (e.target.closest('[data-new]')) { md.remove(); return newBackup(); }
+      const r = e.target.closest('[data-run]'); if (r) return runBackup(Number(r.dataset.run), r.dataset.n);
+      const d = e.target.closest('[data-del]');
+      if (d) { if (!confirm('Hapus jadwal cadangan ini? Salinan yang sudah ada di akun tujuan tidak ikut terhapus.')) return; await api('/api/backups?id=' + d.dataset.del, { method: 'DELETE' }); toast('Jadwal cadangan dihapus'); draw(); }
+    };
+    b.onchange = async (e) => {
+      const s2 = e.target.closest('[data-mode]'); if (!s2) return;
+      const v = s2.value; await api('/api/backups', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: s2.dataset.mode, mode: v === 'manual' ? 'manual' : 'auto', freq: v === 'auto-daily' ? 'daily' : 'weekly' }) });
+      toast('Jadwal cadangan diperbarui');
+    };
+  }
+  draw().catch((e) => (b.innerHTML = `<div class="err">${esc(e.message)}</div>`));
+}
+$('#navBackup').onclick = () => { closeSide(); manageBackups(); };
+
+// ---------- terima file dari tombol Bagikan di HP ----------
+async function takeShared() {
+  const n = Number(new URLSearchParams(location.search).get('share') || 0);
+  if (!n || !('caches' in window)) return;
+  history.replaceState(null, '', '/');
+  const c = await caches.open('dg-share'); const files = [];
+  for (const k of await c.keys()) {
+    const r = await c.match(k);
+    files.push(new File([await r.blob()], decodeURIComponent(r.headers.get('x-name') || 'file'), { type: r.headers.get('content-type') || '' }));
+    await c.delete(k);
+  }
+  if (files.length) uploadAll(files);
+}
+
 // ---------- mulai ----------
 async function startApp() {
   $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden'); $('#fab').classList.remove('hidden');
@@ -2060,6 +2319,7 @@ async function startApp() {
   if (pg) history.replaceState(null, '', '/');
   go(pg === 'files' ? 'files' : 'home');
   refreshInstallUI(); armLock();
+  loadPins(); loadAlerts(true); setInterval(() => loadAlerts(), 5 * 60000); takeShared();
   if (isIOS()) setTimeout(installBanner, 4000);
   if (!S.state.configured) googleSetup();
 }

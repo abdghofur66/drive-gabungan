@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drive Gabungan: satukan semua akun Google Drive</title>
+<meta name="description" content="Gabungkan beberapa akun Google Drive dalam satu aplikasi. Lihat total ruang, pindahkan file antar akun, cadangkan otomatis. Gratis, dipasang di akun Cloudflare milikmu sendiri.">
+<meta property="og:title" content="Drive Gabungan">
+<meta property="og:description" content="Satu aplikasi untuk semua akun Google Drive-mu. Gratis dan datanya tetap milikmu.">
+<meta property="og:image" content="/icon-512.png">
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f8fc;--surface:#fff;--sunk:#eef2f8;--ink:#16213a;--ink2:#5b6782;--ink3:#8a94aa;--line:#e2e7f0;--pri:#2f6bff;--pri-soft:#e6eeff}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1322;--surface:#151d31;--sunk:#1b2540;--ink:#e8ecf6;--ink2:#a3adc4;--ink3:#6f7a94;--line:#25304d;--pri:#5b8cff;--pri-soft:#1f2c50}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px}
+a{color:var(--pri)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav.top{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;color:var(--ink);text-decoration:none}
+.brand img{width:34px;height:34px;border-radius:10px}
+.navl{display:flex;gap:18px;align-items:center;font-weight:600;font-size:14.5px}
+.navl a{color:var(--ink2);text-decoration:none}
+.navl a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--pri);color:#fff!important;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:99px;font-size:15px}
+.btn.ghost{background:var(--surface);color:var(--ink)!important;border:1px solid var(--line)}
+
+/* hero: the strip is the signature */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;padding:48px 0 72px}
+.hero h1{font-size:clamp(34px,5.4vw,56px);line-height:1.06;letter-spacing:-.035em;margin:0 0 18px;font-weight:800}
+.hero p{font-size:18px;color:var(--ink2);margin:0 0 28px;max-width:46ch}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.note{font-size:13.5px;color:var(--ink3);margin-top:14px}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:0 30px 60px -30px rgba(22,33,58,.35)}
+.demo .big{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.demo .big small{font-size:18px;color:var(--ink2);font-weight:600;letter-spacing:0;margin-left:6px}
+.demo .cap{color:var(--ink2);font-size:14px;margin:6px 0 18px}
+.strip{display:flex;height:22px;gap:3px;border-radius:99px;overflow:hidden;background:var(--sunk)}
+.strip i{display:block;height:100%;animation:grow 1.1s cubic-bezier(.2,.8,.2,1) both}
+.strip i:nth-child(2){animation-delay:.12s}.strip i:nth-child(3){animation-delay:.24s}
+@keyframes grow{from{flex-grow:0}}
+@media (prefers-reduced-motion:reduce){.strip i{animation:none}}
+.accs{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.acc{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;font-size:14px}
+.acc .av{width:30px;height:30px;border-radius:50%;color:#fff;font-weight:800;display:grid;place-items:center;font-size:13px}
+.acc b{display:block;font-size:14px}
+.acc .mini{height:5px;border-radius:9px;background:var(--sunk);margin-top:4px;overflow:hidden}
+.acc .mini i{display:block;height:100%;border-radius:9px}
+.acc .r{color:var(--ink2);font-size:13px;font-variant-numeric:tabular-nums}
+
+section{padding:56px 0}
+h2{font-size:clamp(26px,3.6vw,36px);letter-spacing:-.03em;margin:0 0 10px;line-height:1.15}
+.lead{color:var(--ink2);margin:0 0 32px;max-width:60ch;font-size:17px}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 36px}
+.feat h3{font-size:17px;margin:12px 0 6px;letter-spacing:-.01em}
+.feat p{margin:0;color:var(--ink2);font-size:15px}
+.feat .ic{width:42px;height:42px;border-radius:13px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center}
+.feat svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.why{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.why div{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px}
+.why h3{margin:0 0 6px;font-size:17px}
+.why p{margin:0;color:var(--ink2);font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:s}
+.steps div{counter-increment:s;padding-top:16px;border-top:3px solid var(--pri)}
+.steps div::before{content:counter(s);font-weight:800;color:var(--pri);font-size:14px}
+.steps h3{margin:4px 0 6px;font-size:17px}
+.steps p{margin:0;color:var(--ink2);font-size:15px}
+.end{text-align:center;padding:64px 0 40px}
+.end h2{margin-bottom:12px}
+.end .cta{justify-content:center;margin-top:22px}
+footer{padding:28px 0 36px;text-align:center;color:var(--ink3);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;border-top:1px solid var(--line)}
+footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--ink);text-decoration:none}
+footer a:hover{color:var(--pri);text-decoration:none}
+footer img{width:18px;height:18px}
+@media (max-width:860px){.hero{grid-template-columns:1fr;gap:32px;padding-top:20px}.feats{grid-template-columns:1fr 1fr}.why,.steps{grid-template-columns:1fr}.navl a:not(.btn){display:none}}
+@media (max-width:520px){.feats{grid-template-columns:1fr}.demo{padding:20px}.demo .big{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/tentang"><img src="/icon-192.png" alt="">Drive Gabungan</a>
+    <div class="navl"><a href="#fitur">Fitur</a><a href="#aman">Keamanan</a><a href="/panduan">Panduan</a><a class="btn" href="/panduan">Pasang gratis</a></div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Semua akun Google Drive-mu, dalam satu tempat.</h1>
+      <p>Punya akun Drive pribadi, kantor, dan arsip? Drive Gabungan menyatukannya: lihat total ruang, cari file di semua akun, dan pindahkan file dari akun yang penuh ke yang masih lega.</p>
+      <div class="cta"><a class="btn" href="https://deploy.workers.cloudflare.com/?url=https://github.com/abdghofur66/drive-gabungan" target="_blank" rel="noopener">Pasang di Cloudflare</a><a class="btn ghost" href="/panduan">Lihat panduan</a></div>
+      <div class="note">Gratis. Dipasang di akun Cloudflare milikmu sendiri, sekitar 15 menit.</div>
+    </div>
+    <div class="demo" aria-label="Contoh tampilan ruang gabungan">
+      <div class="big">27,4 GB<small>dari 45 GB</small></div>
+      <div class="cap">Tiga akun gratis, terbaca sebagai satu penyimpanan.</div>
+      <div class="strip"><i style="flex-grow:9;background:#2f6bff"></i><i style="flex-grow:11;background:#17a36b"></i><i style="flex-grow:7;background:#f5a524"></i><i style="flex-grow:18"></i></div>
+      <div class="accs">
+        <div class="acc"><span class="av" style="background:#2f6bff">P</span><div><b>pribadi@gmail.com</b><div class="mini"><i style="width:60%;background:#2f6bff"></i></div></div><span class="r">9 GB</span></div>
+        <div class="acc"><span class="av" style="background:#17a36b">K</span><div><b>kerja@gmail.com</b><div class="mini"><i style="width:73%;background:#17a36b"></i></div></div><span class="r">11 GB</span></div>
+        <div class="acc"><span class="av" style="background:#f5a524">A</span><div><b>arsip@gmail.com</b><div class="mini"><i style="width:47%;background:#f5a524"></i></div></div><span class="r">7,4 GB</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="fitur">
+    <h2>Yang bisa dilakukan</h2>
+    <p class="lead">Semua yang biasa kamu lakukan di Google Drive, ditambah hal-hal yang hanya mungkin jika semua akun disatukan.</p>
+    <div class="feats">
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg></div><h3>Pindah antar akun</h3><p>Akun hampir penuh? Pindahkan file atau folder ke akun lain dengan sekali seret.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Cari di semua akun</h3><p>Satu kolom cari untuk semua Drive, sampai ke isi dokumen, dengan filter waktu dan ukuran.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.92A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17.5 18H7z"/><path d="M12 15v-5m0 0-2 2m2-2 2 2"/></svg></div><h3>Cadangan otomatis</h3><p>Folder penting disalin ke akun lain tiap hari atau minggu. Bisa juga dijalankan manual.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div><h3>Link berbagi sendiri</h3><p>Bagikan file dengan batas waktu, password, dan jumlah unduhan. Penerima tak perlu akun Google.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></div><h3>Saran merapikan</h3><p>Temukan file kembar di beberapa akun dan file besar yang setahun tak dibuka.</p></div>
+      <div class="feat"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg></div><h3>Pemberitahuan di HP</h3><p>Dikabari saat akun hampir penuh, aksesnya terputus, atau cadangan selesai.</p></div>
+    </div>
+  </section>
+
+  <section id="aman">
+    <h2>Datamu tetap milikmu</h2>
+    <p class="lead">Drive Gabungan tidak punya server pusat. Setiap orang memasang salinannya sendiri.</p>
+    <div class="why">
+      <div><h3>Berjalan di akunmu sendiri</h3><p>Aplikasi dan database ada di akun Cloudflare milikmu. Pembuatnya pun tidak bisa melihat file, password, atau akunmu.</p></div>
+      <div><h3>Masuk dengan sidik jari</h3><p>Selain password, bisa masuk dengan sidik jari atau wajah. Ada kunci otomatis dan daftar perangkat yang sedang masuk.</p></div>
+      <div><h3>Hapus tetap bisa dibatalkan</h3><p>File yang dihapus masuk sampah Google Drive dan bisa dipulihkan, plus tombol Urungkan langsung setelah menghapus.</p></div>
+      <div><h3>Terus diperbarui</h3><p>Fitur baru dikirim otomatis ke salinanmu setiap minggu, tanpa perlu memasang ulang.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cara memasang</h2>
+    <p class="lead">Tidak perlu keahlian pemrograman. Panduan bergambar menuntunmu langkah demi langkah.</p>
+    <div class="steps">
+      <div><h3>Deploy sekali klik</h3><p>Tekan tombol Pasang di Cloudflare. Aplikasi dan database dibuat otomatis, gratis.</p></div>
+      <div><h3>Siapkan Google Cloud</h3><p>Buat Client ID agar aplikasimu boleh meminta akses Drive. Sekitar 8 menit, sekali saja.</p></div>
+      <div><h3>Hubungkan akun</h3><p>Tambahkan akun Google satu per satu, dan semua ruangnya langsung tergabung.</p></div>
+    </div>
+  </section>
+
+  <div class="end">
+    <h2>Siap menyatukan Drive-mu?</h2>
+    <p class="lead" style="margin:0 auto">Gratis, sumber terbuka, dan bisa dipasang hari ini.</p>
+    <div class="cta"><a class="btn" href="/panduan">Mulai pasang</a><a class="btn ghost" href="https://github.com/abdghofur66/drive-gabungan" target="_blank" rel="noopener">Lihat kode di GitHub</a></div>
+  </div>
+</div>
+<footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
+</body>
+</html>

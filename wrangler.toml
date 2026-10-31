@@ -11,3 +11,7 @@ fallthrough = true
 [[d1_databases]]
 binding = "DB"
 database_name = "drive-gabungan"
+
+# Cek akun (peringatan) & jalankan cadangan otomatis setiap 10 menit
+[triggers]
+crons = ["*/10 * * * *"]

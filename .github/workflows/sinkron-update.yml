@@ -32,6 +32,12 @@ jobs:
           cp /tmp/upstream/README.md README.md
           cp /tmp/upstream/package.json package.json
 
+      - name: Pastikan jadwal cron (cadangan & notifikasi) ada
+        run: |
+          if ! grep -q '^\[triggers\]' wrangler.toml; then
+            printf '\n# Cek akun & cadangan otomatis setiap 10 menit\n[triggers]\ncrons = ["*/10 * * * *"]\n' >> wrangler.toml
+          fi
+
       - name: Commit jika ada perubahan
         run: |
           if git diff --quiet; then

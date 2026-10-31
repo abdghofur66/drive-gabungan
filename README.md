@@ -17,11 +17,16 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 - Pindah/salin file & folder **antar akun** (juga lewat seret ke akun di sidebar), seret ke folder untuk memindah
 - Panel detail, galeri foto, durasi video, foto profil akun
 - Keamanan: kunci otomatis, masuk dengan sidik jari/wajah (passkey), daftar perangkat yang login, pintasan keyboard (tekan `?`), urungkan hapus
+- Link berbagi sendiri (`/s/…`) dengan batas waktu, password, dan jumlah unduhan
+- Cadangan folder ke akun lain: otomatis harian/mingguan (cron Cloudflare) atau manual
+- Notifikasi di HP saat akun hampir penuh, akses terputus, atau cadangan selesai
+- Cari sampai ke isi dokumen + filter waktu, ukuran, pemilik; sematkan folder di sidebar
+- Terima file dari tombol **Bagikan** di HP (PWA share target)
 - Login satu password pemilik; token Google disimpan di D1 milikmu sendiri
 
 ## Pasang (sekali klik)
 
-📖 **Panduan bergambar:** https://drive.outsiderdev.com/panduan
+📖 **Panduan bergambar:** https://drive.outsiderdev.com/panduan · **Halaman produk:** https://drive.outsiderdev.com/tentang
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/abdghofur66/drive-gabungan)
 
@@ -47,7 +52,7 @@ npm install && npx wrangler login && npx wrangler deploy
 ```
 
 ## Catatan
-- Sebelum upload muncul pilihan tujuan: di root kamu memilih akun (yang paling lega sudah terpilih), di dalam folder file masuk ke folder & akun itu.
+- Saat upload atau membuat item baru, kamu memilih akun dan folder tujuan; akun paling lega ditandai, akun yang ruangnya tidak cukup tidak bisa dipilih.
 - Satu file tidak dipecah ke beberapa akun; ukurannya harus muat di salah satu akun.
 - Hapus = pindah ke Sampah Google Drive (bisa dipulihkan dari Drive).
 - Memutus akun di aplikasi juga mencabut izinnya; file di Drive tetap aman.
