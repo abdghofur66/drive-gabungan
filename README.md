@@ -15,9 +15,11 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 
 ## Pasang (sekali klik)
 
+📖 **Panduan bergambar:** https://drive.outsiderdev.com/panduan
+
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/abdghofur66/drive-gabungan)
 
-1. Klik tombol di atas → login/daftar Cloudflare (gratis) → **Deploy**. Database dibuat otomatis.
+1. Klik tombol di atas → login/daftar Cloudflare (gratis) → pilih akun GitHub → isi **Project name** yang belum dipakai sebagai nama repo di GitHub-mu (mis. `drive-saya`) → **Deploy**. Database dibuat otomatis.
 2. **Segera** buka alamat Worker yang diberikan → buat password pemilik. Instance ini sekarang milikmu.
 3. Aplikasi meminta **Client ID & Secret Google** (sekali saja, lihat bawah) → tempel → Simpan.
 4. Klik **+ Hubungkan akun Google**, ulangi untuk setiap akun.
@@ -26,7 +28,8 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 ### Membuat Client ID & Secret Google (±5 menit)
 1. Buka https://console.cloud.google.com → buat project baru.
 2. **APIs & Services → Library** → **Google Drive API** → **Enable**.
-3. **Google Auth Platform → Branding**: isi nama aplikasi & email, tipe **External**.
+3. **Google Auth Platform → Get started**: isi nama aplikasi & email, tipe **External**, centang persetujuan → Create.
+   Lalu di **Branding** isi *Application home page*, *privacy policy link* dan *terms of service link* dengan alamat aplikasimu → Save. **Wajib**, tanpa ini tombol Publish app tidak aktif.
 4. **Data Access → Add or remove scopes** → tambahkan `.../auth/drive`.
 5. **Clients → Create client** → **Web application** → Authorized redirect URI: salin dari aplikasi (tombol **Salin**).
 6. **Audience → Publish app** → status **In production**.
@@ -43,5 +46,5 @@ npm install && npx wrangler login && npx wrangler deploy
 - Hapus = pindah ke Sampah Google Drive (bisa dipulihkan dari Drive).
 - Memutus akun di aplikasi juga mencabut izinnya; file di Drive tetap aman.
 - Batas gratis Cloudflare Workers: 100.000 request/hari, lebih dari cukup untuk pemakaian pribadi.
-- Lupa password: hapus data pengaturan lalu buat ulang:
-  `npx wrangler d1 execute drive-gabungan --remote --command "DELETE FROM settings; DELETE FROM sessions;"`
+- Lupa password: Cloudflare → D1 SQLite Database → database aplikasimu → Console, jalankan
+  `DELETE FROM settings WHERE key LIKE 'pw_%'; DELETE FROM sessions;` lalu buka aplikasi untuk membuat password baru (akun Google tetap terhubung).

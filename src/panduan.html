@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panduan Drive Gabungan</title>
+<meta name="description" content="Cara memasang Drive Gabungan sendiri: deploy ke Cloudflare, buat Client ID Google, dan hubungkan akun Google Drive.">
+<link rel="icon" href="https://outsiderdev.com/img/ico.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f8fc;--surface:#fff;--sunk:#eef2f8;--ink:#16213a;--ink2:#5b6782;--ink3:#8a94aa;--line:#e2e7f0;--pri:#2f6bff;--pri-soft:#e6eeff;--warn:#f5a524;--ok:#17a36b}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1322;--surface:#151d31;--sunk:#1b2540;--ink:#e8ecf6;--ink2:#a3adc4;--ink3:#6f7a94;--line:#25304d;--pri:#5b8cff;--pri-soft:#1f2c50}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:15.5px}
+a{color:var(--pri)}
+.wrap{max-width:760px;margin:0 auto;padding:40px 18px 24px}
+header{margin-bottom:36px}
+.strip{display:flex;height:12px;gap:3px;border-radius:99px;overflow:hidden;width:220px;margin-bottom:22px}
+.strip i{flex:1;border-radius:99px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.15;letter-spacing:-.03em;margin:0 0 12px;font-weight:800}
+.lead{font-size:17px;color:var(--ink2);margin:0 0 20px;max-width:60ch}
+.need{display:flex;flex-wrap:wrap;gap:8px}
+.need span{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:13.5px;font-weight:600}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin:28px 0 40px}
+.toc ol{margin:6px 0 0;padding-left:20px}
+.toc li{margin:4px 0}
+.toc b{font-size:14px}
+section.step{display:grid;grid-template-columns:44px 1fr;gap:0 16px;margin-bottom:44px;scroll-margin-top:20px}
+.num{width:44px;height:44px;border-radius:14px;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+.step h2{font-size:22px;letter-spacing:-.02em;margin:6px 0 4px}
+.step .when{color:var(--ink2);font-size:14px;margin:0 0 14px}
+.step ol,.step ul{padding-left:20px;margin:0 0 14px}
+.step li{margin:6px 0}
+.body{grid-column:2}
+kbd,code{font-family:inherit;font-weight:700;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.92em;white-space:nowrap}
+code{font-weight:600;white-space:normal;word-break:break-all}
+.tip{border-left:4px solid var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--surface));padding:12px 16px;border-radius:0 12px 12px 0;margin:14px 0;font-size:14.5px}
+.tip.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--surface))}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--pri);color:#fff;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:99px;margin:6px 0 14px}
+
+/* ilustrasi layar (mock) */
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:14px 0 6px;box-shadow:0 10px 30px -18px rgba(22,33,58,.4)}
+.shot .bar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink3)}
+.shot .bar i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.shot .bar span{margin-left:8px;background:var(--surface);border-radius:6px;padding:2px 10px;flex:1;max-width:340px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.shot .in{padding:18px;font-size:13.5px}
+.cap{font-size:13px;color:var(--ink3);margin:0 0 14px}
+.m-field{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;margin:6px 0;color:var(--ink3);background:var(--bg)}
+.m-field.fill{color:var(--ink)}
+.m-label{font-size:12px;font-weight:700;color:var(--ink2);margin-top:10px}
+.m-btn{display:inline-block;background:var(--pri);color:#fff;border-radius:99px;padding:7px 16px;font-weight:700;font-size:13px;margin-top:10px;position:relative}
+.m-btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.hl{outline:3px solid var(--warn);outline-offset:3px;border-radius:10px}
+.m-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.m-check{display:flex;align-items:center;gap:8px;margin-top:10px}
+.m-check b{width:16px;height:16px;border-radius:4px;background:var(--pri);display:inline-block}
+.m-warn{background:#fff;color:#202124;border-radius:12px;padding:16px;border:1px solid #dadce0}
+.m-warn h4{margin:0 0 6px;font-size:15px}
+.m-warn p{margin:0 0 8px;color:#5f6368;font-size:12.5px}
+.m-warn .lk{color:#1a73e8;font-weight:600;font-size:12.5px}
+.m-strip{display:flex;height:10px;gap:2px;border-radius:99px;overflow:hidden;margin:8px 0}
+.m-acc{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12.5px}
+.m-acc s{width:10px;height:10px;border-radius:3px;display:inline-block}
+.faq h3{font-size:16px;margin:22px 0 4px}
+.faq p{margin:0;color:var(--ink2)}
+footer{padding:36px 0 10px;text-align:center;color:var(--ink3);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--ink);text-decoration:none}
+footer a:hover{color:var(--pri);text-decoration:none}
+footer img{width:18px;height:18px}
+@media (max-width:560px){section.step{grid-template-columns:1fr}.num{margin-bottom:8px}.body{grid-column:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="strip" aria-hidden="true"><i style="background:#2f6bff"></i><i style="background:#17a36b"></i><i style="background:#f5a524"></i><i style="background:#e5484d"></i><i style="background:var(--line);flex:1.5"></i></div>
+    <h1>Pasang Drive Gabungan milikmu sendiri</h1>
+    <p class="lead">Satukan beberapa akun Google Drive dalam satu tampilan. Setiap orang memasang salinannya sendiri, jadi data dan aksesnya hanya milikmu. Gratis, sekitar 15 menit.</p>
+    <div class="need"><span>Akun Cloudflare (gratis)</span><span>Akun Google</span><span>Akun GitHub</span><span>Laptop/PC</span></div>
+  </header>
+
+  <nav class="toc" aria-label="Daftar isi">
+    <b>Langkahnya</b>
+    <ol>
+      <li><a href="#deploy">Deploy ke Cloudflare</a></li>
+      <li><a href="#password">Buat password pemilik</a></li>
+      <li><a href="#google">Siapkan Google Cloud</a></li>
+      <li><a href="#client">Tempel Client ID dan Secret</a></li>
+      <li><a href="#akun">Hubungkan akun Google Drive</a></li>
+    </ol>
+  </nav>
+
+  <section class="step" id="deploy">
+    <div class="num">1</div>
+    <div class="body">
+      <h2>Deploy ke Cloudflare</h2>
+      <p class="when">±2 menit. Membuat salinan aplikasi di akun Cloudflare-mu.</p>
+      <a class="btn" href="https://deploy.workers.cloudflare.com/?url=https://github.com/abdghofur66/drive-gabungan" target="_blank" rel="noopener">Deploy to Cloudflare</a>
+      <ol>
+        <li>Login atau daftar Cloudflare.</li>
+        <li>Di <b>Git account</b>, pilih akun GitHub-mu (atau <b>New GitHub connection</b> jika belum ada).</li>
+        <li>Isi <b>Project name</b>, misalnya <code>drive-saya</code>. Nama ini jadi nama repo baru di GitHub-mu dan bagian dari alamat aplikasi.</li>
+        <li>Klik <b>Deploy</b> dan tunggu sampai statusnya <b>Ready</b>.</li>
+      </ol>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>dash.cloudflare.com · Set up your application</span></div>
+        <div class="in">
+          <div class="m-label">Git account</div><div class="m-field fill">abdghofur66</div>
+          <div class="m-label">Project name</div><div class="m-field fill hl">drive-saya</div>
+          <div class="m-btn">Deploy</div>
+        </div>
+      </div>
+      <p class="cap">Pilih nama project yang belum pernah dipakai untuk repo di GitHub-mu.</p>
+      <div class="tip">Alamat aplikasimu nanti berbentuk <code>https://drive-saya.namamu.workers.dev</code>. Catat alamat ini.</div>
+    </div>
+  </section>
+
+  <section class="step" id="password">
+    <div class="num">2</div>
+    <div class="body">
+      <h2>Buat password pemilik</h2>
+      <p class="when">Langsung setelah deploy selesai.</p>
+      <p>Buka alamat aplikasimu. Halaman pertama meminta password pemilik. Isi dua kali, minimal 8 karakter, lalu klik <b>Simpan dan masuk</b>.</p>
+      <div class="tip">Lakukan segera. Orang pertama yang membuat password menjadi pemilik aplikasi ini.</div>
+    </div>
+  </section>
+
+  <section class="step" id="google">
+    <div class="num">3</div>
+    <div class="body">
+      <h2>Siapkan Google Cloud</h2>
+      <p class="when">±8 menit, cukup sekali. Ini memberi aplikasimu izin untuk meminta akses Drive.</p>
+      <ol>
+        <li>Buka <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a>, buat project baru, misalnya <b>Drive Gabungan</b>.</li>
+        <li>Buka <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Drive API</a>, klik <b>Enable</b>.</li>
+        <li>Buka <b>Google Auth Platform → Get started</b>. Isi nama aplikasi dan email, pilih <b>External</b>, isi email kontak, centang persetujuan, lalu <b>Create</b>.</li>
+        <li>Buka <b>Branding</b>, isi tiga kolom ini dengan alamat aplikasimu, lalu <b>Save</b>:
+          <ul><li>Application home page</li><li>Application privacy policy link</li><li>Application terms of service link</li></ul>
+        </li>
+        <li>Buka <b>Data Access → Add or remove scopes</b>. Di <b>Manually add scopes</b> tempel <code>https://www.googleapis.com/auth/drive</code>, klik <b>Add to table → Update → Save</b>.</li>
+        <li>Buka <b>Clients → Create client</b>, pilih <b>Web application</b>. Di <b>Authorized redirect URIs</b> klik <b>Add URI</b> dan isi alamat aplikasimu ditambah <code>/oauth/callback</code>. Klik <b>Create</b>.</li>
+        <li>Muncul Client ID dan Client Secret. <b>Salin keduanya sekarang</b>, simpan sementara di Notepad.</li>
+        <li>Buka <b>Audience</b>, klik <b>Publish app → Confirm</b> sampai statusnya <b>In production</b>.</li>
+      </ol>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>console.cloud.google.com · Branding</span></div>
+        <div class="in">
+          <div class="m-label">Application home page</div><div class="m-field fill hl">https://drive-saya.namamu.workers.dev</div>
+          <div class="m-label">Application privacy policy link</div><div class="m-field fill hl">https://drive-saya.namamu.workers.dev</div>
+          <div class="m-label">Application terms of service link</div><div class="m-field fill hl">https://drive-saya.namamu.workers.dev</div>
+          <div class="m-btn">Save</div>
+        </div>
+      </div>
+      <p class="cap">Tanpa tiga isian ini, tombol Publish app di langkah terakhir tidak bisa diklik.</p>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>console.cloud.google.com · Clients · Create client</span></div>
+        <div class="in">
+          <div class="m-label">Application type</div><div class="m-field fill">Web application</div>
+          <div class="m-label">Authorized redirect URIs</div><div class="m-field fill hl">https://drive-saya.namamu.workers.dev/oauth/callback</div>
+          <div class="m-btn">Create</div>
+        </div>
+      </div>
+      <div class="tip">Jangan biarkan status di <b>Testing</b>. Di mode itu Google memutus akses setiap 7 hari. Peringatan "Your app requires verification" setelah publish boleh diabaikan, karena aplikasi ini hanya untuk dirimu.</div>
+    </div>
+  </section>
+
+  <section class="step" id="client">
+    <div class="num">4</div>
+    <div class="body">
+      <h2>Tempel Client ID dan Secret</h2>
+      <p class="when">±1 menit.</p>
+      <p>Kembali ke aplikasimu. Jendela <b>Hubungkan ke Google Cloud</b> muncul otomatis. Tempel Client ID dan Client Secret, lalu klik <b>Simpan</b>.</p>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>drive-saya.namamu.workers.dev</span></div>
+        <div class="in">
+          <b>Hubungkan ke Google Cloud</b>
+          <div class="m-row"><div class="m-field fill" style="flex:1">https://drive-saya.namamu.workers.dev/oauth/callback</div><div class="m-btn ghost" style="margin:0">Salin</div></div>
+          <div class="m-field fill hl">847051161407-xxxx.apps.googleusercontent.com</div>
+          <div class="m-field fill hl">••••••••••••••••••</div>
+          <div class="m-btn">Simpan</div>
+        </div>
+      </div>
+      <p class="cap">Redirect URI yang benar juga bisa disalin dari jendela ini.</p>
+    </div>
+  </section>
+
+  <section class="step" id="akun">
+    <div class="num">5</div>
+    <div class="body">
+      <h2>Hubungkan akun Google Drive</h2>
+      <p class="when">±1 menit per akun.</p>
+      <ol>
+        <li>Klik <b>Hubungkan akun Google</b> di sidebar, lalu pilih akunnya.</li>
+        <li>Muncul layar "Google belum memverifikasi aplikasi ini". Klik <b>Lanjutan</b>, lalu <b>Buka Drive Gabungan (tidak aman)</b>.</li>
+        <li>Centang izin Google Drive, klik <b>Lanjutkan</b>.</li>
+        <li>Ulangi untuk akun lain. Setiap akun menambah satu warna di pita penyimpanan.</li>
+      </ol>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>accounts.google.com</span></div>
+        <div class="in"><div class="m-warn"><h4>Google belum memverifikasi aplikasi ini</h4><p>Aplikasi meminta akses ke informasi sensitif di Akun Google Anda.</p><span class="lk hl">Lanjutan</span> &nbsp;<span class="lk">Kembali ke tempat aman</span></div></div>
+      </div>
+      <p class="cap">Peringatan ini wajar. Aplikasinya milikmu dan berjalan di akun Cloudflare-mu sendiri.</p>
+      <div class="shot" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i><span>Drive Gabungan</span></div>
+        <div class="in">
+          <b style="font-size:20px">27,4 GB</b> <span style="color:var(--ink2)">dari 45 GB</span>
+          <div class="m-strip"><i style="flex:9;background:#2f6bff"></i><i style="flex:11;background:#17a36b"></i><i style="flex:7;background:#f5a524"></i><i style="flex:18;background:var(--line)"></i></div>
+          <div class="m-acc"><s style="background:#2f6bff"></s>pribadi@gmail.com</div>
+          <div class="m-acc"><s style="background:#17a36b"></s>kerja@gmail.com</div>
+          <div class="m-acc"><s style="background:#f5a524"></s>arsip@gmail.com</div>
+        </div>
+      </div>
+      <div class="tip ok">Selesai. Buka alamat aplikasimu dari perangkat mana saja dan masuk dengan password pemilik. Di HP, pilih <b>Tambahkan ke layar utama</b> agar terasa seperti aplikasi.</div>
+    </div>
+  </section>
+
+  <div class="faq">
+    <h2 style="font-size:22px;letter-spacing:-.02em">Pertanyaan umum</h2>
+    <h3>Apakah data saya bisa dilihat orang lain?</h3>
+    <p>Tidak. Password, Client Secret, dan token akun tersimpan di database Cloudflare milikmu sendiri. Pembuat aplikasi ini pun tidak bisa mengaksesnya.</p>
+    <h3>Upload masuk ke akun mana?</h3>
+    <p>Sebelum upload kamu memilih akun tujuan. Akun yang paling lega sudah terpilih otomatis. Di dalam folder, file masuk ke folder dan akun pemiliknya.</p>
+    <h3>Muncul "redirect_uri_mismatch" saat menghubungkan akun.</h3>
+    <p>Redirect URI di Google Cloud belum sama persis dengan alamat aplikasimu. Salin ulang dari jendela "Hubungkan ke Google Cloud", atau tunggu 5–10 menit setelah menyimpan.</p>
+    <h3>Akun tertulis "Perlu dihubungkan ulang".</h3>
+    <p>Izin dicabut atau status aplikasi masih Testing. Pastikan statusnya In production, lalu klik Hubungkan akun Google dan pilih akun yang sama.</p>
+    <h3>Lupa password pemilik.</h3>
+    <p>Di Cloudflare, buka <b>D1 SQLite Database</b>, pilih database aplikasimu, buka <b>Console</b>, jalankan <code>DELETE FROM settings WHERE key LIKE 'pw_%'; DELETE FROM sessions;</code> lalu buka aplikasi untuk membuat password baru. Akun Google tetap terhubung.</p>
+    <h3>Apakah benar-benar gratis?</h3>
+    <p>Ya. Paket gratis Cloudflare memberi 100.000 permintaan per hari, jauh di atas kebutuhan pribadi. Ruang penyimpanan tetap dari akun Google Drive-mu.</p>
+  </div>
+
+  <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
+</div>
+</body>
+</html>

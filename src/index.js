@@ -2,6 +2,7 @@
 // Cloudflare Worker + D1. Satu instance = satu pemilik (self-host).
 // Developed by OutsiderDev — https://outsiderdev.com
 import HTML from './ui.html';
+import PANDUAN from './panduan.html';
 
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/drive';
 const FOLDER = 'application/vnd.google-apps.folder';
@@ -203,6 +204,10 @@ async function route(req, env) {
 
   if (p === '/' || p === '/index.html') {
     return new Response(HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'x-frame-options': 'DENY' } });
+  }
+
+  if (p === '/panduan' || p === '/panduan/') {
+    return new Response(PANDUAN, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
   }
 
   if (p === '/api/state') {
