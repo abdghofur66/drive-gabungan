@@ -355,6 +355,12 @@ body:has(.selbar) .fab{display:none!important}
 .legend button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;text-align:left;font-size:13px}
 .legend button:hover,.legend button.hi{background:var(--sunk)}
 .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend button{align-items:flex-start}
+.legend .lg{flex:1;min-width:0}
+.legend .lt{display:flex;justify-content:space-between;gap:8px}
+.legend .lb{height:6px;border-radius:9px;background:var(--sunk);margin:6px 0 4px;overflow:hidden}
+.legend .lb i{display:block;height:100%;border-radius:9px}
+.legend .ls{font-size:12px;color:var(--ink2)}
 .legend .l{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .legend .r{color:var(--ink2);font-variant-numeric:tabular-nums}
 .brk{display:flex;flex-direction:column;gap:16px}
@@ -955,10 +961,12 @@ async function loadDash() {
     <div class="card kpi"><span class="k">Di sampah</span><span class="v">${fmt(trash).replace(' ', '<small>')}</small></span><span class="h">${trash ? 'bisa dikosongkan dari Google Drive' : 'sampah sudah bersih'}</span>${trash ? '<a class="act" href="https://drive.google.com/drive/trash" target="_blank" rel="noopener">Buka sampah Drive</a>' : ''}</div>
     <div class="card kpi"><span class="k">Akun terhubung</span><span class="v">${acc.length}</span><span class="h">${bad ? bad + ' bermasalah' : 'semua aktif'}</span><button class="act" data-add>+ Tambah akun</button></div>
 
-    <div class="card c-donut"><h3>Ruang per akun</h3><p class="sub">Arahkan atau sentuh untuk melihat rinciannya.</p>
+    <div class="card c-donut"><h3>Ruang per akun</h3><p class="sub">Terpakai dan sisa ruang di setiap akun.</p>
       <div class="donut-wrap"><div class="donut"><svg viewBox="0 0 190 190"><circle r="70" cx="95" cy="95" stroke="var(--sunk)" style="cursor:default"></circle>${segs}</svg>
         <div class="mid"><div><b data-mv>${pct}%</b><span data-ml>${unl ? fmt(use) : 'terpakai'}</span></div></div></div>
-      <div class="legend">${ok.map((a) => `<button data-a="${a.id}"><span class="sw" style="background:${a.color}"></span><span class="l">${esc(a.email)}</span><span class="r">${fmt(a.usage)}</span></button>`).join('')}</div></div></div>
+      <div class="legend">${ok.map((a) => { const p3 = a.limit ? Math.round((a.usage / a.limit) * 100) : 0; return `<button data-a="${a.id}">${avatar(a, 26)}<div class="lg"><div class="lt"><span class="l">${esc(a.email)}</span><span class="r">${p3}%</span></div>
+        <div class="lb"><i style="width:${p3}%;background:${a.color}"></i></div>
+        <div class="ls">${fmt(a.usage)} terpakai${a.limit ? ' · ' + fmt(Math.max(0, a.limit - a.usage)) + ' kosong' : ''}</div></div></button>`; }).join('')}</div></div></div>
 
     <div class="card c-break"><h3>Isi penyimpanan</h3><p class="sub">Kuota Google dibagi untuk Drive, Gmail, dan Foto.</p>
       <div class="brk">${ok.map((a) => {
