@@ -201,6 +201,8 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sh-p .r{font-size:12.5px;color:var(--ink2)}
 .dialog.wide{max-width:540px}
+.qk{display:flex;gap:6px;flex-wrap:wrap;margin-top:-2px}
+.qk .chip{height:30px;font-size:12px}
 .bell{position:relative}
 .badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:99px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
 .bellm{width:340px;max-width:calc(100vw - 16px)}
@@ -2130,17 +2132,32 @@ $('#pins').addEventListener('click', (e) => {
 
 // ---------- link berbagi ----------
 function createLink(f) {
-  dialog({
-    title: 'Buat link berbagi', desc: `"${f.name}" bisa diunduh siapa pun yang punya link, tanpa perlu akun Google.`,
-    body: `<label class="lbl">Berlaku</label><select class="field" data-days><option value="1">1 hari</option><option value="7" selected>7 hari</option><option value="30">30 hari</option><option value="0">Tanpa batas waktu</option></select>
-      <label class="lbl">Password (opsional)</label><input class="field" type="text" data-pw placeholder="Kosongkan jika tanpa password" autocomplete="off">
-      <label class="lbl">Batas unduhan (opsional)</label><input class="field" type="number" min="1" data-max placeholder="Tanpa batas">`,
+  const md = dialog({
+    title: 'Buat link berbagi', desc: `"${f.name}" bisa dibuka siapa pun yang punya link, tanpa perlu akun Google.`,
+    body: `<label class="lbl">Jenis akses</label>
+      <div class="seg2"><label><input type="radio" name="lm" value="download" checked> Bisa diunduh<small>Penerima mendapat file aslinya</small></label>
+        <label><input type="radio" name="lm" value="view"> Hanya lihat<small>Pratinjau di halaman, tanpa tombol unduh</small></label></div>
+      <label class="lbl">Berlaku selama</label>
+      <div class="sh-row"><input class="field" type="number" min="1" value="7" data-n style="flex:1"><select class="field" data-u style="width:130px"><option value="1">menit</option><option value="60">jam</option><option value="1440" selected>hari</option><option value="0">tanpa batas</option></select></div>
+      <div class="qk" data-qk>${[[15, 'menit', 1], [1, 'jam', 60], [1, 'hari', 1440], [7, 'hari', 1440]].map(([n, l, u]) => `<button type="button" class="chip" data-q="${n},${u}">${n} ${l}</button>`).join('')}</div>
+      <label class="lbl" data-maxl>Batas unduhan (opsional)</label><input class="field" type="number" min="1" data-max placeholder="Tanpa batas">
+      <label class="lbl">Password (opsional)</label><input class="field" type="text" data-pw placeholder="Kosongkan jika tanpa password" autocomplete="off">`,
     ok: 'Buat link',
     run: async (b) => {
-      const r = await post('/api/links', { acc: f.acc, id: f.id, days: b.querySelector('[data-days]').value, password: b.querySelector('[data-pw]').value.trim(), max: b.querySelector('[data-max]').value });
+      const u = Number(b.querySelector('[data-u]').value), n = Number(b.querySelector('[data-n]').value);
+      if (u && !(n > 0)) throw new Error('Isi durasi lebih dari 0');
+      const r = await post('/api/links', { acc: f.acc, id: f.id, minutes: u ? n * u : 0, mode: b.querySelector('input[name=lm]:checked').value, password: b.querySelector('[data-pw]').value.trim(), max: b.querySelector('[data-max]').value });
       setTimeout(() => showLink(r.url, f.name), 50);
     },
   });
+  const b = md.querySelector('.body');
+  b.querySelectorAll('input[name=lm]').forEach((x) => (x.onchange = () => {
+    const v = x.value === 'view';
+    b.querySelector('[data-maxl]').textContent = v ? 'Batas berapa kali dibuka (opsional)' : 'Batas unduhan (opsional)';
+  }));
+  const u = b.querySelector('[data-u]'), n = b.querySelector('[data-n]');
+  u.onchange = () => { n.disabled = u.value === '0'; };
+  b.querySelector('[data-qk]').onclick = (e) => { const q = e.target.closest('[data-q]'); if (!q) return; const [a1, a2] = q.dataset.q.split(','); n.value = a1; u.value = a2; n.disabled = false; };
 }
 function showLink(link, name) {
   const md = dialog({
@@ -2158,7 +2175,7 @@ async function manageLinks() {
   async function draw() {
     const { links } = await api('/api/links');
     b.innerHTML = links.length ? `<div class="lk-l">${links.map((l, i) => { const a = accOf(l.acc_id); return `<div class="lk ${l.active ? '' : 'off'}">
-      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''} unduhan · ${l.active ? (l.expires ? 'berlaku sampai ' + dshort(l.expires) : 'tanpa batas waktu') : 'tidak aktif'}${l.locked ? ' · berpassword' : ''}</span></div>
+      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.mode === 'view' ? 'Hanya lihat' : 'Unduh'} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''}x ${l.mode === 'view' ? 'dibuka' : 'diunduh'} · ${l.active ? (l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas waktu') : 'tidak aktif'}${l.locked ? ' · berpassword' : ''}</span></div>
       ${l.active ? `<button type="button" class="icon-btn" data-c="${i}" title="Salin link">${ic('copy')}</button>` : ''}<button type="button" class="icon-btn" data-x="${i}" title="Cabut link">${ic('trash')}</button></div>`; }).join('')}</div>`
       : `<div class="empty" style="padding:20px 0"><div><div class="art">${ic('link')}</div><h3>Belum ada link</h3><p>Buka menu ⋮ pada file, lalu pilih "Buat link berbagi".</p></div></div>`;
     b.onclick = async (e) => {

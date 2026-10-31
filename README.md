@@ -17,7 +17,7 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 - Pindah/salin file & folder **antar akun** (juga lewat seret ke akun di sidebar), seret ke folder untuk memindah
 - Panel detail, galeri foto, durasi video, foto profil akun
 - Keamanan: kunci otomatis, masuk dengan sidik jari/wajah (passkey), daftar perangkat yang login, pintasan keyboard (tekan `?`), urungkan hapus
-- Link berbagi sendiri (`/s/…`) dengan batas waktu, password, dan jumlah unduhan
+- Link berbagi sendiri (`/s/…`): bisa diunduh atau **hanya lihat** (pratinjau), durasi dalam menit/jam/hari, password, batas unduhan/dibuka
 - Cadangan folder ke akun lain: otomatis harian/mingguan (cron Cloudflare) atau manual
 - Notifikasi di HP saat akun hampir penuh, akses terputus, atau cadangan selesai
 - Cari sampai ke isi dokumen + filter waktu, ukuran, pemilik; sematkan folder di sidebar

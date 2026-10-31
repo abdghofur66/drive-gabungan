@@ -131,6 +131,7 @@ async function ensureSchema(env) {
   for (const col of ['ua TEXT', 'ip TEXT', 'created INTEGER', 'seen INTEGER']) {
     await env.DB.prepare('ALTER TABLE sessions ADD COLUMN ' + col).run().catch(() => {});
   }
+  await env.DB.prepare("ALTER TABLE links ADD COLUMN mode TEXT DEFAULT 'download'").run().catch(() => {});
   schemaReady = true;
 }
 async function getSetting(env, k) {
@@ -305,47 +306,87 @@ function linkPage(title, inner) {
 <style>:root{--bg:#f6f8fc;--s:#fff;--i:#16213a;--i2:#5b6782;--l:#e2e7f0;--p:#2f6bff}@media(prefers-color-scheme:dark){:root{--bg:#0d1322;--s:#151d31;--i:#e8ecf6;--i2:#a3adc4;--l:#25304d;--p:#5b8cff}}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--bg);color:var(--i);font-family:"Plus Jakarta Sans",system-ui,sans-serif}
 .c{width:100%;max-width:400px;background:var(--s);border:1px solid var(--l);border-radius:24px;padding:28px;text-align:center}
+.c.wide{max-width:960px;padding:20px}
+.pv{margin:6px 0 4px;border-radius:14px;overflow:hidden;background:var(--bg);display:grid;place-items:center;-webkit-user-select:none;user-select:none}
+.pv img,.pv video{max-width:100%;max-height:72vh;display:block}
+.pv audio{width:100%;margin:24px 0}
+.pv iframe{width:100%;height:72vh;border:0;background:#fff}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--p);background:color-mix(in srgb,var(--p) 14%,transparent);border-radius:99px;padding:3px 10px;margin-bottom:10px}
 .ic{width:72px;height:72px;border-radius:20px;background:var(--p);color:#fff;display:grid;place-items:center;margin:0 auto 16px;font-weight:800;font-size:15px}
 h1{font-size:18px;margin:0 0 6px;word-break:break-word}p{color:var(--i2);margin:0 0 18px;font-size:14px}
 input{width:100%;height:46px;border:1.5px solid var(--l);border-radius:12px;padding:0 14px;background:var(--bg);color:var(--i);font:inherit;margin-bottom:10px}
 button,a.b{display:flex;width:100%;height:46px;align-items:center;justify-content:center;border:0;border-radius:99px;background:var(--p);color:#fff;font:700 15px inherit;text-decoration:none;cursor:pointer}
 .e{color:#e5484d}.f{margin-top:22px;font-size:12.5px;color:var(--i2)}.f a{color:var(--i);font-weight:700;text-decoration:none}</style></head>
-<body><div class="c">${inner}<div class="f">Dibagikan lewat <a href="https://outsiderdev.com" target="_blank" rel="noopener">Drive Gabungan · OutsiderDev</a></div></div></body></html>`,
+<body><div class="c${inner.includes('class="pv"') ? ' wide' : ''}">${inner}<div class="f">Dibagikan lewat <a href="https://outsiderdev.com" target="_blank" rel="noopener">Drive Gabungan · OutsiderDev</a></div></div></body></html>`,
   { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-frame-options': 'DENY', 'referrer-policy': 'no-referrer' } });
 }
 function escH(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function fmtB(b) { const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; b = Number(b || 0); while (b >= 1024 && i < 4) { b /= 1024; i++; } return (i ? b.toFixed(1) : b) + ' ' + u[i]; }
-async function linkRoute(env, req, url, id, dl) {
+async function linkToken(L) {
+  const d = await crypto.subtle.digest('SHA-256', enc.encode(L.id + '|' + (L.pw_hash || 'open') + '|' + L.created));
+  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, '0')).join('').slice(0, 40);
+}
+async function linkRoute(env, req, url, id, sub) {
   const L = await env.DB.prepare('SELECT * FROM links WHERE id=?').bind(id).first();
-  const dead = !L || (L.expires && L.expires < Date.now()) || (L.max_dl && L.dl >= L.max_dl);
-  if (dead) return linkPage('Link tidak tersedia', `<div class="ic">!</div><h1>Link tidak tersedia</h1><p>Link ini sudah kedaluwarsa, mencapai batas unduhan, atau dicabut pemiliknya.</p>`);
-  const ext = (L.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase();
-  const info = `${fmtB(L.size)}${L.expires ? ' · berlaku sampai ' + new Date(L.expires).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}`;
-  let err = '';
-  if (req.method === 'POST' || dl) {
-    if (L.pw_hash) {
-      const pw = req.method === 'POST' ? (await req.formData()).get('pw') || '' : '';
-      if (!safeEq(await hashPw(pw, L.pw_salt), L.pw_hash)) {
-        if (req.method === 'POST') await new Promise((r) => setTimeout(r, 800));
-        err = req.method === 'POST' ? '<p class="e">Password salah.</p>' : '';
-      }
-    }
-    if (!err && (!L.pw_hash || req.method === 'POST')) {
-      const acc = await getAcc(env, L.acc_id);
-      const ex = EXPORT_DL[L.mime];
-      const r = ex ? await gapi(env, acc, `/files/${encodeURIComponent(L.file_id)}/export?mimeType=${encodeURIComponent(ex[0])}`) : await gapi(env, acc, `/files/${encodeURIComponent(L.file_id)}?alt=media`);
-      if (!r.ok) return linkPage('Gagal', `<div class="ic">!</div><h1>File tidak bisa diambil</h1><p>File mungkin sudah dihapus atau dipindah oleh pemiliknya.</p>`);
-      await env.DB.prepare('UPDATE links SET dl=dl+1 WHERE id=?').bind(id).run();
-      const name = ex && !L.name.endsWith('.' + ex[1]) ? L.name + '.' + ex[1] : L.name;
-      const h = { 'content-type': ex ? ex[0] : L.mime || 'application/octet-stream', 'content-disposition': `attachment; filename*=UTF-8''${encodeURIComponent(name)}`, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
-      if (r.headers.get('content-length')) h['content-length'] = r.headers.get('content-length');
-      return new Response(r.body, { headers: h });
-    }
+  const view = L?.mode === 'view';
+  const tok = L ? await linkToken(L) : '';
+  const hasTok = getCookie(req, 'lk') === tok;
+  const expired = !L || (L.expires && L.expires < Date.now());
+  const usedUp = L && L.max_dl && L.dl >= L.max_dl;
+  // berkas pratinjau boleh terus dimuat (mis. video di-seek) selama halaman sudah dibuka dengan sah
+  if (sub === 'raw') {
+    if (expired || !view || !hasTok) return new Response('Tidak tersedia', { status: 403 });
+    return streamLink(env, L, req, true);
   }
+  if (expired || usedUp) return linkPage('Link tidak tersedia', `<div class="ic">!</div><h1>Link tidak tersedia</h1><p>Link ini sudah kedaluwarsa, mencapai batas ${view ? 'dibuka' : 'unduhan'}, atau dicabut pemiliknya.</p>`);
+  const ext = (L.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase();
+  const until = L.expires ? new Date(L.expires).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + ' WIB' : '';
+  const info = `${fmtB(L.size)}${until ? ' · berlaku sampai ' + until : ''}`;
+  let ok = !L.pw_hash, err = '';
+  if (L.pw_hash && req.method === 'POST') {
+    const pw = (await req.formData()).get('pw') || '';
+    if (safeEq(await hashPw(pw, L.pw_salt), L.pw_hash)) ok = true;
+    else { await new Promise((r) => setTimeout(r, 800)); err = '<p class="e">Password salah.</p>'; }
+  }
+  if (!view && ok && (sub === 'dl' || req.method === 'POST')) {
+    await env.DB.prepare('UPDATE links SET dl=dl+1 WHERE id=?').bind(id).run();
+    return streamLink(env, L, req, false);
+  }
+  if (view && ok) {
+    await env.DB.prepare('UPDATE links SET dl=dl+1 WHERE id=?').bind(id).run();
+    const m = L.mime || '', raw = `/s/${escH(id)}/raw`;
+    const nc = 'oncontextmenu="return false" draggable="false"';
+    let media;
+    if (m.startsWith('image/')) media = `<img src="${raw}" alt="" ${nc}>`;
+    else if (m.startsWith('video/')) media = `<video src="${raw}" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline ${nc}></video>`;
+    else if (m.startsWith('audio/')) media = `<audio src="${raw}" controls controlslist="nodownload" ${nc}></audio>`;
+    else if (m === 'application/pdf' || m.startsWith('application/vnd.google-apps.') || m.startsWith('text/')) media = `<iframe src="${raw}#toolbar=0&navpanes=0" title="Pratinjau"></iframe>`;
+    else media = `<p style="padding:30px 10px">Pratinjau belum tersedia untuk jenis file ini.</p>`;
+    const left = L.max_dl ? ` · sisa ${Math.max(0, L.max_dl - L.dl - 1)}x dibuka` : '';
+    const r = linkPage(escH(L.name), `<span class="tag">Hanya lihat</span><h1>${escH(L.name)}</h1><p>${escH(info + left)}</p><div class="pv">${media}</div>`);
+    r.headers.append('set-cookie', `lk=${tok}; Path=/s/${id}; HttpOnly; Secure; SameSite=Strict; Max-Age=21600`);
+    return r;
+  }
+  const label = view ? 'Lihat' : 'Unduh';
   const form = L.pw_hash
-    ? `<form method="post" action="/s/${escH(id)}">${err}<input type="password" name="pw" placeholder="Password dari pengirim" required autofocus><button type="submit">Unduh</button></form>`
-    : `<a class="b" href="/s/${escH(id)}/dl">Unduh</a>`;
-  return linkPage(escH(L.name), `<div class="ic">${escH(ext)}</div><h1>${escH(L.name)}</h1><p>${escH(info)}</p>${form}`);
+    ? `<form method="post" action="/s/${escH(id)}">${err}<input type="password" name="pw" placeholder="Password dari pengirim" required autofocus><button type="submit">${label}</button></form>`
+    : `<a class="b" href="/s/${escH(id)}/dl">${label}</a>`;
+  return linkPage(escH(L.name), `${view ? '<span class="tag">Hanya lihat</span>' : ''}<div class="ic">${escH(ext)}</div><h1>${escH(L.name)}</h1><p>${escH(info)}</p>${form}`);
+}
+async function streamLink(env, L, req, inline) {
+  const acc = await getAcc(env, L.acc_id);
+  const ex = L.mime.startsWith('application/vnd.google-apps.') ? (inline ? ['application/pdf', 'pdf'] : EXPORT_DL[L.mime]) : null;
+  const hdr = {};
+  if (inline && !ex && req.headers.get('range')) hdr.range = req.headers.get('range');
+  const r = ex ? await gapi(env, acc, `/files/${encodeURIComponent(L.file_id)}/export?mimeType=${encodeURIComponent(ex[0])}`) : await gapi(env, acc, `/files/${encodeURIComponent(L.file_id)}?alt=media`, { headers: hdr });
+  if (!r.ok && r.status !== 206) return linkPage('Gagal', `<div class="ic">!</div><h1>File tidak bisa diambil</h1><p>File mungkin sudah dihapus atau dipindah oleh pemiliknya.</p>`);
+  const name = ex && !L.name.endsWith('.' + ex[1]) ? L.name + '.' + ex[1] : L.name;
+  let type = ex ? ex[0] : L.mime || 'application/octet-stream';
+  if (inline && /html|xml|javascript/i.test(type) && !/svg/i.test(type)) type = 'text/plain; charset=utf-8';
+  const h = { 'content-type': type, 'content-disposition': `${inline ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(name)}`, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'accept-ranges': 'bytes' };
+  if (inline && !/pdf/i.test(type)) h['content-security-policy'] = "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'";
+  for (const k of ['content-length', 'content-range']) if (r.headers.get(k)) h[k] = r.headers.get(k);
+  return new Response(r.body, { status: r.status, headers: h });
 }
 
 // ---------- passkey (WebAuthn) ----------
@@ -544,8 +585,8 @@ async function route(req, env) {
     return new Response(SW, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache' } });
   }
 
-  const lm = p.match(/^\/s\/([A-Za-z0-9_-]{6,20})(\/dl)?$/);
-  if (lm) return linkRoute(env, req, url, lm[1], !!lm[2]);
+  const lm = p.match(/^\/s\/([A-Za-z0-9_-]{6,20})(?:\/(dl|raw))?$/);
+  if (lm) return linkRoute(env, req, url, lm[1], lm[2] || '');
 
   if (p === '/tentang' || p === '/tentang/') {
     return new Response(TENTANG, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
@@ -714,18 +755,19 @@ async function route(req, env) {
       const a = await getAcc(env, b.acc);
       const meta = await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=name,mimeType,size`);
       if (meta.mimeType === FOLDER) throw new HttpError(400, 'Link berbagi hanya untuk file. Untuk folder, gunakan Bagikan.');
-      if (meta.mimeType.startsWith('application/vnd.google-apps.') && !EXPORT_DL[meta.mimeType]) throw new HttpError(400, 'Jenis file Google ini tidak bisa diunduh lewat link');
+      if (meta.mimeType.startsWith('application/vnd.google-apps.') && !EXPORT_DL[meta.mimeType] && b.mode !== 'view') throw new HttpError(400, 'Jenis file Google ini tidak bisa diunduh lewat link');
       const id = b64u(crypto.getRandomValues(new Uint8Array(6)));
       let salt = null, hash = null;
       if (b.password) { salt = randHex(16); hash = await hashPw(String(b.password), salt); }
-      const exp = Number(b.days) > 0 ? Date.now() + Number(b.days) * 864e5 : null;
-      await env.DB.prepare('INSERT INTO links(id,acc_id,file_id,name,mime,size,expires,pw_salt,pw_hash,max_dl,dl,created) VALUES(?,?,?,?,?,?,?,?,?,?,0,?)')
-        .bind(id, a.id, b.id, meta.name, meta.mimeType, Number(meta.size || 0), exp, salt, hash, Number(b.max) > 0 ? Number(b.max) : null, Date.now()).run();
+      const mins = Number(b.minutes) > 0 ? Number(b.minutes) : Number(b.days) > 0 ? Number(b.days) * 1440 : 0;
+      const exp = mins > 0 ? Date.now() + mins * 60000 : null;
+      await env.DB.prepare('INSERT INTO links(id,acc_id,file_id,name,mime,size,expires,pw_salt,pw_hash,max_dl,dl,created,mode) VALUES(?,?,?,?,?,?,?,?,?,?,0,?,?)')
+        .bind(id, a.id, b.id, meta.name, meta.mimeType, Number(meta.size || 0), exp, salt, hash, Number(b.max) > 0 ? Number(b.max) : null, Date.now(), b.mode === 'view' ? 'view' : 'download').run();
       await logAct(env, 'link', meta.name, a.id);
       return json({ ok: true, id, url: url.origin + '/s/' + id });
     }
     if (m === 'DELETE') { await env.DB.prepare('DELETE FROM links WHERE id=?').bind(qp('id')).run(); return json({ ok: true }); }
-    const r = (await env.DB.prepare('SELECT id,acc_id,file_id,name,mime,size,expires,max_dl,dl,created, pw_hash IS NOT NULL AS locked FROM links ORDER BY created DESC').all()).results || [];
+    const r = (await env.DB.prepare('SELECT id,acc_id,file_id,name,mime,size,expires,max_dl,dl,created,mode, pw_hash IS NOT NULL AS locked FROM links ORDER BY created DESC').all()).results || [];
     return json({ links: r.map((x) => ({ ...x, url: url.origin + '/s/' + x.id, active: !((x.expires && x.expires < Date.now()) || (x.max_dl && x.dl >= x.max_dl)) })) });
   }
 
