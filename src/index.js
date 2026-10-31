@@ -184,6 +184,7 @@ async function listFiles(env, accId, folder, q, type) {
   const accs = accId === 'all' ? await allAcc(env) : [await getAcc(env, accId)];
   const parts = ['trashed=false'];
   if (q) parts.push(`name contains '${qesc(q)}'`);
+  else if (folder === 'shared') parts.push('sharedWithMe = true');
   else parts.push(`'${qesc(folder || 'root')}' in parents`);
   if (TYPE_Q[type]) parts.push(TYPE_Q[type]);
   const query = parts.join(' and ');
@@ -195,7 +196,7 @@ async function listFiles(env, accId, folder, q, type) {
       for (let i = 0; i < 5; i++) {
         const p = new URLSearchParams({
           q: query, pageSize: '1000', orderBy: 'folder,name',
-          fields: 'nextPageToken,files(id,name,mimeType,size,modifiedTime,thumbnailLink,webViewLink)',
+          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress))',
         });
         if (pt) p.set('pageToken', pt);
         const d = await gjson(env, a, '/files?' + p);
@@ -368,7 +369,7 @@ async function route(req, env) {
   if (p === '/api/overview') {
     const accs = await allAcc(env);
     const recent = [], largest = [], errors = [];
-    const F = 'files(id,name,mimeType,size,modifiedTime,thumbnailLink,webViewLink)';
+    const F = 'files(id,name,mimeType,size,createdTime,modifiedTime,thumbnailLink,webViewLink)';
     const q = encodeURIComponent(`trashed=false and mimeType!='${FOLDER}'`);
     await Promise.all(accs.map(async (a) => {
       try {

@@ -154,6 +154,10 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .files.grid .it.folder .th{aspect-ratio:auto;height:64px;justify-content:start;padding:0 14px;grid-template-columns:auto 1fr;gap:10px}
 .files.grid .it.folder .nm{position:absolute;left:58px;right:40px;top:50%;transform:translateY(-50%);padding:0}
 .files.grid .it.folder .sz{display:none}
+.files.grid .it.folder .nm small{display:block;font-size:11.5px;font-weight:500;color:var(--ink2);margin-top:1px}
+.files.grid .sz{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.files.list .dt{white-space:nowrap}
+.own{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--ink2)}
 .files.grid .it.folder .th .ft{width:28px;height:28px}
 .files.grid .it.folder .tag{left:auto;right:auto;bottom:auto;position:static;margin-left:-6px}
 .files.grid .it.folder .more{top:50%;transform:translateY(-50%)}
@@ -184,7 +188,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .empty p{margin:0 0 18px;color:var(--ink2)}
 
 .fab{display:none}
-.install{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:35;width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-pop);padding:14px;display:flex;gap:12px;align-items:center;animation:rise .25s var(--ease)}
+.install{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top));z-index:35;width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-pop);padding:14px;display:flex;gap:12px;align-items:center;animation:rise .25s var(--ease)}
 .install img{width:48px;height:48px;border-radius:12px;flex-shrink:0}
 .install .tx{flex:1;min-width:0}
 .install .tx b{display:block;font-size:14.5px}
@@ -298,6 +302,8 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .modal{position:fixed;inset:0;z-index:45;display:grid;place-items:center;padding:16px}
 .dialog{position:relative;width:100%;max-width:440px;background:var(--surface);border-radius:24px;box-shadow:var(--shadow-pop);padding:24px;animation:rise .2s var(--ease)}
 @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}}
+@keyframes drop{from{opacity:0;margin-top:-16px}}
+.install{animation:drop .3s var(--ease)}
 .dialog h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
 .dialog .desc{color:var(--ink2);margin:0 0 16px;font-size:13.5px}
 .dialog .body{display:flex;flex-direction:column;gap:10px}
@@ -353,7 +359,6 @@ footer img{width:18px;height:18px}
 
 /* ===== Mobile ===== */
 @media (max-width:860px){
-  .install{bottom:calc(92px + env(safe-area-inset-bottom))}
   .shell{grid-template-columns:1fr}
   aside{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:42;transform:translateX(-102%);transition:transform .25s var(--ease);box-shadow:var(--shadow-pop)}
   aside.open{transform:none}
@@ -405,6 +410,7 @@ footer img{width:18px;height:18px}
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
@@ -441,6 +447,7 @@ footer img{width:18px;height:18px}
     <nav class="nav" aria-label="Halaman">
       <button id="navHome" class="on"><svg class="i"><use href="#i-home"/></svg>Beranda</button>
       <button id="navFiles"><svg class="i"><use href="#i-grid"/></svg>Semua file</button>
+      <button id="navShared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
     </nav>
 
     <section class="store" aria-label="Penyimpanan gabungan">
@@ -530,6 +537,7 @@ function ago(d) {
   if (s < 86400 * 7) return Math.round(s / 86400) + ' hari lalu';
   return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+function dshort(d) { return d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
 function ic(id) { return `<svg class="i"><use href="#i-${id}"/></svg>`; }
 let toastT;
 function toast(m) {
@@ -684,20 +692,22 @@ function disconnect(id) {
   });
 }
 function openAccount(id) {
-  S.acc = id; S.path = []; clearSearch(false); go('files');
+  S.shared = false; S.acc = id; S.path = []; clearSearch(false); go('files');
 }
 function go(page) {
   S.page = page;
   $('#dash').classList.toggle('hidden', page !== 'home');
   $('#filesPage').classList.toggle('hidden', page !== 'files');
   $('#navHome').classList.toggle('on', page === 'home');
-  $('#navFiles').classList.toggle('on', page === 'files' && S.acc === 'all');
-  document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', page === 'files' && x.dataset.id == S.acc));
+  $('#navFiles').classList.toggle('on', page === 'files' && S.acc === 'all' && !S.shared);
+  $('#navShared').classList.toggle('on', page === 'files' && !!S.shared);
+  document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', page === 'files' && !S.shared && x.dataset.id == S.acc));
   closeSide();
   page === 'home' ? loadDash() : load();
 }
 $('#navHome').onclick = () => go('home');
-$('#navFiles').onclick = () => { S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
+$('#navShared').onclick = () => { S.shared = true; S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
+$('#navFiles').onclick = () => { S.shared = false; S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
 
 // ---------- beranda / dashboard ----------
 let dashSeq = 0;
@@ -838,7 +848,7 @@ async function load() {
   renderCrumbs(); skeleton(); $('#notes').innerHTML = '';
   const c = cur();
   const typeQ = S.type === 'doc' ? 'doc' : S.type;
-  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : 'root', q: S.q, type: typeQ });
+  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : (S.shared ? 'shared' : 'root'), q: S.q, type: typeQ });
   try {
     const d = await api('/api/files?' + p);
     if (my !== seq) return;
@@ -858,7 +868,7 @@ function sorted() {
   return f;
 }
 function renderCrumbs() {
-  const root = S.acc === 'all' ? 'Semua Drive' : (accOf(S.acc).email || 'Drive').split('@')[0];
+  const root = (S.shared ? 'Dibagikan ke saya' : 'Semua Drive') + (S.acc === 'all' ? '' : ' · ' + (accOf(S.acc).email || 'Drive').split('@')[0]);
   let h = `<button data-i="-1">${esc(root)}</button>`;
   S.path.forEach((f, i) => (h += `<span class="sep">/</span><button data-i="${i}">${esc(f.name)}</button>`));
   if (S.q) h += `<span class="sep">/</span><button disabled>Hasil untuk “${esc(S.q)}”</button>`;
@@ -883,9 +893,9 @@ function render() {
     const label = i === 0 && folders && S.view === 'grid' ? '<div class="group-label">Folder</div>' : (i === folders && folders && S.view === 'grid' ? '<div class="group-label">File</div>' : '');
     return `${label}<div class="it ${isF ? 'folder' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
       <div class="th">${th}<span class="tag" style="background:${a.color || '#999'}" title="${esc(a.email)}"></span></div>
-      <div class="nm">${esc(f.name)}</div>
-      <div class="sz">${isF ? 'Folder' : fmt(f.size)}</div>
-      ${S.view === 'list' ? `<div class="dt">${ago(f.modifiedTime)}</div>` : ''}
+      <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>Dibuat ${dshort(f.createdTime)}</small>` : ''}</div>
+      <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${dshort(f.createdTime)}`}${f.ownedByMe === false && f.owners?.[0] ? `<br><span class="own">${ic('share').replace('class="i"', 'class="i" style="width:12px;height:12px"')}${esc(f.owners[0].displayName || f.owners[0].emailAddress)}</span>` : ''}</div>
+      ${S.view === 'list' ? `<div class="dt" title="Dibuat">${dshort(f.createdTime)}</div>` : ''}
       <button class="icon-btn more" data-m="${i}" aria-label="Aksi untuk ${esc(f.name)}">${ic('dots')}</button>
     </div>`;
   }).join('');
@@ -894,6 +904,8 @@ function showEmpty() {
   const e = $('#empty'); e.classList.remove('hidden');
   if (!S.accounts.length) {
     e.innerHTML = `<div><div class="art">${ic('cloud')}</div><h3>Hubungkan Drive pertamamu</h3><p>Setiap akun Google yang dihubungkan menambah ruang di pita penyimpanan.</p><button class="btn pri" onclick="$('#addAcc').click()">${ic('plus')}Hubungkan akun Google</button></div>`;
+  } else if (S.shared && !S.path.length) {
+    e.innerHTML = `<div><div class="art">${ic('share')}</div><h3>Belum ada yang dibagikan</h3><p>File dan folder yang dibagikan orang lain ke akun-akunmu akan muncul di sini.</p></div>`;
   } else if (S.q) {
     e.innerHTML = `<div><div class="art">${ic('search')}</div><h3>Tidak ada yang cocok</h3><p>Coba kata lain, atau hapus filter jenis file.</p><button class="btn ghost" onclick="clearSearch()">Hapus pencarian</button></div>`;
   } else {
@@ -933,7 +945,7 @@ let qt;
 $('#q').oninput = () => {
   const has = !!$('#q').value;
   $('#qx').classList.toggle('hidden', !has); $('#qk').classList.toggle('hidden', has);
-  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); if (S.page !== 'files') { S.acc = 'all'; S.path = []; go('files'); } else load(); }, 350);
+  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); if (S.page !== 'files') { S.shared = false; S.acc = 'all'; S.path = []; go('files'); } else load(); }, 350);
 };
 function clearSearch(reload = true) {
   $('#q').value = ''; $('#qx').classList.add('hidden'); $('#qk').classList.remove('hidden');
