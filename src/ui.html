@@ -2,466 +2,838 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1322" media="(prefers-color-scheme: dark)">
 <title>Drive Gabungan</title>
 <link rel="icon" href="https://outsiderdev.com/img/ico.png">
+<link rel="apple-touch-icon" href="https://outsiderdev.com/img/ico.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1f2937;--mut:#6b7280;--bd:#e5e7eb;--pri:#2563eb;--danger:#dc2626;--hover:#f1f5f9}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--tx:#e5e7eb;--mut:#9ca3af;--bd:#2a2f38;--pri:#60a5fa;--danger:#f87171;--hover:#222731}}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+:root{
+  --bg:#f6f8fc; --surface:#ffffff; --sunk:#eef2f8; --ink:#16213a; --ink2:#5b6782; --ink3:#8a94aa;
+  --line:#e2e7f0; --pri:#2f6bff; --pri-ink:#fff; --pri-soft:#e6eeff; --danger:#d93636; --ok:#17a36b;
+  --r-lg:20px; --r:12px; --r-sm:8px;
+  --shadow:0 1px 2px rgba(22,33,58,.06),0 8px 24px -12px rgba(22,33,58,.18);
+  --shadow-pop:0 18px 50px -12px rgba(22,33,58,.35);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+:root[data-theme="dark"]{
+  --bg:#0d1322; --surface:#151d31; --sunk:#1b2540; --ink:#e8ecf6; --ink2:#a3adc4; --ink3:#6f7a94;
+  --line:#25304d; --pri:#5b8cff; --pri-soft:#1f2c50; --danger:#ff6b6b; --ok:#38d39a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-pop:0 18px 50px -12px rgba(0,0,0,.7);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1322; --surface:#151d31; --sunk:#1b2540; --ink:#e8ecf6; --ink2:#a3adc4; --ink3:#6f7a94;
+  --line:#25304d; --pri:#5b8cff; --pri-soft:#1f2c50; --danger:#ff6b6b; --ok:#38d39a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-pop:0 18px 50px -12px rgba(0,0,0,.7);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.45}
 button,input,select{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:7px 12px}
-button.pri{background:var(--pri);border-color:var(--pri);color:#fff}
-button.danger{color:var(--danger)}
-button:disabled{opacity:.5;cursor:default}
-input,select{border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:8px 10px}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--pri);outline-offset:2px;border-radius:6px}
 .hidden{display:none!important}
-/* login */
-.center{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px}
-.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
-.box h1{margin:0;font-size:20px}
-.err{color:var(--danger);font-size:13px;min-height:1em}
-/* app */
-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
-header h1{font-size:17px;margin:0;white-space:nowrap}
+svg.i{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;font-weight:600;font-size:14px;transition:background .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.ghost{background:var(--surface);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--sunk)}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:inline-grid;place-items:center;color:var(--ink2);transition:background .15s}
+.icon-btn:hover,.icon-btn.on{background:var(--sunk);color:var(--ink)}
+.field{width:100%;height:46px;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);padding:0 14px;outline:none;transition:border-color .15s}
+.field:focus{border-color:var(--pri)}
+.muted{color:var(--ink2)}
+.small{font-size:12.5px}
+
+/* ===== Auth ===== */
+.auth{min-height:100%;display:grid;place-items:center;padding:24px 16px}
+.auth-card{width:100%;max-width:380px}
+.auth-mark{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.auth-mark .logo{width:44px;height:44px;border-radius:14px;background:var(--pri);display:grid;place-items:center;color:#fff}
+.auth h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+.auth p{margin:0 0 22px;color:var(--ink2)}
+.auth form{display:flex;flex-direction:column;gap:10px}
+.auth .btn{height:46px;justify-content:center;margin-top:6px}
+.err{color:var(--danger);font-size:13px;min-height:18px}
+.strip-demo{display:flex;height:10px;border-radius:99px;overflow:hidden;gap:3px;margin-bottom:26px}
+.strip-demo i{flex:1;border-radius:99px}
+
+/* ===== Shell ===== */
+.shell{display:grid;grid-template-columns:288px 1fr;min-height:100%}
+aside{position:sticky;top:0;height:100vh;padding:20px 16px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--line);background:var(--surface);overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.brand .logo{width:34px;height:34px;border-radius:11px;background:var(--pri);display:grid;place-items:center;color:#fff}
+.brand .logo svg{width:18px;height:18px}
+
+/* the signature element: combined storage strip */
+.store{padding:16px;border-radius:var(--r-lg);background:var(--sunk)}
+.store-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.store-num{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.store-num small{font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:0;margin-left:4px}
+.strip{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--line);gap:2px}
+.strip span{display:block;height:100%;transition:flex-grow .6s var(--ease)}
+.strip span.free{background:transparent}
+.store-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:12.5px;color:var(--ink2)}
+
+.acc-list{display:flex;flex-direction:column;gap:2px}
+.acc{display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--r);cursor:pointer;transition:background .15s;position:relative}
+.acc:hover{background:var(--sunk)}
+.acc.on{background:var(--pri-soft)}
+.acc .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0}
+.acc .meta{flex:1;min-width:0}
+.acc .em{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc .mini{height:4px;border-radius:9px;background:var(--line);margin-top:6px;overflow:hidden}
+.acc .mini i{display:block;height:100%;border-radius:9px}
+.acc .sub{font-size:12px;color:var(--ink2);margin-top:3px}
+.acc .rm{opacity:0;width:28px;height:28px}
+.acc:hover .rm,.acc:focus-within .rm{opacity:1}
+.acc.err .sub{color:var(--danger)}
+.add-acc{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r);border:1.5px dashed var(--line);color:var(--ink2);font-weight:600;font-size:13.5px;transition:border-color .15s,color .15s}
+.add-acc:hover{border-color:var(--pri);color:var(--pri)}
+.side-foot{margin-top:auto;display:flex;gap:4px;align-items:center}
+.side-foot .btn{flex:1;justify-content:center;height:38px;font-size:13px}
+
+/* ===== Main ===== */
+main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:14px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px)}
 #menuBtn{display:none}
-.search{position:relative;flex:1;max-width:520px}
-.search input{width:100%;padding-right:34px}
-.search .x{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;padding:4px 8px;color:var(--mut);font-size:16px}
-.layout{display:flex;min-height:calc(100vh - 57px)}
-aside{width:270px;flex-shrink:0;padding:16px;border-right:1px solid var(--bd);background:var(--card);display:flex;flex-direction:column;gap:14px}
-main{flex:1;padding:16px;min-width:0;display:flex;flex-direction:column}
-.total .bar,.acc .bar{height:6px;background:var(--bd);border-radius:4px;overflow:hidden;margin-top:6px}
-.bar i{display:block;height:100%;background:var(--pri)}
-.mut{color:var(--mut);font-size:12px}
-.acc{padding:8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
-.acc:hover{background:var(--hover)}
-.acc.on{border-color:var(--pri)}
-.acc .row{display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.acc .em{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.acc .rm{border:0;background:none;padding:0 4px;color:var(--mut)}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
-.crumbs{flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:200px}
-.crumbs a{color:var(--pri);cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.item{background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:flex;flex-direction:column}
-.item:hover{border-color:var(--pri)}
-.thumb{height:100px;display:flex;align-items:center;justify-content:center;font-size:38px;background:var(--hover)}
-.thumb img{width:100%;height:100%;object-fit:cover}
-.meta{padding:8px;display:flex;gap:6px;align-items:flex-start}
-.meta .nm{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
-.more{position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:6px;opacity:.9}
-.empty{color:var(--mut);text-align:center;padding:40px}
-.warn{background:#fef3c7;color:#92400e;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-size:13px}
-/* menu & modal */
-.menu{position:fixed;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:30;display:flex;flex-direction:column;min-width:170px;padding:4px}
-.menu button{border:0;text-align:left;border-radius:6px}
-.menu button:hover{background:var(--hover)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
-.mbox{background:var(--card);border-radius:12px;width:100%;max-width:960px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
-.mhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bd)}
-.mhead .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.mbody{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;min-height:200px;background:var(--bg)}
-.mbody img,.mbody video{max-width:100%;max-height:78vh}
-.mbody iframe{width:100%;height:78vh;border:0;background:#fff}
-.small .mbox{max-width:420px}
-.small .mbody{display:block;padding:14px;background:var(--card)}
-.flist{display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow:auto}
-.flist div{padding:8px;border-radius:6px;cursor:pointer}
-.flist div:hover{background:var(--hover)}
-/* uploads */
-#uploads{position:fixed;right:16px;bottom:16px;width:300px;display:flex;flex-direction:column;gap:6px;z-index:20}
-.up{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:8px;z-index:50;font-size:13px;max-width:90vw}
-/* footer */
-footer{margin-top:auto;padding:18px 0 4px;text-align:center;color:var(--mut);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
-footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--tx);text-decoration:none}
+.search{position:relative;flex:1;max-width:620px}
+.search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+.search input{width:100%;height:48px;border-radius:999px;border:1.5px solid transparent;background:var(--surface);box-shadow:var(--shadow);padding:0 46px 0 48px;outline:none;transition:border-color .15s}
+.search input:focus{border-color:var(--pri)}
+.search .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px}
+.search kbd{position:absolute;right:16px;top:50%;transform:translateY(-50%);font:600 11px/1 inherit;color:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:4px 7px}
+
+.content{padding:4px 28px 28px;flex:1;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+.crumbs{flex:1;min-width:0;display:flex;align-items:center;gap:2px;flex-wrap:wrap;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.crumbs button{padding:4px 8px;border-radius:8px;color:var(--ink2);font-weight:700}
+.crumbs button:hover{background:var(--sunk);color:var(--ink)}
+.crumbs button:last-child{color:var(--ink)}
+.crumbs .sep{color:var(--ink3);font-weight:400}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.chip:hover{color:var(--ink)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:inline-flex;background:var(--sunk);border-radius:999px;padding:3px}
+.seg button{width:36px;height:34px;border-radius:999px;display:grid;place-items:center;color:var(--ink3)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.sort{height:40px;border-radius:999px;border:1px solid var(--line);background:var(--surface);padding:0 12px;font-size:13px;font-weight:600}
+
+.notice{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,#f5a524 14%,var(--surface));border:1px solid color-mix(in srgb,#f5a524 40%,transparent);padding:10px 14px;border-radius:var(--r);margin-bottom:12px;font-size:13px}
+
+/* grid */
+.files.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.files.grid .it{background:var(--surface);border-radius:16px;overflow:hidden;cursor:pointer;position:relative;border:1px solid var(--line);transition:border-color .15s,box-shadow .2s,transform .2s var(--ease)}
+.files.grid .it:hover{border-color:color-mix(in srgb,var(--pri) 45%,var(--line));box-shadow:var(--shadow);transform:translateY(-2px)}
+.files.grid .th{aspect-ratio:4/3;display:grid;place-items:center;background:var(--sunk);position:relative;overflow:hidden}
+.files.grid .th img{width:100%;height:100%;object-fit:cover}
+.files.grid .th .ft{width:52px;height:52px}
+.files.grid .tag{position:absolute;left:10px;bottom:10px;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 3px var(--surface)}
+.files.grid .nm{padding:10px 12px 2px;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files.grid .sz{padding:0 12px 12px;font-size:12px;color:var(--ink2)}
+.files.grid .more{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px);opacity:0;transition:opacity .15s}
+.files.grid .it:hover .more,.files.grid .more:focus-visible{opacity:1}
+.files.grid .it.folder .th{aspect-ratio:auto;height:64px;justify-content:start;padding:0 14px;grid-template-columns:auto 1fr;gap:10px}
+.files.grid .it.folder .nm{position:absolute;left:58px;right:40px;top:50%;transform:translateY(-50%);padding:0}
+.files.grid .it.folder .sz{display:none}
+.files.grid .it.folder .th .ft{width:28px;height:28px}
+.files.grid .it.folder .tag{left:auto;right:auto;bottom:auto;position:static;margin-left:-6px}
+.files.grid .it.folder .more{top:50%;transform:translateY(-50%)}
+.group-label{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--ink2);margin:6px 2px -4px}
+
+/* list */
+.files.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.files.list .group-label{display:none}
+.files.list .it{display:grid;grid-template-columns:40px 1fr 110px 120px 40px;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid var(--line);cursor:pointer;position:relative;transition:background .12s}
+.files.list .it:first-of-type{border-top:0}
+.files.list .it:hover{background:var(--sunk)}
+.files.list .th{width:40px;height:40px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;overflow:hidden;position:relative}
+.files.list .th img{width:100%;height:100%;object-fit:cover}
+.files.list .th .ft{width:24px;height:24px}
+.files.list .tag{position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px var(--surface)}
+.files.list .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.files.list .sz,.files.list .dt{font-size:12.5px;color:var(--ink2)}
+.files.list .more{width:36px;height:36px;border-radius:10px}
+
+.sk{background:linear-gradient(90deg,var(--sunk),var(--line),var(--sunk));background-size:200% 100%;animation:sk 1.2s infinite;border-radius:16px}
+@keyframes sk{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}*{transition:none!important}}
+
+.empty{flex:1;display:grid;place-items:center;text-align:center;padding:48px 16px}
+.empty .art{width:84px;height:84px;border-radius:26px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;margin:0 auto 16px}
+.empty .art svg{width:40px;height:40px}
+.empty h3{margin:0 0 6px;font-size:18px}
+.empty p{margin:0 0 18px;color:var(--ink2)}
+
+.fab{display:none}
+
+/* drop overlay */
+.drop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:color-mix(in srgb,var(--pri) 18%,transparent);backdrop-filter:blur(4px);pointer-events:none;opacity:0;transition:opacity .15s}
+.drop.on{opacity:1}
+.drop div{background:var(--surface);padding:28px 36px;border-radius:24px;box-shadow:var(--shadow-pop);text-align:center;font-weight:700;border:2px dashed var(--pri)}
+
+/* menus & sheets */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(10,15,30,.45);opacity:0;transition:opacity .2s}
+.scrim.on{opacity:1}
+.menu{position:fixed;z-index:50;min-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-pop);padding:6px;transform-origin:top left;animation:pop .14s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}}
+.menu .hd{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center;min-width:0}
+.menu .hd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu button{display:flex;align-items:center;gap:12px;width:100%;padding:10px;border-radius:10px;font-size:14px;font-weight:500;text-align:left}
+.menu button:hover{background:var(--sunk)}
+.menu button.danger{color:var(--danger)}
+.menu svg.i{width:18px;height:18px;color:var(--ink2)}
+.menu button.danger svg.i{color:var(--danger)}
+
+.modal{position:fixed;inset:0;z-index:45;display:grid;place-items:center;padding:16px}
+.dialog{position:relative;width:100%;max-width:440px;background:var(--surface);border-radius:24px;box-shadow:var(--shadow-pop);padding:24px;animation:rise .2s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}}
+.dialog h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
+.dialog .desc{color:var(--ink2);margin:0 0 16px;font-size:13.5px}
+.dialog .body{display:flex;flex-direction:column;gap:10px}
+.dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.copyrow{display:flex;gap:6px}
+.copyrow .field{font-size:12.5px;height:42px}
+.flist{max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:2px;margin:0 -6px}
+.flist button{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;text-align:left}
+.flist button:hover{background:var(--sunk)}
+
+/* viewer */
+.viewer{position:fixed;inset:0;z-index:45;background:rgba(6,10,20,.92);display:flex;flex-direction:column;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:12px 16px;color:#fff}
+.viewer .vh .t{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer .vh .icon-btn{color:#d6dcea}
+.viewer .vh .icon-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.viewer .vb{flex:1;min-height:0;display:grid;place-items:center;padding:0 16px 16px;position:relative}
+.viewer .vb img,.viewer .vb video{max-width:100%;max-height:100%;border-radius:10px}
+.viewer .vb iframe{width:100%;height:100%;border:0;border-radius:12px;background:#fff}
+.viewer .nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center}
+.viewer .nav:hover{background:rgba(255,255,255,.22)}
+.viewer .nav.l{left:16px}.viewer .nav.r{right:16px}
+.viewer .nop{color:#c7cede;text-align:center}
+
+/* uploads tray */
+.tray{position:fixed;right:20px;bottom:20px;z-index:30;width:340px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow-pop);overflow:hidden;border:1px solid var(--line)}
+.tray .th{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 12px 18px;font-weight:700;border-bottom:1px solid var(--line)}
+.tray .rows{max-height:260px;overflow:auto}
+.up{padding:12px 18px;border-top:1px solid var(--line)}
+.up:first-child{border-top:0}
+.up .n{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up .s{font-size:12px;color:var(--ink2);margin-top:2px}
+.up .b{height:5px;border-radius:9px;background:var(--sunk);margin-top:8px;overflow:hidden}
+.up .b i{display:block;height:100%;width:0;background:var(--pri);border-radius:9px;transition:width .3s}
+.up.ok .s{color:var(--ok)}.up.ok .b i{background:var(--ok)}
+.up.bad .s{color:var(--danger)}.up.bad .b i{background:var(--danger)}
+
+.toast{position:fixed;left:50%;bottom:24px;z-index:70;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-pop);animation:rise .2s var(--ease);max-width:calc(100vw - 32px)}
+
+footer{margin-top:auto;padding:28px 0 6px;text-align:center;color:var(--ink3);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--ink);text-decoration:none}
 footer a:hover{color:var(--pri);text-decoration:none}
 footer img{width:18px;height:18px}
-.drop{outline:3px dashed var(--pri);outline-offset:-8px}
-@media (max-width:780px){
-  #menuBtn{display:inline-block}
-  aside{position:fixed;left:0;top:57px;bottom:0;z-index:15;transform:translateX(-100%);transition:.2s;overflow:auto}
+
+/* ===== Mobile ===== */
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  aside{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:42;transform:translateX(-102%);transition:transform .25s var(--ease);box-shadow:var(--shadow-pop)}
   aside.open{transform:none}
-  header h1{display:none}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  #menuBtn{display:inline-grid}
+  .top{padding:10px 14px}
+  .search input{height:44px}
+  .search kbd{display:none}
+  .content{padding:0 14px 96px}
+  .crumbs{font-size:17px}
+  .files.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .files.grid .more{opacity:1}
+  .files.list .it{grid-template-columns:40px 1fr 36px}
+  .files.list .sz,.files.list .dt{display:none}
+  #upBtn,#mkdirBtn{display:none}
+  .fab{display:grid;place-items:center;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:25;width:58px;height:58px;border-radius:20px;background:var(--pri);color:#fff;box-shadow:0 10px 26px -6px color-mix(in srgb,var(--pri) 70%,transparent)}
+  .fab svg{width:26px;height:26px}
+  .menu.sheet{left:0!important;right:0;top:auto!important;bottom:0;border-radius:24px 24px 0 0;padding:8px 10px calc(14px + env(safe-area-inset-bottom));animation:sheet .22s var(--ease)}
+  .menu.sheet::before{content:"";display:block;width:40px;height:4px;border-radius:9px;background:var(--line);margin:4px auto 8px}
+  @keyframes sheet{from{transform:translateY(100%)}}
+  .menu.sheet button{padding:14px 12px;font-size:15px}
+  .tray{left:12px;right:12px;width:auto;bottom:calc(88px + env(safe-area-inset-bottom))}
+  .viewer .nav{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- Halaman login / setup -->
-<div id="authView" class="center hidden">
-  <div class="box">
-    <h1 id="authTitle">Drive Gabungan</h1>
-    <div class="mut" id="authDesc"></div>
-    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
-    <input type="password" id="pw2" placeholder="Ulangi password" class="hidden" autocomplete="new-password">
-    <button class="pri" id="authBtn">Masuk</button>
-    <div class="err" id="authErr"></div>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.92A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17.5 18H7z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+  <symbol id="i-fnew" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5M4 20h16"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M10 13h6m-2-2 2 2-2 2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <!-- file type glyphs (filled tiles) -->
+  <symbol id="t-folder" viewBox="0 0 48 48"><path fill="#f5b83d" d="M4 12a4 4 0 0 1 4-4h10l4 4h18a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path fill="#ffcf5c" d="M4 18h40v18a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/></symbol>
+  <symbol id="t-file" viewBox="0 0 48 48"><path fill="#9aa6c0" d="M12 4h17l11 11v25a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"/><path fill="#c7cfe0" d="M29 4v7a4 4 0 0 0 4 4h7z"/></symbol>
+</svg>
+
+<!-- ===== Auth ===== -->
+<div id="authView" class="auth hidden">
+  <div class="auth-card">
+    <div class="auth-mark"><div class="logo"><svg class="i"><use href="#i-cloud"/></svg></div><b style="font-size:18px">Drive Gabungan</b></div>
+    <div class="strip-demo" aria-hidden="true"><i style="background:#2f6bff"></i><i style="background:#17a36b"></i><i style="background:#f5a524"></i><i style="background:#e5484d"></i><i style="background:var(--line);flex:1.6"></i></div>
+    <h1 id="authTitle">Masuk</h1>
+    <p id="authDesc">Masukkan password pemilik.</p>
+    <form id="authForm">
+      <input class="field" type="password" id="pw" placeholder="Password" autocomplete="current-password" required>
+      <input class="field hidden" type="password" id="pw2" placeholder="Ulangi password" autocomplete="new-password">
+      <button class="btn pri" id="authBtn" type="submit">Masuk</button>
+      <div class="err" id="authErr"></div>
+    </form>
+    <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
   </div>
-  <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
 </div>
 
-<!-- Aplikasi -->
-<div id="appView" class="hidden">
-  <header>
-    <button id="menuBtn">☰</button>
-    <h1>☁️ Drive Gabungan</h1>
-    <div class="search">
-      <input id="q" placeholder="Cari di semua akun…">
-      <button class="x hidden" id="qx" title="Hapus pencarian">✕</button>
+<!-- ===== App ===== -->
+<div id="appView" class="shell hidden">
+  <aside id="side">
+    <div class="brand"><div class="logo"><svg class="i"><use href="#i-cloud"/></svg></div>Drive Gabungan</div>
+
+    <section class="store" aria-label="Penyimpanan gabungan">
+      <div class="store-top">
+        <div class="store-num" id="stNum">–</div>
+        <div class="small muted" id="stCap"></div>
+      </div>
+      <div class="strip" id="strip"></div>
+      <div class="store-foot"><span id="stFree"></span><span id="stCount"></span></div>
+    </section>
+
+    <div class="acc-list" id="accList"></div>
+    <button class="add-acc" id="addAcc"><svg class="i"><use href="#i-plus"/></svg>Hubungkan akun Google</button>
+
+    <div class="side-foot">
+      <button class="icon-btn" id="themeBtn" title="Ganti tema"><svg class="i"><use href="#i-moon"/></svg></button>
+      <button class="icon-btn" id="chgPw" title="Ganti password"><svg class="i"><use href="#i-key"/></svg></button>
+      <button class="btn ghost danger" id="logout"><svg class="i"><use href="#i-out"/></svg>Keluar</button>
     </div>
-    <select id="type">
-      <option value="">Semua jenis</option>
-      <option value="folder">Folder</option>
-      <option value="image">Gambar</option>
-      <option value="video">Video</option>
-      <option value="audio">Audio</option>
-      <option value="pdf">PDF</option>
-      <option value="doc">Dokumen</option>
-    </select>
-  </header>
-  <div class="layout">
-    <aside id="side">
-      <div class="total">
-        <b>Total penyimpanan</b>
-        <div class="bar"><i id="totBar" style="width:0"></i></div>
-        <div class="mut" id="totTxt">–</div>
+  </aside>
+
+  <main id="main">
+    <div class="top">
+      <button class="icon-btn" id="menuBtn" aria-label="Buka menu"><svg class="i"><use href="#i-menu"/></svg></button>
+      <div class="search">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input id="q" placeholder="Cari di semua Drive" autocomplete="off" aria-label="Cari file">
+        <kbd id="qk">/</kbd>
+        <button class="icon-btn x hidden" id="qx" aria-label="Hapus pencarian" title="Hapus pencarian"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
-      <div>
-        <div class="acc on" data-id="all"><div class="row"><span class="dot" style="background:var(--pri)"></span><span class="em">Semua akun</span></div></div>
-        <div id="accList"></div>
+      <button class="btn ghost" id="mkdirBtn"><svg class="i"><use href="#i-fnew"/></svg>Folder</button>
+      <button class="btn pri" id="upBtn"><svg class="i"><use href="#i-up"/></svg>Upload</button>
+      <input type="file" id="fileIn" multiple class="hidden">
+    </div>
+
+    <div class="content">
+      <div class="bar">
+        <nav class="crumbs" id="crumbs" aria-label="Lokasi"></nav>
+        <select class="sort" id="sort" aria-label="Urutkan">
+          <option value="name">Nama A–Z</option>
+          <option value="new">Terbaru</option>
+          <option value="big">Terbesar</option>
+        </select>
+        <div class="seg" role="group" aria-label="Tampilan">
+          <button id="vGrid" class="on" title="Grid"><svg class="i"><use href="#i-grid"/></svg></button>
+          <button id="vList" title="Daftar"><svg class="i"><use href="#i-list"/></svg></button>
+        </div>
       </div>
-      <button class="pri" id="addAcc">+ Hubungkan akun Google</button>
-      <div style="margin-top:auto;display:flex;gap:6px">
-        <button id="chgPw" style="flex:1">Ganti password</button>
-        <button id="logout" class="danger">Keluar</button>
-      </div>
-    </aside>
-    <main id="main">
-      <div id="cfgWarn" class="warn hidden"></div>
-      <div class="toolbar">
-        <div class="crumbs" id="crumbs"></div>
-        <button id="mkdirBtn">+ Folder</button>
-        <button class="pri" id="upBtn">⬆ Upload</button>
-        <input type="file" id="fileIn" multiple class="hidden">
-      </div>
-      <div id="errs"></div>
-      <div class="grid" id="grid"></div>
-      <div class="empty hidden" id="empty">Tidak ada file</div>
+      <div class="chips" id="chips"></div>
+      <div id="notes"></div>
+      <div class="files grid" id="files"></div>
+      <div class="empty hidden" id="empty"></div>
       <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
-    </main>
-  </div>
+    </div>
+  </main>
 </div>
 
-<div id="uploads"></div>
+<button class="fab hidden" id="fab" aria-label="Tambah"><svg class="i"><use href="#i-plus"/></svg></button>
+<div class="drop" id="drop"><div><svg class="i" style="width:34px;height:34px;color:var(--pri)"><use href="#i-up"/></svg><br>Lepaskan untuk upload</div></div>
 
 <script>
 const $ = (s) => document.querySelector(s);
 const FOLDER = 'application/vnd.google-apps.folder';
-const CHUNK = 8 * 1024 * 1024; // kelipatan 256 KB, di bawah batas 100 MB Worker
-let S = { acc: 'all', path: [], files: [], accounts: [], q: '', type: '' };
+const CHUNK = 8 * 1024 * 1024;
+const S = { acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
+  view: store('view') || 'grid', state: null };
 
+function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function fmt(b) {
   if (b == null || isNaN(b)) return '';
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; b = Number(b);
   while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
-  return b.toFixed(i ? 1 : 0) + ' ' + u[i];
+  return (i ? b.toFixed(b < 10 ? 1 : 0) : b) + ' ' + u[i];
 }
+function ago(d) {
+  if (!d) return '';
+  const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + ' mnt lalu';
+  if (s < 86400) return Math.round(s / 3600) + ' jam lalu';
+  if (s < 86400 * 7) return Math.round(s / 86400) + ' hari lalu';
+  return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function ic(id) { return `<svg class="i"><use href="#i-${id}"/></svg>`; }
+let toastT;
 function toast(m) {
-  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 3500);
+  document.querySelectorAll('.toast').forEach((t) => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; t.setAttribute('role', 'status');
+  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200);
 }
 async function api(path, opt = {}) {
   const r = await fetch(path, { credentials: 'same-origin', ...opt });
   const d = await r.json().catch(() => ({}));
-  if (r.status === 401 && !path.includes('login')) { showAuth(true); throw new Error(d.error || 'Login dulu'); }
-  if (!r.ok) throw new Error(d.error || 'Error ' + r.status);
+  if (r.status === 401 && !path.includes('login')) { showAuth(); throw new Error(d.error || 'Silakan masuk lagi'); }
+  if (!r.ok) throw new Error(d.error || 'Terjadi kesalahan (' + r.status + ')');
   return d;
 }
 const post = (p, b) => api(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) });
-function accOf(id) { return S.accounts.find((a) => a.id == id) || {}; }
-function icon(m) {
-  if (m === FOLDER) return '📁';
-  if (m.startsWith('image/')) return '🖼️';
-  if (m.startsWith('video/')) return '🎬';
-  if (m.startsWith('audio/')) return '🎵';
-  if (m === 'application/pdf') return '📕';
-  if (m.includes('spreadsheet') || m.includes('excel')) return '📊';
-  if (m.includes('presentation') || m.includes('powerpoint')) return '📽️';
-  if (m.includes('document') || m.includes('word')) return '📄';
-  if (m.includes('zip') || m.includes('compressed')) return '🗜️';
-  return '📎';
+const accOf = (id) => S.accounts.find((a) => a.id == id) || {};
+
+// ---------- tema ----------
+function applyTheme() { const t = store('theme'); if (t) document.documentElement.dataset.theme = t; }
+applyTheme();
+$('#themeBtn').onclick = () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  const t = dark ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t; store('theme', t);
+};
+
+// ---------- jenis file ----------
+const KIND = [
+  ['folder', 'Folder', '#f5b83d', (m) => m === FOLDER],
+  ['image', 'Gambar', '#17a36b', (m) => m.startsWith('image/')],
+  ['video', 'Video', '#e5484d', (m) => m.startsWith('video/')],
+  ['audio', 'Audio', '#a855f7', (m) => m.startsWith('audio/')],
+  ['pdf', 'PDF', '#d93636', (m) => m === 'application/pdf'],
+  ['doc', 'Dokumen', '#2f6bff', (m) => /document|word|spreadsheet|excel|presentation|powerpoint/.test(m)],
+];
+function kindOf(m) {
+  if (/spreadsheet|excel/.test(m)) return ['sheet', '#15a35a', 'XLS'];
+  if (/presentation|powerpoint/.test(m)) return ['slide', '#f08c1d', 'PPT'];
+  if (/document|word/.test(m)) return ['doc', '#2f6bff', 'DOC'];
+  if (m === 'application/pdf') return ['pdf', '#d93636', 'PDF'];
+  if (m.startsWith('image/')) return ['img', '#17a36b', 'IMG'];
+  if (m.startsWith('video/')) return ['vid', '#e5484d', 'VID'];
+  if (m.startsWith('audio/')) return ['aud', '#a855f7', 'AUD'];
+  if (/zip|compressed|rar|7z/.test(m)) return ['zip', '#7c6b55', 'ZIP'];
+  return ['file', '#7a86a3', ''];
 }
+function glyph(m) {
+  if (m === FOLDER) return '<svg class="ft" viewBox="0 0 48 48"><use href="#t-folder"/></svg>';
+  const [, c, lbl] = kindOf(m);
+  return `<svg class="ft" viewBox="0 0 48 48"><path fill="${c}" d="M12 4h17l11 11v25a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"/><path fill="#fff" opacity=".45" d="M29 4v7a4 4 0 0 0 4 4h7z"/>${lbl ? `<text x="24" y="34" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Plus Jakarta Sans,sans-serif">${lbl}</text>` : ''}</svg>`;
+}
+function renderChips() {
+  $('#chips').innerHTML = `<button class="chip ${!S.type ? 'on' : ''}" data-t="">Semua</button>` +
+    KIND.map(([k, l]) => `<button class="chip ${S.type === k ? 'on' : ''}" data-t="${k}">${l}</button>`).join('');
+}
+$('#chips').onclick = (e) => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  S.type = c.dataset.t; renderChips(); load();
+};
 
 // ---------- auth ----------
 let authMode = 'login';
-function showAuth(setup) {
-  $('#appView').classList.add('hidden'); $('#authView').classList.remove('hidden');
-  authMode = setup === 'setup' ? 'setup' : 'login';
+function showAuth(mode) {
+  $('#appView').classList.add('hidden'); $('#fab').classList.add('hidden'); $('#authView').classList.remove('hidden');
+  authMode = mode === 'setup' ? 'setup' : 'login';
   $('#pw2').classList.toggle('hidden', authMode !== 'setup');
-  $('#authTitle').textContent = authMode === 'setup' ? 'Buat password pemilik' : 'Drive Gabungan';
+  $('#pw2').required = authMode === 'setup';
+  $('#authTitle').textContent = authMode === 'setup' ? 'Buat password pemilik' : 'Masuk';
   $('#authDesc').textContent = authMode === 'setup'
-    ? 'Ini pertama kali aplikasi dibuka. Buat password pemilik (minimal 8 karakter). Hanya kamu yang bisa masuk.'
+    ? 'Instance ini baru. Password ini hanya untukmu, minimal 8 karakter.'
     : 'Masukkan password pemilik.';
-  $('#authBtn').textContent = authMode === 'setup' ? 'Simpan & masuk' : 'Masuk';
-  $('#pw').focus();
+  $('#authBtn').textContent = authMode === 'setup' ? 'Simpan dan masuk' : 'Masuk';
+  setTimeout(() => $('#pw').focus(), 50);
 }
-async function doAuth() {
-  $('#authErr').textContent = '';
-  const pw = $('#pw').value;
+$('#authForm').onsubmit = async (e) => {
+  e.preventDefault(); $('#authErr').textContent = ''; $('#authBtn').disabled = true;
   try {
     if (authMode === 'setup') {
-      if (pw !== $('#pw2').value) throw new Error('Password tidak sama');
-      await post('/api/setup', { password: pw });
-    } else await post('/api/login', { password: pw });
+      if ($('#pw').value !== $('#pw2').value) throw new Error('Kedua password tidak sama');
+      await post('/api/setup', { password: $('#pw').value });
+    } else await post('/api/login', { password: $('#pw').value });
     $('#pw').value = $('#pw2').value = '';
     startApp();
-  } catch (e) { $('#authErr').textContent = e.message; }
-}
-$('#authBtn').onclick = doAuth;
-$('#pw').onkeydown = $('#pw2').onkeydown = (e) => { if (e.key === 'Enter') doAuth(); };
-$('#logout').onclick = async () => { await post('/api/logout', {}); showAuth(); };
-$('#chgPw').onclick = () => {
-  dialog('Ganti password', `<input type="password" id="o" placeholder="Password lama" style="width:100%;margin-bottom:8px">
-    <input type="password" id="n" placeholder="Password baru (min. 8)" style="width:100%">`, async (b) => {
-    await post('/api/password', { old: b.querySelector('#o').value, password: b.querySelector('#n').value });
-    toast('Password diganti');
-  });
+  } catch (err) { $('#authErr').textContent = err.message; }
+  $('#authBtn').disabled = false;
 };
+$('#logout').onclick = async () => { await post('/api/logout', {}); showAuth(); };
+$('#chgPw').onclick = () => dialog({
+  title: 'Ganti password',
+  body: `<input class="field" type="password" id="o" placeholder="Password lama"><input class="field" type="password" id="n" placeholder="Password baru (min. 8)">`,
+  ok: 'Ganti password',
+  run: async (b) => { await post('/api/password', { old: b.querySelector('#o').value, password: b.querySelector('#n').value }); toast('Password diganti'); },
+});
 
-// ---------- akun ----------
+// ---------- akun & pita penyimpanan ----------
 async function loadAccounts() {
-  const d = await api('/api/accounts');
-  S.accounts = d.accounts;
-  let lim = 0, use = 0, unlimited = false;
-  $('#accList').innerHTML = d.accounts.map((a) => {
-    if (!a.error) { use += a.usage; if (a.limit == null) unlimited = true; else lim += a.limit; }
+  const { accounts } = await api('/api/accounts');
+  S.accounts = accounts;
+  const ok = accounts.filter((a) => !a.error);
+  const use = ok.reduce((s, a) => s + a.usage, 0);
+  const unlimited = ok.some((a) => a.limit == null);
+  const lim = ok.reduce((s, a) => s + (a.limit || 0), 0);
+
+  $('#stNum').innerHTML = accounts.length ? `${fmt(use).replace(' ', '<small>')}</small>` : '0<small>GB</small>';
+  $('#stCap').textContent = accounts.length ? 'dari ' + (unlimited ? 'tak terbatas' : fmt(lim)) : '';
+  $('#stFree').textContent = accounts.length ? (unlimited ? 'Ruang kosong tak terbatas' : fmt(Math.max(0, lim - use)) + ' kosong') : 'Belum ada akun';
+  $('#stCount').textContent = accounts.length ? accounts.length + ' akun' : '';
+  const total = unlimited ? use || 1 : lim || 1;
+  $('#strip').innerHTML = ok.map((a) => `<span title="${esc(a.email)}: ${fmt(a.usage)}" style="flex-grow:${a.usage / total};background:${a.color}"></span>`).join('') +
+    `<span class="free" style="flex-grow:${Math.max(0, (total - use) / total)}"></span>`;
+
+  $('#accList').innerHTML = accounts.map((a) => {
     const pct = a.limit ? Math.min(100, (a.usage / a.limit) * 100) : 0;
-    return `<div class="acc ${S.acc == a.id ? 'on' : ''}" data-id="${a.id}">
-      <div class="row"><span class="dot" style="background:${a.color}"></span><span class="em" title="${esc(a.email)}">${esc(a.email)}</span>
-      <button class="rm" data-rm="${a.id}" title="Putuskan akun">✕</button></div>
-      ${a.error ? `<div class="mut" style="color:var(--danger)">${esc(a.error)}</div>`
-        : `<div class="bar"><i style="width:${pct}%;background:${a.color}"></i></div>
-           <div class="mut">${fmt(a.usage)} dari ${a.limit ? fmt(a.limit) : 'tak terbatas'}</div>`}
+    return `<div class="acc ${S.acc == a.id ? 'on' : ''} ${a.error ? 'err' : ''}" data-id="${a.id}" tabindex="0" role="button">
+      <span class="sw" style="background:${a.color}"></span>
+      <div class="meta"><div class="em" title="${esc(a.email)}">${esc(a.email)}</div>
+        ${a.error ? `<div class="sub">Perlu dihubungkan ulang</div>`
+          : `<div class="mini"><i style="width:${pct}%;background:${a.color}"></i></div><div class="sub">${fmt(a.usage)} dari ${a.limit ? fmt(a.limit) : '∞'}</div>`}
+      </div>
+      <button class="icon-btn rm" data-rm="${a.id}" title="Putuskan akun" aria-label="Putuskan ${esc(a.email)}">${ic('x')}</button>
     </div>`;
-  }).join('') || '<div class="mut" style="padding:8px">Belum ada akun. Klik tombol di bawah untuk menghubungkan.</div>';
-  $('#totBar').style.width = lim ? Math.min(100, (use / lim) * 100) + '%' : '0';
-  $('#totTxt').textContent = d.accounts.length
-    ? `${fmt(use)} terpakai dari ${unlimited ? 'tak terbatas' : fmt(lim)} · sisa ${unlimited ? '∞' : fmt(Math.max(0, lim - use))}`
-    : 'Belum ada akun';
+  }).join('');
+  if (accounts.length) $('#accList').insertAdjacentHTML('afterbegin',
+    `<div class="acc ${S.acc === 'all' ? 'on' : ''}" data-id="all" tabindex="0" role="button"><span class="sw" style="background:conic-gradient(${ok.map((a, i) => `${a.color} ${i * 100 / ok.length}% ${(i + 1) * 100 / ok.length}%`).join(',') || 'var(--pri) 0 100%'})"></span><div class="meta"><div class="em">Semua akun</div></div></div>`);
 }
-$('#side').onclick = async (e) => {
+$('#side').addEventListener('click', async (e) => {
   const rm = e.target.closest('[data-rm]');
   if (rm) {
     e.stopPropagation();
     const a = accOf(rm.dataset.rm);
-    if (!confirm(`Putuskan akun ${a.email}? File di Drive-nya tidak terhapus.`)) return;
-    await api('/api/accounts?id=' + a.id, { method: 'DELETE' });
-    if (S.acc == a.id) S.acc = 'all';
-    S.path = []; await loadAccounts(); load(); return;
+    dialog({
+      title: 'Putuskan akun ini?', desc: `${a.email} tidak lagi tampil di sini. File di Google Drive-nya tetap aman.`,
+      ok: 'Putuskan', danger: true,
+      run: async () => { await api('/api/accounts?id=' + a.id, { method: 'DELETE' }); if (S.acc == a.id) S.acc = 'all'; S.path = []; await loadAccounts(); load(); toast('Akun diputuskan'); },
+    });
+    return;
   }
-  const el = e.target.closest('.acc');
-  if (!el) return;
-  S.acc = el.dataset.id; S.path = [];
+  const el = e.target.closest('.acc'); if (!el) return;
+  S.acc = el.dataset.id; S.path = []; clearSearch(false);
   document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', x === el));
-  $('#side').classList.remove('open');
-  load();
-};
+  closeSide(); load();
+});
+$('#side').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.classList.contains('acc')) e.target.click(); });
 $('#addAcc').onclick = () => (S.state && !S.state.configured ? googleSetup() : (location.href = '/oauth/start'));
 function googleSetup() {
   const ru = S.state.redirectUri;
-  const md = dialog('Hubungkan ke Google Cloud', `
-    <div class="mut" style="margin-bottom:10px;line-height:1.5">
-      Langkah sekali saja. Buat OAuth Client tipe <b>Web application</b> di
-      <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Cloud Console</a>
-      (panduan lengkap ada di README), lalu daftarkan Redirect URI ini:</div>
-    <div style="display:flex;gap:6px;margin-bottom:12px"><input readonly value="${esc(ru)}" style="flex:1;font-size:12px">
-      <button type="button" data-copy>Salin</button></div>
-    <input id="gid" placeholder="Client ID" style="width:100%;margin-bottom:8px">
-    <input id="gsec" type="password" placeholder="Client Secret" style="width:100%">`,
-  async (b) => {
-    await post('/api/config', { id: b.querySelector('#gid').value, secret: b.querySelector('#gsec').value });
-    S.state.configured = true;
-    toast('Tersimpan. Sekarang hubungkan akun Google.');
+  dialog({
+    title: 'Hubungkan ke Google Cloud',
+    desc: 'Sekali saja. Buat OAuth Client tipe Web application di Google Cloud Console, daftarkan Redirect URI ini, lalu tempel Client ID dan Secret-nya.',
+    body: `<div class="copyrow"><input class="field" readonly value="${esc(ru)}"><button class="btn ghost" type="button" data-copy>${ic('copy')}Salin</button></div>
+      <input class="field" id="gid" placeholder="Client ID">
+      <input class="field" id="gsec" type="password" placeholder="Client Secret">
+      <a class="small" style="color:var(--pri)" href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Buka Google Cloud Console</a>`,
+    ok: 'Simpan',
+    run: async (b) => {
+      await post('/api/config', { id: b.querySelector('#gid').value, secret: b.querySelector('#gsec').value });
+      S.state.configured = true; toast('Tersimpan. Sekarang hubungkan akun Google.');
+    },
+    after: (md) => (md.querySelector('[data-copy]').onclick = (e) => navigator.clipboard.writeText(ru).then(() => (e.currentTarget.lastChild.textContent = 'Tersalin'))),
   });
-  md.querySelector('[data-copy]').onclick = (e) => {
-    navigator.clipboard.writeText(ru).then(() => (e.target.textContent = 'Tersalin'));
-  };
 }
-$('#menuBtn').onclick = () => $('#side').classList.toggle('open');
+function closeSide() { $('#side').classList.remove('open'); document.querySelector('.scrim.side')?.remove(); }
+$('#menuBtn').onclick = () => {
+  $('#side').classList.add('open');
+  const s = document.createElement('div'); s.className = 'scrim side';
+  s.style.zIndex = 41; s.onclick = closeSide; document.body.appendChild(s); requestAnimationFrame(() => s.classList.add('on'));
+};
 
 // ---------- daftar file ----------
-function cur() { return S.path[S.path.length - 1]; }
-let loadSeq = 0;
+const cur = () => S.path[S.path.length - 1];
+let seq = 0;
+function skeleton() {
+  $('#empty').classList.add('hidden');
+  $('#files').innerHTML = Array.from({ length: 10 }, () =>
+    S.view === 'grid' ? '<div class="sk" style="aspect-ratio:4/3.9"></div>' : '<div class="sk" style="height:56px;border-radius:0;margin-top:1px"></div>').join('');
+}
 async function load() {
-  const seq = ++loadSeq;
-  renderCrumbs();
-  $('#grid').innerHTML = '<div class="mut">Memuat…</div>'; $('#empty').classList.add('hidden'); $('#errs').innerHTML = '';
+  const my = ++seq;
+  renderCrumbs(); skeleton(); $('#notes').innerHTML = '';
   const c = cur();
-  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : 'root', q: S.q, type: S.type });
+  const typeQ = S.type === 'doc' ? 'doc' : S.type;
+  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : 'root', q: S.q, type: typeQ });
   try {
     const d = await api('/api/files?' + p);
-    if (seq !== loadSeq) return;
+    if (my !== seq) return;
     S.files = d.files;
-    $('#errs').innerHTML = d.errors.map((x) => `<div class="warn">${esc(x)}</div>`).join('');
+    $('#notes').innerHTML = d.errors.map((x) => `<div class="notice">${esc(x)}</div>`).join('');
     render();
-  } catch (e) { if (seq === loadSeq) $('#grid').innerHTML = `<div class="warn">${esc(e.message)}</div>`; }
+  } catch (e) {
+    if (my === seq) { $('#files').innerHTML = ''; $('#notes').innerHTML = `<div class="notice">${esc(e.message)}</div>`; }
+  }
+}
+function sorted() {
+  const f = [...S.files];
+  const isF = (x) => (x.mimeType === FOLDER ? 0 : 1);
+  if (S.sort === 'new') f.sort((a, b) => isF(a) - isF(b) || new Date(b.modifiedTime) - new Date(a.modifiedTime));
+  else if (S.sort === 'big') f.sort((a, b) => isF(a) - isF(b) || (b.size || 0) - (a.size || 0));
+  else f.sort((a, b) => isF(a) - isF(b) || a.name.localeCompare(b.name, 'id', { numeric: true }));
+  return f;
 }
 function renderCrumbs() {
-  const root = S.acc === 'all' ? 'Semua akun' : (accOf(S.acc).email || 'Akun');
-  let h = `<a data-i="-1">${esc(root)}</a>`;
-  S.path.forEach((f, i) => (h += ` › <a data-i="${i}">${esc(f.name)}</a>`));
-  if (S.q) h += ` › <span class="mut">hasil cari "${esc(S.q)}"</span>`;
+  const root = S.acc === 'all' ? 'Semua Drive' : (accOf(S.acc).email || 'Drive').split('@')[0];
+  let h = `<button data-i="-1">${esc(root)}</button>`;
+  S.path.forEach((f, i) => (h += `<span class="sep">/</span><button data-i="${i}">${esc(f.name)}</button>`));
+  if (S.q) h += `<span class="sep">/</span><button disabled>Hasil untuk “${esc(S.q)}”</button>`;
   $('#crumbs').innerHTML = h;
 }
 $('#crumbs').onclick = (e) => {
-  const a = e.target.closest('a'); if (!a) return;
-  S.path = S.path.slice(0, Number(a.dataset.i) + 1); clearSearch(false); load();
+  const b = e.target.closest('button[data-i]'); if (!b) return;
+  S.path = S.path.slice(0, Number(b.dataset.i) + 1); clearSearch(false); load();
 };
+let view = [];
 function render() {
-  $('#grid').innerHTML = S.files.map((f, i) => {
-    const a = accOf(f.acc);
-    const th = f.hasThumb ? `<img loading="lazy" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.replaceWith(document.createTextNode('${icon(f.mimeType)}'))">` : icon(f.mimeType);
-    return `<div class="item" data-i="${i}" title="${esc(f.name)}">
-      <div class="thumb">${th}</div>
-      <div class="meta"><span class="dot" style="background:${a.color || '#999'};margin-top:4px" title="${esc(a.email)}"></span>
-        <div style="flex:1;min-width:0"><div class="nm">${esc(f.name)}</div><div class="mut">${f.size ? fmt(f.size) : ''}</div></div></div>
-      <button class="more" data-m="${i}">⋮</button></div>`;
+  view = sorted();
+  const el = $('#files'); el.className = 'files ' + S.view;
+  if (!view.length) { el.innerHTML = ''; return showEmpty(); }
+  $('#empty').classList.add('hidden');
+  const folders = view.filter((f) => f.mimeType === FOLDER).length;
+  el.innerHTML = view.map((f, i) => {
+    const a = accOf(f.acc), isF = f.mimeType === FOLDER;
+    const th = f.hasThumb && !isF
+      ? `<img loading="lazy" alt="" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.outerHTML=glyph('${esc(f.mimeType)}')">`
+      : glyph(f.mimeType);
+    const label = i === 0 && folders && S.view === 'grid' ? '<div class="group-label">Folder</div>' : (i === folders && folders && S.view === 'grid' ? '<div class="group-label">File</div>' : '');
+    return `${label}<div class="it ${isF ? 'folder' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
+      <div class="th">${th}<span class="tag" style="background:${a.color || '#999'}" title="${esc(a.email)}"></span></div>
+      <div class="nm">${esc(f.name)}</div>
+      <div class="sz">${isF ? 'Folder' : fmt(f.size)}</div>
+      ${S.view === 'list' ? `<div class="dt">${ago(f.modifiedTime)}</div>` : ''}
+      <button class="icon-btn more" data-m="${i}" aria-label="Aksi untuk ${esc(f.name)}">${ic('dots')}</button>
+    </div>`;
   }).join('');
-  $('#empty').classList.toggle('hidden', S.files.length > 0);
 }
-$('#grid').onclick = (e) => {
+function showEmpty() {
+  const e = $('#empty'); e.classList.remove('hidden');
+  if (!S.accounts.length) {
+    e.innerHTML = `<div><div class="art">${ic('cloud')}</div><h3>Hubungkan Drive pertamamu</h3><p>Setiap akun Google yang dihubungkan menambah ruang di pita penyimpanan.</p><button class="btn pri" onclick="$('#addAcc').click()">${ic('plus')}Hubungkan akun Google</button></div>`;
+  } else if (S.q) {
+    e.innerHTML = `<div><div class="art">${ic('search')}</div><h3>Tidak ada yang cocok</h3><p>Coba kata lain, atau hapus filter jenis file.</p><button class="btn ghost" onclick="clearSearch()">Hapus pencarian</button></div>`;
+  } else {
+    e.innerHTML = `<div><div class="art">${ic('up')}</div><h3>Folder ini kosong</h3><p>Seret file ke sini atau upload dari perangkatmu.</p><button class="btn pri" onclick="$('#fileIn').click()">${ic('up')}Upload file</button></div>`;
+  }
+}
+$('#files').addEventListener('click', (e) => {
   const m = e.target.closest('[data-m]');
-  if (m) { e.stopPropagation(); return showMenu(S.files[m.dataset.m], m); }
-  const it = e.target.closest('.item'); if (!it) return;
-  open(S.files[it.dataset.i]);
-};
-$('#grid').oncontextmenu = (e) => {
-  const it = e.target.closest('.item'); if (!it) return;
-  e.preventDefault(); showMenu(S.files[it.dataset.i], null, e.clientX, e.clientY);
-};
+  if (m) { e.stopPropagation(); return showMenu(view[m.dataset.m], m); }
+  const it = e.target.closest('.it'); if (it) open(view[it.dataset.i]);
+});
+$('#files').addEventListener('contextmenu', (e) => {
+  const it = e.target.closest('.it'); if (!it) return;
+  e.preventDefault(); showMenu(view[it.dataset.i], null, e.clientX, e.clientY);
+});
+$('#files').addEventListener('keydown', (e) => {
+  const it = e.target.closest('.it'); if (!it) return;
+  if (e.key === 'Enter') open(view[it.dataset.i]);
+  if (e.key === 'Delete') trash(view[it.dataset.i]);
+  if (e.key === 'F2') { e.preventDefault(); rename(view[it.dataset.i]); }
+});
 function open(f) {
   if (f.mimeType === FOLDER) { S.path.push({ id: f.id, name: f.name, acc: f.acc }); clearSearch(false); return load(); }
-  preview(f);
+  viewer(view.indexOf(f));
 }
+function setView(v) {
+  S.view = v; store('view', v);
+  $('#vGrid').classList.toggle('on', v === 'grid'); $('#vList').classList.toggle('on', v === 'list');
+  render();
+}
+$('#vGrid').onclick = () => setView('grid');
+$('#vList').onclick = () => setView('list');
+$('#sort').onchange = () => { S.sort = $('#sort').value; store('sort', S.sort); render(); };
 
-// ---------- pencarian (dengan tombol X) ----------
+// ---------- pencarian (tombol X) ----------
 let qt;
 $('#q').oninput = () => {
-  $('#qx').classList.toggle('hidden', !$('#q').value);
-  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); load(); }, 400);
+  const has = !!$('#q').value;
+  $('#qx').classList.toggle('hidden', !has); $('#qk').classList.toggle('hidden', has);
+  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); load(); }, 350);
 };
 function clearSearch(reload = true) {
-  $('#q').value = ''; $('#qx').classList.add('hidden');
+  $('#q').value = ''; $('#qx').classList.add('hidden'); $('#qk').classList.remove('hidden');
   if (S.q) { S.q = ''; if (reload) load(); }
 }
 $('#qx').onclick = () => { clearSearch(); $('#q').focus(); };
-$('#type').onchange = () => { S.type = $('#type').value; load(); };
+$('#q').onkeydown = (e) => { if (e.key === 'Escape') { clearSearch(); $('#q').blur(); } };
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && !document.querySelector('.modal,.viewer')) {
+    e.preventDefault(); $('#q').focus();
+  }
+});
 
-// ---------- preview ----------
-function contentUrl(f, dl) { return `/api/content?acc=${f.acc}&id=${encodeURIComponent(f.id)}${dl ? '&dl=1' : ''}`; }
-function preview(f) {
-  const m = f.mimeType, u = contentUrl(f);
-  let inner;
-  if (m.startsWith('image/')) inner = `<img src="${u}">`;
-  else if (m.startsWith('video/')) inner = `<video src="${u}" controls autoplay></video>`;
-  else if (m.startsWith('audio/')) inner = `<audio src="${u}" controls autoplay></audio>`;
-  else if (m === 'application/pdf' || m.startsWith('application/vnd.google-apps.') || m.startsWith('text/'))
-    inner = m.includes('form') || m.includes('site') || m.includes('map') ? noPrev(f) : `<iframe src="${u}"></iframe>`;
-  else inner = noPrev(f);
-  const md = document.createElement('div'); md.className = 'modal';
-  md.innerHTML = `<div class="mbox"><div class="mhead"><span class="dot" style="background:${accOf(f.acc).color}"></span>
-    <span class="t">${esc(f.name)}</span>
-    ${f.webViewLink ? `<a href="${esc(f.webViewLink)}" target="_blank" rel="noopener"><button>Buka di Drive</button></a>` : ''}
-    <a href="${contentUrl(f, 1)}"><button>⬇</button></a><button data-x>✕</button></div>
-    <div class="mbody">${inner}</div></div>`;
-  md.onclick = (e) => { if (e.target === md || e.target.closest('[data-x]')) md.remove(); };
-  document.body.appendChild(md);
+// ---------- viewer ----------
+const contentUrl = (f, dl) => `/api/content?acc=${f.acc}&id=${encodeURIComponent(f.id)}${dl ? '&dl=1' : ''}`;
+function viewer(idx) {
+  const files = view.filter((f) => f.mimeType !== FOLDER);
+  let i = files.indexOf(view[idx]);
+  const v = document.createElement('div'); v.className = 'viewer'; v.setAttribute('role', 'dialog');
+  document.body.appendChild(v);
+  function draw() {
+    const f = files[i], m = f.mimeType, u = contentUrl(f);
+    let inner;
+    if (m.startsWith('image/')) inner = `<img src="${u}" alt="">`;
+    else if (m.startsWith('video/')) inner = `<video src="${u}" controls autoplay playsinline></video>`;
+    else if (m.startsWith('audio/')) inner = `<audio src="${u}" controls autoplay></audio>`;
+    else if ((m === 'application/pdf' || m.startsWith('application/vnd.google-apps.') || m.startsWith('text/')) && !/form|site|map|shortcut/.test(m))
+      inner = `<iframe src="${u}"></iframe>`;
+    else inner = `<div class="nop">${glyph(m)}<p>Pratinjau belum tersedia untuk jenis file ini.</p><a class="btn pri" href="${contentUrl(f, 1)}">${ic('down')}Unduh</a></div>`;
+    v.innerHTML = `<div class="vh"><span class="tag" style="width:10px;height:10px;border-radius:50%;background:${accOf(f.acc).color}"></span>
+      <div class="t">${esc(f.name)}<div class="small" style="color:#9aa4ba;font-weight:500">${esc(accOf(f.acc).email || '')} · ${fmt(f.size)}</div></div>
+      ${f.webViewLink ? `<a class="icon-btn" href="${esc(f.webViewLink)}" target="_blank" rel="noopener" title="Buka di Google Drive">${ic('ext')}</a>` : ''}
+      <a class="icon-btn" href="${contentUrl(f, 1)}" title="Unduh">${ic('down')}</a>
+      <button class="icon-btn" data-x title="Tutup">${ic('x')}</button></div>
+      <div class="vb">${inner}
+        ${files.length > 1 ? `<button class="nav l" data-p aria-label="Sebelumnya">${ic('left')}</button><button class="nav r" data-n aria-label="Berikutnya">${ic('right')}</button>` : ''}</div>`;
+  }
+  const close = () => { v.remove(); document.removeEventListener('keydown', key); };
+  const step = (d) => { i = (i + d + files.length) % files.length; draw(); };
+  function key(e) { if (e.key === 'Escape') close(); if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); }
+  v.onclick = (e) => {
+    if (e.target.closest('[data-x]') || e.target.classList.contains('vb')) close();
+    else if (e.target.closest('[data-p]')) step(-1);
+    else if (e.target.closest('[data-n]')) step(1);
+  };
+  let sx = 0;
+  v.addEventListener('touchstart', (e) => (sx = e.touches[0].clientX), { passive: true });
+  v.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60 && !e.target.closest('iframe,video')) step(dx < 0 ? 1 : -1); });
+  document.addEventListener('keydown', key);
+  draw();
 }
-function noPrev(f) { return `<div class="empty">${icon(f.mimeType)}<br>Pratinjau tidak tersedia untuk jenis file ini.<br>Silakan unduh atau buka di Drive.</div>`; }
 
 // ---------- menu aksi ----------
-function closeMenu() { document.querySelectorAll('.menu').forEach((m) => m.remove()); }
-document.addEventListener('click', closeMenu);
-function showMenu(f, btn, x, y) {
+const mobile = () => matchMedia('(max-width:860px)').matches;
+function closeMenu() { document.querySelectorAll('.menu,.scrim.menu-s').forEach((m) => m.remove()); }
+document.addEventListener('click', (e) => { if (!e.target.closest('.menu')) closeMenu(); });
+function popMenu(items, anchor, x, y, head) {
   closeMenu();
-  const m = document.createElement('div'); m.className = 'menu';
-  const isF = f.mimeType === FOLDER;
-  const acts = [
-    [isF ? 'Buka' : 'Pratinjau', () => open(f)],
-    !isF && ['Unduh', () => (location.href = contentUrl(f, 1))],
-    f.webViewLink && ['Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
-    ['Ganti nama', () => rename(f)],
-    ['Pindahkan…', () => move(f)],
-    ['Hapus (ke Sampah)', () => trash(f), 'danger'],
-  ].filter(Boolean);
-  acts.forEach(([t, fn, cls]) => {
-    const b = document.createElement('button'); b.textContent = t; if (cls) b.className = cls;
+  const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu');
+  if (head) m.innerHTML = `<div class="hd">${head}</div>`;
+  items.filter(Boolean).forEach(([icon, t, fn, cls]) => {
+    const b = document.createElement('button'); b.setAttribute('role', 'menuitem');
+    if (cls) b.className = cls; b.innerHTML = ic(icon) + esc(t);
     b.onclick = (e) => { e.stopPropagation(); closeMenu(); fn(); }; m.appendChild(b);
   });
   m.onclick = (e) => e.stopPropagation();
-  document.body.appendChild(m);
-  const r = btn ? btn.getBoundingClientRect() : { left: x, bottom: y };
-  m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8) + 'px';
-  m.style.top = Math.min(r.bottom + 4, innerHeight - m.offsetHeight - 8) + 'px';
+  if (mobile()) {
+    const s = document.createElement('div'); s.className = 'scrim on menu-s'; s.onclick = closeMenu;
+    document.body.appendChild(s); m.classList.add('sheet'); document.body.appendChild(m);
+  } else {
+    document.body.appendChild(m);
+    const r = anchor ? anchor.getBoundingClientRect() : { left: x, bottom: y, right: x };
+    const left = anchor ? r.right - m.offsetWidth : r.left;
+    m.style.left = Math.max(8, Math.min(left, innerWidth - m.offsetWidth - 8)) + 'px';
+    m.style.top = Math.min(r.bottom + 6, innerHeight - m.offsetHeight - 8) + 'px';
+  }
+  m.querySelector('button')?.focus();
 }
-function dialog(title, html, onOk, okText = 'Simpan') {
-  const md = document.createElement('div'); md.className = 'modal small';
-  md.innerHTML = `<div class="mbox"><div class="mhead"><span class="t">${esc(title)}</span></div>
-    <div class="mbody">${html}<div class="err" data-err></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-    <button data-c>Batal</button>${onOk ? `<button class="pri" data-ok>${esc(okText)}</button>` : ''}</div></div></div>`;
-  const b = md.querySelector('.mbody');
-  md.querySelector('[data-c]').onclick = () => md.remove();
-  md.onclick = (e) => { if (e.target === md) md.remove(); };
-  const ok = md.querySelector('[data-ok]');
-  if (ok) ok.onclick = async () => {
-    ok.disabled = true;
-    try { await onOk(b); md.remove(); } catch (e) { md.querySelector('[data-err]').textContent = e.message; ok.disabled = false; }
+function showMenu(f, anchor, x, y) {
+  const isF = f.mimeType === FOLDER;
+  popMenu([
+    [isF ? 'move' : 'eye', isF ? 'Buka' : 'Pratinjau', () => open(f)],
+    !isF && ['down', 'Unduh', () => (location.href = contentUrl(f, 1))],
+    f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
+    ['edit', 'Ganti nama', () => rename(f)],
+    ['move', 'Pindahkan', () => move(f)],
+    ['trash', 'Pindahkan ke sampah', () => trash(f), 'danger'],
+  ], anchor, x, y, `<span class="sw" style="width:10px;height:10px;border-radius:3px;background:${accOf(f.acc).color};flex-shrink:0"></span><span>${esc(f.name)}</span>`);
+}
+
+// ---------- dialog ----------
+function dialog({ title, desc, body = '', ok, run, danger, after }) {
+  const md = document.createElement('div'); md.className = 'modal'; md.setAttribute('role', 'dialog');
+  md.innerHTML = `<div class="scrim on"></div><form class="dialog"><h3>${esc(title)}</h3>${desc ? `<p class="desc">${esc(desc)}</p>` : ''}
+    <div class="body">${body}</div><div class="err" data-err></div>
+    <div class="acts"><button type="button" class="btn ghost" data-c>Batal</button>${ok ? `<button type="submit" class="btn ${danger ? 'pri' : 'pri'}" style="${danger ? 'background:var(--danger)' : ''}" data-ok>${esc(ok)}</button>` : ''}</div></form>`;
+  const close = () => { md.remove(); document.removeEventListener('keydown', key); };
+  const key = (e) => { if (e.key === 'Escape') close(); };
+  md.querySelector('[data-c]').onclick = close;
+  md.querySelector('.scrim').onclick = close;
+  md.querySelector('form').onsubmit = async (e) => {
+    e.preventDefault(); const b = md.querySelector('[data-ok]'); if (!b) return;
+    b.disabled = true;
+    try { await run(md.querySelector('.body')); close(); } catch (err) { md.querySelector('[data-err]').textContent = err.message; b.disabled = false; }
   };
-  b.querySelectorAll('input').forEach((i) => (i.onkeydown = (e) => { if (e.key === 'Enter' && ok) ok.click(); }));
+  document.addEventListener('keydown', key);
   document.body.appendChild(md);
-  setTimeout(() => b.querySelector('input')?.focus(), 50);
+  after?.(md);
+  setTimeout(() => { const i = md.querySelector('.body input:not([readonly])'); if (i) { i.focus(); i.select?.(); } else md.querySelector('[data-ok]')?.focus(); }, 40);
   return md;
 }
 function rename(f) {
-  dialog('Ganti nama', `<input id="nn" style="width:100%" value="${esc(f.name)}">`, async (b) => {
-    await post('/api/rename', { acc: f.acc, id: f.id, name: b.querySelector('#nn').value.trim() });
-    toast('Nama diganti'); load();
+  dialog({
+    title: 'Ganti nama', body: `<input class="field" id="nn" value="${esc(f.name)}">`, ok: 'Simpan',
+    run: async (b) => { await post('/api/rename', { acc: f.acc, id: f.id, name: b.querySelector('#nn').value.trim() }); toast('Nama diganti'); load(); },
+    after: (md) => { const i = md.querySelector('#nn'); setTimeout(() => { const d = f.name.lastIndexOf('.'); i.setSelectionRange(0, d > 0 && f.mimeType !== FOLDER ? d : f.name.length); }, 60); },
   });
 }
-async function trash(f) {
-  if (!confirm(`Pindahkan "${f.name}" ke Sampah Google Drive (${accOf(f.acc).email})?`)) return;
-  try { await post('/api/trash', { acc: f.acc, id: f.id }); toast('Dipindah ke Sampah'); load(); loadAccounts(); }
-  catch (e) { toast(e.message); }
+function trash(f) {
+  dialog({
+    title: 'Pindahkan ke sampah?', desc: `"${f.name}" dipindah ke Sampah di ${accOf(f.acc).email}. Masih bisa dipulihkan dari Google Drive.`,
+    ok: 'Pindahkan ke sampah', danger: true,
+    run: async () => { await post('/api/trash', { acc: f.acc, id: f.id }); toast('Dipindahkan ke sampah'); load(); loadAccounts(); },
+  });
 }
 function move(f) {
-  let stack = [{ id: 'root', name: 'Drive Saya' }];
-  const md = dialog('Pindahkan "' + f.name + '"', `<div class="mut" data-p></div><div class="flist" data-l></div>`, async () => {
-    const to = stack[stack.length - 1];
-    await post('/api/move', { acc: f.acc, id: f.id, to: to.id });
-    toast('Dipindah ke ' + to.name); load();
-  }, 'Pindah ke sini');
-  const b = md.querySelector('.mbody');
+  const stack = [{ id: 'root', name: 'Drive Saya' }];
+  const md = dialog({
+    title: 'Pindahkan', desc: `Pilih folder tujuan di ${accOf(f.acc).email}.`,
+    body: `<div class="small muted" data-p></div><div class="flist" data-l></div>`, ok: 'Pindahkan ke sini',
+    run: async () => { const to = stack[stack.length - 1]; await post('/api/move', { acc: f.acc, id: f.id, to: to.id }); toast('Dipindahkan ke ' + to.name); load(); },
+  });
+  const b = md.querySelector('.body');
   async function show() {
     const c = stack[stack.length - 1];
-    b.querySelector('[data-p]').textContent = accOf(f.acc).email + ' / ' + stack.map((s) => s.name).join(' / ');
-    const l = b.querySelector('[data-l]'); l.innerHTML = '<div class="mut">Memuat…</div>';
-    const d = await api(`/api/files?acc=${f.acc}&folder=${encodeURIComponent(c.id)}&type=folder`);
-    const fs = d.files.filter((x) => x.id !== f.id);
-    l.innerHTML = (stack.length > 1 ? '<div data-up>⬅ Kembali</div>' : '') +
-      fs.map((x, i) => `<div data-i="${i}">📁 ${esc(x.name)}</div>`).join('') ||
-      '<div class="mut">Tidak ada subfolder</div>';
-    l.onclick = (e) => {
-      if (e.target.closest('[data-up]')) { stack.pop(); return show(); }
-      const it = e.target.closest('[data-i]'); if (!it) return;
-      const x = fs[it.dataset.i]; stack.push({ id: x.id, name: x.name }); show();
-    };
+    b.querySelector('[data-p]').textContent = stack.map((s) => s.name).join(' / ');
+    const l = b.querySelector('[data-l]'); l.innerHTML = '<div class="sk" style="height:40px"></div>';
+    try {
+      const d = await api(`/api/files?acc=${f.acc}&folder=${encodeURIComponent(c.id)}&type=folder`);
+      const fs = d.files.filter((x) => x.id !== f.id);
+      l.innerHTML = (stack.length > 1 ? `<button type="button" data-up>${ic('left')}Kembali</button>` : '') +
+        (fs.map((x, i) => `<button type="button" data-i="${i}"><svg class="ft" viewBox="0 0 48 48" style="width:22px;height:22px"><use href="#t-folder"/></svg>${esc(x.name)}</button>`).join('') ||
+          '<div class="small muted" style="padding:10px">Tidak ada subfolder</div>');
+      l.onclick = (e) => {
+        if (e.target.closest('[data-up]')) { stack.pop(); return show(); }
+        const it = e.target.closest('[data-i]'); if (!it) return;
+        const x = fs[it.dataset.i]; stack.push({ id: x.id, name: x.name }); show();
+      };
+    } catch (e) { l.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
   }
   show();
 }
@@ -471,47 +843,57 @@ function target() {
   const c = cur();
   if (c) return { acc: c.acc, folder: c.id };
   if (S.acc !== 'all') return { acc: S.acc, folder: 'root' };
-  return { acc: 'all', folder: 'root' }; // otomatis ke akun paling lega
+  return { acc: 'all', folder: 'root' };
 }
-$('#mkdirBtn').onclick = () => {
-  dialog('Folder baru', '<input id="fn" style="width:100%" placeholder="Nama folder">', async (b) => {
-    const t = target();
-    await post('/api/mkdir', { acc: t.acc, parent: t.folder, name: b.querySelector('#fn').value.trim() || 'Folder baru' });
-    toast('Folder dibuat'); load();
+function mkdir() {
+  dialog({
+    title: 'Folder baru', body: '<input class="field" id="fn" placeholder="Nama folder" value="Folder baru">', ok: 'Buat folder',
+    run: async (b) => { const t = target(); await post('/api/mkdir', { acc: t.acc, parent: t.folder, name: b.querySelector('#fn').value.trim() || 'Folder baru' }); toast('Folder dibuat'); load(); },
   });
-};
+}
+$('#mkdirBtn').onclick = mkdir;
 $('#upBtn').onclick = () => $('#fileIn').click();
+$('#fab').onclick = (e) => { e.stopPropagation(); popMenu([['up', 'Upload file', () => $('#fileIn').click()], ['fnew', 'Folder baru', mkdir]]); };
 $('#fileIn').onchange = () => { uploadAll([...$('#fileIn').files]); $('#fileIn').value = ''; };
-const main = $('#main');
-main.ondragover = (e) => { e.preventDefault(); main.classList.add('drop'); };
-main.ondragleave = () => main.classList.remove('drop');
-main.ondrop = (e) => { e.preventDefault(); main.classList.remove('drop'); uploadAll([...e.dataTransfer.files]); };
+let dragN = 0;
+addEventListener('dragenter', (e) => { if (e.dataTransfer?.types.includes('Files') && !$('#appView').classList.contains('hidden')) { dragN++; $('#drop').classList.add('on'); } });
+addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; $('#drop').classList.remove('on'); } });
+addEventListener('dragover', (e) => e.preventDefault());
+addEventListener('drop', (e) => { e.preventDefault(); dragN = 0; $('#drop').classList.remove('on'); if (e.dataTransfer?.files.length) uploadAll([...e.dataTransfer.files]); });
 
+let tray;
+function getTray() {
+  if (tray && document.body.contains(tray)) return tray;
+  tray = document.createElement('div'); tray.className = 'tray';
+  tray.innerHTML = `<div class="th"><span data-h>Mengupload</span><button class="icon-btn" data-x aria-label="Tutup">${ic('x')}</button></div><div class="rows"></div>`;
+  tray.querySelector('[data-x]').onclick = () => tray.remove();
+  document.body.appendChild(tray); return tray;
+}
 async function uploadAll(files) {
   if (!files.length) return;
   if (!S.accounts.length) return toast('Hubungkan akun Google dulu');
-  for (const f of files) await uploadOne(f);
+  const t = getTray(); let done = 0;
+  t.querySelector('[data-h]').textContent = `Mengupload ${files.length} file`;
+  for (const f of files) { if (await uploadOne(f, t)) done++; }
+  t.querySelector('[data-h]').textContent = `${done} dari ${files.length} file terupload`;
   load(); loadAccounts();
 }
-async function uploadOne(file) {
-  const box = document.createElement('div'); box.className = 'up';
-  box.innerHTML = `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>${esc(file.name)}</b></div>
-    <div class="mut" data-s>Menyiapkan…</div><div class="bar" style="height:5px;background:var(--bd);border-radius:4px;margin-top:6px;overflow:hidden"><i data-b style="display:block;height:100%;width:0;background:var(--pri)"></i></div>`;
-  $('#uploads').appendChild(box);
-  const st = box.querySelector('[data-s]'), bar = box.querySelector('[data-b]');
+async function uploadOne(file, t) {
+  const row = document.createElement('div'); row.className = 'up';
+  row.innerHTML = `<div class="n">${esc(file.name)}</div><div class="s">Menyiapkan…</div><div class="b"><i></i></div>`;
+  t.querySelector('.rows').prepend(row);
+  const st = row.querySelector('.s'), bar = row.querySelector('.b i');
   try {
-    const t = target();
-    const init = await post('/api/upload/init', { name: file.name, size: file.size, mimeType: file.type || 'application/octet-stream', acc: t.acc, folder: t.folder });
-    st.textContent = '→ ' + init.email;
+    const tg = target();
+    const init = await post('/api/upload/init', { name: file.name, size: file.size, mimeType: file.type || 'application/octet-stream', acc: tg.acc, folder: tg.folder });
     let start = 0;
     do {
       const end = Math.min(start + CHUNK, file.size);
-      const blob = file.slice(start, end);
       let ok = false, err;
       for (let tr = 0; tr < 3 && !ok; tr++) {
         try {
-          const r = await fetch(`/api/upload/chunk?id=${init.id}&start=${start}&total=${file.size}`, { method: 'PUT', body: blob });
-          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Error ' + r.status);
+          const r = await fetch(`/api/upload/chunk?id=${init.id}&start=${start}&total=${file.size}`, { method: 'PUT', body: file.slice(start, end) });
+          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Gagal (' + r.status + ')');
           ok = true;
         } catch (e) { err = e; await new Promise((r) => setTimeout(r, 1500)); }
       }
@@ -519,35 +901,35 @@ async function uploadOne(file) {
       start = end;
       const pct = file.size ? (start / file.size) * 100 : 100;
       bar.style.width = pct + '%';
-      st.textContent = `→ ${init.email} · ${pct.toFixed(0)}%`;
+      st.textContent = `${pct.toFixed(0)}% ke ${init.email}`;
     } while (start < file.size);
-    st.textContent = '✔ Tersimpan di ' + init.email;
-    setTimeout(() => box.remove(), 4000);
+    row.classList.add('ok'); st.textContent = 'Tersimpan di ' + init.email;
+    return true;
   } catch (e) {
-    st.style.color = 'var(--danger)'; st.textContent = '✖ ' + e.message;
-    bar.style.background = 'var(--danger)';
-    setTimeout(() => box.remove(), 9000);
+    row.classList.add('bad'); bar.style.width = '100%'; st.textContent = e.message;
+    return false;
   }
 }
 
-// ---------- start ----------
+// ---------- mulai ----------
 async function startApp() {
-  $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden');
-  const st = await api('/api/state');
-  S.state = st;
-  if (!st.configured) googleSetup();
+  $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden'); $('#fab').classList.remove('hidden');
+  S.sort = store('sort') || 'name'; $('#sort').value = S.sort;
+  setView(S.view); renderChips();
+  S.state = await api('/api/state');
   try { await loadAccounts(); } catch (e) { toast(e.message); }
   load();
+  if (!S.state.configured) googleSetup();
 }
 (async () => {
   const msg = new URLSearchParams(location.search).get('msg');
-  if (msg) { toast(msg); history.replaceState(null, '', '/'); }
+  if (msg) { setTimeout(() => toast(msg), 300); history.replaceState(null, '', '/'); }
   try {
     const st = await api('/api/state');
-    if (!st.setup) showAuth('setup');
-    else if (!st.loggedIn) showAuth();
-    else startApp();
-  } catch (e) { document.body.innerHTML = '<div class="center"><div class="box"><b>Gagal memuat</b><div class="err">' + esc(e.message) + '</div></div></div>'; }
+    if (!st.setup) showAuth('setup'); else if (!st.loggedIn) showAuth(); else startApp();
+  } catch (e) {
+    document.body.innerHTML = `<div class="auth"><div class="auth-card"><h1>Tidak bisa memuat</h1><p class="err">${esc(e.message)}</p></div></div>`;
+  }
 })();
 </script>
 </body>
