@@ -207,6 +207,14 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 .copyrow{display:flex;gap:6px}
 .copyrow .field{font-size:12.5px;height:42px}
+.dests{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
+.dest{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:var(--r);min-width:0}
+.dest .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0}
+.dest.pick{cursor:pointer;transition:border-color .15s,background .15s}
+.dest.pick:has(input:checked){border-color:var(--pri);background:var(--pri-soft)}
+.dest.pick input{accent-color:var(--pri);margin:0}
+.dest.no{opacity:.5;cursor:not-allowed}
+.dest .em1{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
 .flist{max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:2px;margin:0 -6px}
 .flist button{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;text-align:left}
 .flist button:hover{background:var(--sunk)}
@@ -494,7 +502,12 @@ $('#authForm').onsubmit = async (e) => {
   } catch (err) { $('#authErr').textContent = err.message; }
   $('#authBtn').disabled = false;
 };
-$('#logout').onclick = async () => { await post('/api/logout', {}); showAuth(); };
+$('#logout').onclick = () => dialog({
+  title: 'Keluar dari Drive Gabungan?',
+  desc: 'Kamu perlu memasukkan password pemilik lagi di perangkat ini. Akun Google yang terhubung tidak terpengaruh.',
+  ok: 'Keluar', danger: true,
+  run: async () => { await post('/api/logout', {}); closeSide(); showAuth(); },
+});
 $('#chgPw').onclick = () => dialog({
   title: 'Ganti password',
   body: `<input class="field" type="password" id="o" placeholder="Password lama"><input class="field" type="password" id="n" placeholder="Password baru (min. 8)">`,
@@ -869,22 +882,53 @@ function getTray() {
   tray.querySelector('[data-x]').onclick = () => tray.remove();
   document.body.appendChild(tray); return tray;
 }
-async function uploadAll(files) {
+function uploadAll(files) {
   if (!files.length) return;
   if (!S.accounts.length) return toast('Hubungkan akun Google dulu');
+  const total = files.reduce((s, f) => s + f.size, 0);
+  const names = files.length === 1 ? `"${files[0].name}"` : files.length + ' file';
+  const c = cur();
+  if (c) {
+    const a = accOf(c.acc);
+    return dialog({
+      title: 'Upload ' + names, desc: `${fmt(total)} akan disimpan di folder ini.`,
+      body: `<div class="dest"><span class="sw" style="background:${a.color}"></span><div><b>${esc(c.name)}</b><div class="small muted">${esc(a.email)}</div></div></div>`,
+      ok: 'Upload', run: async () => { doUpload(files, { acc: c.acc, folder: c.id }); },
+    });
+  }
+  const ok = S.accounts.filter((a) => !a.error);
+  const free = (a) => (a.limit == null ? Infinity : a.limit - a.usage);
+  const best = [...ok].sort((x, y) => free(y) - free(x))[0];
+  const pre = S.acc !== 'all' ? S.acc : best?.id;
+  const rows = ok.map((a) => {
+    const fr = free(a), fits = fr >= total;
+    return `<label class="dest pick ${fits ? '' : 'no'}"><input type="radio" name="dst" value="${a.id}" ${a.id == pre ? 'checked' : ''} ${fits ? '' : 'disabled'}>
+      <span class="sw" style="background:${a.color}"></span>
+      <div style="flex:1;min-width:0"><b class="em1">${esc(a.email)}</b><div class="small muted">${fr === Infinity ? 'Ruang tak terbatas' : fmt(fr) + ' kosong'}${a.id === best?.id ? ' · paling lega' : ''}${fits ? '' : ' · tidak cukup'}</div></div></label>`;
+  }).join('');
+  dialog({
+    title: 'Upload ' + names, desc: `${fmt(total)} akan disimpan di root Drive akun yang dipilih.`,
+    body: `<div class="dests">${rows}</div>`, ok: 'Upload',
+    run: async (b) => {
+      const v = b.querySelector('input[name=dst]:checked');
+      if (!v) throw new Error('Tidak ada akun dengan ruang yang cukup');
+      doUpload(files, { acc: v.value, folder: 'root' });
+    },
+  });
+}
+async function doUpload(files, tg) {
   const t = getTray(); let done = 0;
   t.querySelector('[data-h]').textContent = `Mengupload ${files.length} file`;
-  for (const f of files) { if (await uploadOne(f, t)) done++; }
+  for (const f of files) { if (await uploadOne(f, t, tg)) done++; }
   t.querySelector('[data-h]').textContent = `${done} dari ${files.length} file terupload`;
   load(); loadAccounts();
 }
-async function uploadOne(file, t) {
+async function uploadOne(file, t, tg) {
   const row = document.createElement('div'); row.className = 'up';
   row.innerHTML = `<div class="n">${esc(file.name)}</div><div class="s">Menyiapkan…</div><div class="b"><i></i></div>`;
   t.querySelector('.rows').prepend(row);
   const st = row.querySelector('.s'), bar = row.querySelector('.b i');
   try {
-    const tg = target();
     const init = await post('/api/upload/init', { name: file.name, size: file.size, mimeType: file.type || 'application/octet-stream', acc: tg.acc, folder: tg.folder });
     let start = 0;
     do {

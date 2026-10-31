@@ -38,7 +38,7 @@ npm install && npx wrangler login && npx wrangler deploy
 ```
 
 ## Catatan
-- Upload dari tampilan "Semua akun" (di root) masuk ke akun dengan ruang kosong terbanyak. Di dalam folder, file masuk ke folder & akun itu.
+- Sebelum upload muncul pilihan tujuan: di root kamu memilih akun (yang paling lega sudah terpilih), di dalam folder file masuk ke folder & akun itu.
 - Satu file tidak dipecah ke beberapa akun; ukurannya harus muat di salah satu akun.
 - Hapus = pindah ke Sampah Google Drive (bisa dipulihkan dari Drive).
 - Memutus akun di aplikasi juga mencabut izinnya; file di Drive tetap aman.
