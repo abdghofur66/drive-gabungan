@@ -338,13 +338,23 @@ function linkPage(title, inner) {
 .pv img,.pv video{max-width:100%;max-height:72vh;display:block}
 .pv audio{width:100%;margin:24px 0}
 .pv iframe{width:100%;height:72vh;border:0;background:#fff}
+.fl{display:block;text-align:left;max-height:62vh;overflow:auto}
+.fl .row{display:grid;grid-template-columns:28px 1fr auto auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--l);font-size:14px}
+.fl .row:first-child{border-top:0}
+.fl .row.dir{cursor:pointer}.fl .row.dir:hover{background:var(--s)}
+.fl .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.fl .sz,.fl .m{font-size:12.5px;color:var(--i2);white-space:nowrap}
+.fl a.m{color:var(--p);font-weight:700;text-decoration:none}
+.fl-bar{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:6px 0 8px;text-align:left}
+.crumb{font-size:13px;color:var(--i2)}.crumb a{color:var(--i);font-weight:700;text-decoration:none}
+button.b.sm,.b.sm{width:auto;height:38px;padding:0 16px;font-size:13.5px}
 .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--p);background:color-mix(in srgb,var(--p) 14%,transparent);border-radius:99px;padding:3px 10px;margin-bottom:10px}
 .ic{width:72px;height:72px;border-radius:20px;background:var(--p);color:#fff;display:grid;place-items:center;margin:0 auto 16px;font-weight:800;font-size:15px}
 h1{font-size:18px;margin:0 0 6px;word-break:break-word}p{color:var(--i2);margin:0 0 18px;font-size:14px}
 input{width:100%;height:46px;border:1.5px solid var(--l);border-radius:12px;padding:0 14px;background:var(--bg);color:var(--i);font:inherit;margin-bottom:10px}
 button,a.b{display:flex;width:100%;height:46px;align-items:center;justify-content:center;border:0;border-radius:99px;background:var(--p);color:#fff;font:700 15px inherit;text-decoration:none;cursor:pointer}
 .e{color:#e5484d}.f{margin-top:22px;font-size:12.5px;color:var(--i2)}.f a{color:var(--i);font-weight:700;text-decoration:none}</style></head>
-<body><div class="c${inner.includes('class="pv"') ? ' wide' : ''}">${inner}<div class="f">Dibagikan lewat <a href="https://outsiderdev.com" target="_blank" rel="noopener">Drive Gabungan · OutsiderDev</a></div></div></body></html>`,
+<body><div class="c${inner.includes('class="pv') ? ' wide' : ''}">${inner}<div class="f">Dibagikan lewat <a href="https://outsiderdev.com" target="_blank" rel="noopener">Drive Gabungan · OutsiderDev</a></div></div></body></html>`,
   { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-frame-options': 'DENY', 'referrer-policy': 'no-referrer' } });
 }
 function escH(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -353,8 +363,9 @@ async function linkToken(L) {
   const d = await crypto.subtle.digest('SHA-256', enc.encode(L.id + '|' + (L.pw_hash || 'open') + '|' + L.created));
   return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, '0')).join('').slice(0, 40);
 }
-async function linkRoute(env, req, url, id, sub) {
+async function linkRoute(env, req, url, id, sub, arg) {
   const L = await env.DB.prepare('SELECT * FROM links WHERE id=?').bind(id).first();
+  if (L && L.mime === FOLDER) return folderLink(env, req, url, L, sub, arg);
   const view = L?.mode === 'view';
   const tok = L ? await linkToken(L) : '';
   const hasTok = getCookie(req, 'lk') === tok;
@@ -414,6 +425,119 @@ async function streamLink(env, L, req, inline) {
   if (inline && !/pdf/i.test(type)) h['content-security-policy'] = "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'";
   for (const k of ['content-length', 'content-range']) if (r.headers.get(k)) h[k] = r.headers.get(k);
   return new Response(r.body, { status: r.status, headers: h });
+}
+
+// ---------- link berbagi untuk folder ----------
+async function insideFolder(env, acc, fileId, rootId) {
+  if (fileId === rootId) return true;
+  let cur = fileId;
+  for (let i = 0; i < 25; i++) {
+    const f = await gjson(env, acc, `/files/${encodeURIComponent(cur)}?fields=parents`).catch(() => null);
+    const par = f?.parents?.[0];
+    if (!par) return false;
+    if (par === rootId) return true;
+    cur = par;
+  }
+  return false;
+}
+const iconFor = (m) => (m === FOLDER ? '📁' : m.startsWith('image/') ? '🖼️' : m.startsWith('video/') ? '🎬' : m.startsWith('audio/') ? '🎵' : m === 'application/pdf' ? '📕' : /sheet|excel/.test(m) ? '📊' : /presentation|powerpoint/.test(m) ? '📽️' : /document|word/.test(m) ? '📄' : '📎');
+async function folderLink(env, req, url, L, sub, arg) {
+  const view = L.mode === 'view';
+  const tok = await linkToken(L);
+  const authed = getCookie(req, 'lk') === tok;
+  const expired = L.expires && L.expires < Date.now();
+  const acc = await getAcc(env, L.acc_id);
+  const gone = () => linkPage('Link tidak tersedia', `<div class="ic">!</div><h1>Link tidak tersedia</h1><p>Link ini sudah kedaluwarsa, mencapai batas dibuka, atau dicabut pemiliknya.</p>`);
+  if (expired) return sub ? new Response('Tidak tersedia', { status: 403 }) : gone();
+  // isi folder (JSON) untuk navigasi & unduh semua
+  if (sub === 'list') {
+    if (!authed) return json({ error: 'Buka link dulu' }, 403);
+    const dir = url.searchParams.get('d') || L.file_id;
+    if (!(await insideFolder(env, acc, dir, L.file_id))) return json({ error: 'Di luar folder yang dibagikan' }, 403);
+    const q = encodeURIComponent(`'${qesc(dir)}' in parents and trashed=false`);
+    const d = await gjson(env, acc, `/files?q=${q}&orderBy=folder,name&pageSize=1000&fields=files(id,name,mimeType,size,modifiedTime)`);
+    return json({ files: (d.files || []).map((f) => ({ ...f, canGet: f.mimeType === FOLDER || !f.mimeType.startsWith('application/vnd.google-apps.') || !!EXPORT_DL[f.mimeType] })) });
+  }
+  if (sub === 'f' || sub === 'v') {
+    if (!authed || !arg) return new Response('Buka link dulu', { status: 403 });
+    if (!(await insideFolder(env, acc, arg, L.file_id))) return new Response('Di luar folder yang dibagikan', { status: 403 });
+    const meta = await gjson(env, acc, `/files/${encodeURIComponent(arg)}?fields=name,mimeType,size`);
+    const one = { ...L, file_id: arg, name: meta.name, mime: meta.mimeType, size: meta.size };
+    if (sub === 'f') {
+      if (view && url.searchParams.get('inline') !== '1') return new Response('Link ini hanya untuk dilihat', { status: 403 });
+      return streamLink(env, one, req, view);
+    }
+    // halaman pratinjau satu file (mode hanya lihat)
+    const raw = `/s/${escH(L.id)}/f/${escH(arg)}?inline=1`, m = meta.mimeType, nc = 'oncontextmenu="return false" draggable="false"';
+    let media;
+    if (m.startsWith('image/')) media = `<img src="${raw}" alt="" ${nc}>`;
+    else if (m.startsWith('video/')) media = `<video src="${raw}" controls controlslist="nodownload noplaybackrate" disablepictureinpicture playsinline ${nc}></video>`;
+    else if (m.startsWith('audio/')) media = `<audio src="${raw}" controls controlslist="nodownload"></audio>`;
+    else if (m === 'application/pdf' || m.startsWith('application/vnd.google-apps.') || m.startsWith('text/')) media = `<iframe src="${raw}#toolbar=0&navpanes=0" title="Pratinjau"></iframe>`;
+    else media = '<p style="padding:30px 10px">Pratinjau belum tersedia untuk jenis file ini.</p>';
+    return linkPage(escH(meta.name), `<span class="tag">Hanya lihat</span><h1>${escH(meta.name)}</h1><p><a href="javascript:history.back()">← Kembali ke folder</a></p><div class="pv">${media}</div>`);
+  }
+  // halaman utama: password → hitung dibuka → daftar isi
+  let ok = !L.pw_hash || authed, err = '';
+  if (!ok && req.method === 'POST') {
+    const pw = (await req.formData()).get('pw') || '';
+    if (safeEq(await hashPw(pw, L.pw_salt), L.pw_hash)) ok = true;
+    else { await new Promise((r) => setTimeout(r, 800)); err = '<p class="e">Password salah.</p>'; }
+  }
+  if (!ok) {
+    return linkPage(escH(L.name), `${view ? '<span class="tag">Hanya lihat</span>' : ''}<div class="ic">📁</div><h1>${escH(L.name)}</h1><p>Folder ini dilindungi password.</p>
+      <form method="post" action="/s/${escH(L.id)}">${err}<input type="password" name="pw" placeholder="Password dari pengirim" required autofocus><button type="submit">Buka folder</button></form>`);
+  }
+  let setCookie = false;
+  if (!authed) {
+    if (L.max_dl && L.dl >= L.max_dl) return gone();
+    await env.DB.prepare('UPDATE links SET dl=dl+1 WHERE id=?').bind(L.id).run();
+    setCookie = true;
+  }
+  const until = L.expires ? new Date(L.expires).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + ' WIB' : '';
+  const base = `/s/${escH(L.id)}`;
+  const page = linkPage(escH(L.name), `${view ? '<span class="tag">Hanya lihat</span>' : '<span class="tag">Folder</span>'}<h1>${escH(L.name)}</h1>
+    <p>${until ? 'Berlaku sampai ' + escH(until) : 'Folder bersama'}</p>
+    <div class="fl-bar"><div class="crumb" id="cr"></div>${view ? '' : '<button type="button" class="b sm" id="zipAll">Unduh semua (ZIP)</button>'}</div>
+    <div class="pv fl" id="list"><p style="padding:20px">Memuat isi folder…</p></div>
+    <p class="e" id="er" style="display:none"></p>
+    <script>
+    const BASE=${JSON.stringify(base)}, ROOT=${JSON.stringify(L.file_id)}, ROOTN=${JSON.stringify(L.name)}, VIEW=${view};
+    const IC=${JSON.stringify({ folder: '📁' })};
+    let stack=[{id:ROOT,name:ROOTN}];
+    const esc=(s)=>String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmt=(b)=>{const u=['B','KB','MB','GB'];let i=0;b=Number(b||0);while(b>=1024&&i<3){b/=1024;i++}return (i?b.toFixed(1):b)+' '+u[i]};
+    const ico=(m)=>m==='application/vnd.google-apps.folder'?'📁':m.startsWith('image/')?'🖼️':m.startsWith('video/')?'🎬':m.startsWith('audio/')?'🎵':m==='application/pdf'?'📕':/sheet|excel/.test(m)?'📊':/presentation|powerpoint/.test(m)?'📽️':/document|word/.test(m)?'📄':'📎';
+    async function show(){
+      const cur=stack[stack.length-1];
+      document.getElementById('cr').innerHTML=stack.map((s,i)=>'<a href="#" data-j="'+i+'">'+esc(s.name)+'</a>').join(' / ');
+      const L=document.getElementById('list'); L.innerHTML='<p style="padding:20px">Memuat…</p>';
+      const r=await fetch(BASE+'/list?d='+encodeURIComponent(cur.id)); const d=await r.json();
+      if(!r.ok){L.innerHTML='<p style="padding:20px">'+esc(d.error||'Gagal memuat')+'</p>';return}
+      L.innerHTML=d.files.map((f,i)=>{const isF=f.mimeType==='application/vnd.google-apps.folder';
+        const act=isF?'':(!f.canGet?'<span class="m">tidak tersedia</span>':VIEW?'<a class="m" href="'+BASE+'/v/'+f.id+'">Lihat</a>':'<a class="m" href="'+BASE+'/f/'+f.id+'">Unduh</a>');
+        return '<div class="row'+(isF?' dir':'')+'" data-i="'+i+'"><span class="fi">'+ico(f.mimeType)+'</span><span class="nm">'+esc(f.name)+'</span><span class="sz">'+(isF?'':fmt(f.size))+'</span>'+act+'</div>'}).join('')||'<p style="padding:20px">Folder kosong.</p>';
+      L.onclick=(e)=>{const row=e.target.closest('.row.dir');if(!row)return;const f=d.files[row.dataset.i];stack.push({id:f.id,name:f.name});show();};
+    }
+    document.getElementById('cr').onclick=(e)=>{const a=e.target.closest('[data-j]');if(!a)return;e.preventDefault();stack=stack.slice(0,+a.dataset.j+1);show();};
+    const z=document.getElementById('zipAll');
+    if(z) z.onclick=async()=>{
+      const er=document.getElementById('er'); z.disabled=true; z.textContent='Menyiapkan…';
+      try{
+        await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=ok;s.onerror=()=>no(new Error('Gagal memuat pembuat ZIP'));document.head.appendChild(s)});
+        const zip=new JSZip(); const items=[];
+        async function walk(id,path){const d=await (await fetch(BASE+'/list?d='+encodeURIComponent(id))).json();for(const f of d.files){if(f.mimeType==='application/vnd.google-apps.folder')await walk(f.id,path+f.name+'/');else if(f.canGet)items.push({f,path});}}
+        await walk(ROOT,'');
+        let n=0; for(const it of items){z.textContent='Mengunduh '+(++n)+'/'+items.length;const r=await fetch(BASE+'/f/'+it.f.id);if(!r.ok)continue;const cd=r.headers.get('content-disposition')||'';const m=cd.match(/filename\\*=UTF-8''([^;]+)/);zip.file(it.path+(m?decodeURIComponent(m[1]):it.f.name),await r.blob());}
+        z.textContent='Membuat ZIP…'; const blob=await zip.generateAsync({type:'blob'});
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=ROOTN+'.zip';a.click();z.textContent='Unduh semua (ZIP)';
+      }catch(e){er.style.display='block';er.textContent=e.message;z.textContent='Unduh semua (ZIP)'}
+      z.disabled=false;
+    };
+    show();
+    </script>`);
+  if (setCookie) page.headers.append('set-cookie', `lk=${tok}; Path=/s/${L.id}; HttpOnly; Secure; SameSite=Strict; Max-Age=21600`);
+  return page;
 }
 
 // ---------- passkey (WebAuthn) ----------
@@ -613,8 +737,8 @@ async function route(req, env) {
     return new Response(SW, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache' } });
   }
 
-  const lm = p.match(/^\/s\/([A-Za-z0-9_-]{6,20})(?:\/(dl|raw))?$/);
-  if (lm) return linkRoute(env, req, url, lm[1], lm[2] || '');
+  const lm = p.match(/^\/s\/([A-Za-z0-9_-]{6,20})(?:\/(dl|raw|list|f|v)(?:\/([A-Za-z0-9_-]{10,100}))?)?$/);
+  if (lm) return linkRoute(env, req, url, lm[1], lm[2] || '', lm[3] || '');
 
   if (p === '/tentang' || p === '/tentang/') {
     return new Response(TENTANG, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
@@ -786,7 +910,7 @@ async function route(req, env) {
       const b = await body(req);
       const a = await getAcc(env, b.acc);
       const meta = await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=name,mimeType,size`);
-      if (meta.mimeType === FOLDER) throw new HttpError(400, 'Link berbagi hanya untuk file. Untuk folder, gunakan Bagikan.');
+
       if (meta.mimeType.startsWith('application/vnd.google-apps.') && !EXPORT_DL[meta.mimeType] && b.mode !== 'view') throw new HttpError(400, 'Jenis file Google ini tidak bisa diunduh lewat link');
       const id = b64u(crypto.getRandomValues(new Uint8Array(6)));
       let salt = null, hash = null;

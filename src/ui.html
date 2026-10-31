@@ -1521,7 +1521,7 @@ function showMenu(f, anchor, x, y) {
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
     ['share', 'Bagikan', () => share(f)],
     ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
-    !isF && ['link', 'Buat link berbagi (Fitur Khusus)', () => createLink(f), '', 'links'],
+    ['link', 'Buat link berbagi (Fitur Khusus)', () => createLink(f), '', 'links'],
     isF && ['pin', S.pins.some((x) => x.id === f.id) ? 'Lepas dari sidebar' : 'Sematkan di sidebar', () => { seen('pins'); togglePin(f); }, '', 'pins'],
     isF && S.accounts.filter((a) => !a.error).length > 1 && ['backup', 'Cadangkan folder ini', () => newBackup(f), '', 'backup'],
     ['check', 'Pilih', () => toggleSel(f)],
@@ -1801,7 +1801,7 @@ $('#moreBtn').onclick = (e) => {
   e.stopPropagation();
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   popMenu([
-    canInstall() && ['down', 'Pasang sebagai aplikasi', install],
+    ['down', standalone() || installedApp || store('installed') ? 'Sudah terpasang sebagai aplikasi' : 'Pasang sebagai aplikasi', install],
     ['moon', dark ? 'Mode terang' : 'Mode gelap', toggleTheme],
     ['link', 'Link berbagi', manageLinks],
     ['backup', 'Cadangan', manageBackups],
@@ -1821,6 +1821,11 @@ navigator.getInstalledRelatedApps?.().then((a) => { if (a.length) { installedApp
 function refreshInstallUI() { $('#installSide').classList.toggle('hidden', !canInstall()); }
 async function install() {
   document.querySelector('.install')?.remove();
+  if (standalone()) return toast('Kamu sedang memakai Drive Gabungan sebagai aplikasi');
+  if ((installedApp || store('installed')) && !deferred) return dialog({
+    title: 'Sudah terpasang', cancel: 'Tutup',
+    desc: 'Drive Gabungan sudah terpasang di perangkat ini. Buka dari ikon di layar utama atau daftar aplikasi. Kalau ikonnya sudah dihapus, pasang ulang lewat menu browser (⋮ → Instal aplikasi / Tambahkan ke layar utama).',
+  });
   if (deferred) {
     deferred.prompt();
     const { outcome } = await deferred.userChoice;
@@ -1828,6 +1833,10 @@ async function install() {
     if (outcome === 'accepted') toast('Drive Gabungan sedang dipasang');
     return;
   }
+  if (!isIOS()) return dialog({
+    title: 'Pasang sebagai aplikasi', cancel: 'Tutup',
+    body: `<div class="ios-steps"><div><b>1</b>Buka menu browser (⋮ di Chrome/Edge, atau ikon pasang di ujung kolom alamat).</div><div><b>2</b>Pilih "Instal aplikasi", "Pasang aplikasi", atau "Tambahkan ke layar utama".</div><div><b>3</b>Konfirmasi. Ikon Drive Gabungan akan muncul di layar utama atau daftar aplikasi.</div></div><p class="small muted" style="margin-top:12px">Firefox di laptop belum mendukung pemasangan aplikasi web. Gunakan Chrome atau Edge.</p>`,
+  });
   if (isIOS()) dialog({
     title: 'Pasang di iPhone atau iPad',
     body: `<div class="ios-steps"><div><b>1</b>Buka halaman ini di Safari.</div><div><b>2</b>Ketuk tombol Bagikan (kotak dengan panah ke atas).</div><div><b>3</b>Pilih "Tambah ke Layar Utama", lalu "Tambah".</div></div>`,
@@ -2180,15 +2189,16 @@ $('#pins').addEventListener('click', (e) => {
 // ---------- link berbagi ----------
 function createLink(f) {
   const md = dialog({
-    title: 'Buat link berbagi', desc: `"${f.name}" bisa dibuka siapa pun yang punya link, tanpa perlu akun Google.`,
+    title: f.mimeType === FOLDER ? 'Buat link berbagi folder' : 'Buat link berbagi', desc: `"${f.name}" bisa dibuka siapa pun yang punya link, tanpa perlu akun Google.${f.mimeType === FOLDER ? ' Penerima bisa menjelajah isi folder beserta subfoldernya.' : ''}`,
     body: `<div class="infobox">${ic('info')}<div><b>Ini fitur Drive Gabungan, bukan Google Drive</b>Link dibuat dan diatur oleh aplikasimu sendiri. Izin berbagi di Google Drive tidak berubah, file tetap privat di sana, dan link bisa diubah atau dicabut kapan saja di menu <b>Link berbagi</b>. Untuk berbagi lewat akun Google, pakai menu <b>Bagikan</b>.</div></div>
       <label class="lbl">Jenis akses</label>
       <div class="seg2"><label><input type="radio" name="lm" value="download" checked> Bisa diunduh<small>Penerima mendapat file aslinya</small></label>
         <label><input type="radio" name="lm" value="view"> Hanya lihat<small>Pratinjau di halaman, tanpa tombol unduh</small></label></div>
+      ${f.mimeType === FOLDER ? '<p class="small muted" style="margin:-2px 0 0">Mode unduh: penerima bisa mengunduh per file atau semua isi folder sebagai ZIP.</p>' : ''}
       <label class="lbl">Berlaku selama</label>
       <div class="sh-row"><input class="field" type="number" min="1" value="7" data-n style="flex:1"><select class="field" data-u style="width:130px"><option value="1">menit</option><option value="60">jam</option><option value="1440" selected>hari</option><option value="0">tanpa batas</option></select></div>
       <div class="qk" data-qk>${[[15, 'menit', 1], [1, 'jam', 60], [1, 'hari', 1440], [7, 'hari', 1440]].map(([n, l, u]) => `<button type="button" class="chip" data-q="${n},${u}">${n} ${l}</button>`).join('')}</div>
-      <label class="lbl" data-maxl>Batas unduhan (opsional)</label><input class="field" type="number" min="1" data-max placeholder="Tanpa batas">
+      <label class="lbl" data-maxl>${f.mimeType === FOLDER ? 'Batas berapa kali dibuka (opsional)' : 'Batas unduhan (opsional)'}</label><input class="field" type="number" min="1" data-max placeholder="Tanpa batas">
       <label class="lbl">Password (opsional)</label><input class="field" type="text" data-pw placeholder="Kosongkan jika tanpa password" autocomplete="off">`,
     ok: 'Buat link',
     run: async (b) => {
@@ -2201,7 +2211,7 @@ function createLink(f) {
   const b = md.querySelector('.body');
   b.querySelectorAll('input[name=lm]').forEach((x) => (x.onchange = () => {
     const v = x.value === 'view';
-    b.querySelector('[data-maxl]').textContent = v ? 'Batas berapa kali dibuka (opsional)' : 'Batas unduhan (opsional)';
+    b.querySelector('[data-maxl]').textContent = v || f.mimeType === FOLDER ? 'Batas berapa kali dibuka (opsional)' : 'Batas unduhan (opsional)';
   }));
   const u = b.querySelector('[data-u]'), n = b.querySelector('[data-n]');
   u.onchange = () => { n.disabled = u.value === '0'; };
@@ -2223,7 +2233,7 @@ async function manageLinks() {
   async function draw() {
     const { links } = await api('/api/links');
     b.innerHTML = links.length ? `<div class="lk-l">${links.map((l, i) => { const a = accOf(l.acc_id); return `<div class="lk ${l.active ? '' : 'off'}">
-      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.mode === 'view' ? 'Hanya lihat' : 'Unduh'} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''}x ${l.mode === 'view' ? 'dibuka' : 'diunduh'} · ${l.active ? (l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas waktu') : '<b class="hangus">hangus</b>'}${l.locked ? ' · berpassword' : ''}</span></div>
+      <div class="n"><b>${esc(l.name)}</b><span>${avatar(a, 14, false)} ${esc((a.email || '').split('@')[0])} · ${l.mime === 'application/vnd.google-apps.folder' ? 'Folder · ' : ''}${l.mode === 'view' ? 'Hanya lihat' : 'Unduh'} · ${l.dl}${l.max_dl ? '/' + l.max_dl : ''}x ${l.mode === 'view' || l.mime === 'application/vnd.google-apps.folder' ? 'dibuka' : 'diunduh'} · ${l.active ? (l.expires ? 'sampai ' + new Date(l.expires).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'tanpa batas waktu') : '<b class="hangus">hangus</b>'}${l.locked ? ' · berpassword' : ''}</span></div>
       ${l.active ? `<button type="button" class="icon-btn" data-c="${i}" title="Salin link">${ic('copy')}</button>` : ''}
       <button type="button" class="icon-btn" data-e="${i}" title="Edit / perbarui">${ic('edit')}</button>
       <button type="button" class="icon-btn" data-x="${i}" title="Cabut link">${ic('trash')}</button></div>`; }).join('')}</div>`
