@@ -911,7 +911,7 @@ async function route(req, env) {
       const a = await getAcc(env, b.acc);
       const meta = await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=name,mimeType,size`);
 
-      if (meta.mimeType.startsWith('application/vnd.google-apps.') && !EXPORT_DL[meta.mimeType] && b.mode !== 'view') throw new HttpError(400, 'Jenis file Google ini tidak bisa diunduh lewat link');
+      if (meta.mimeType !== FOLDER && meta.mimeType.startsWith('application/vnd.google-apps.') && !EXPORT_DL[meta.mimeType] && b.mode !== 'view') throw new HttpError(400, 'Jenis file Google ini tidak bisa diunduh lewat link');
       const id = b64u(crypto.getRandomValues(new Uint8Array(6)));
       let salt = null, hash = null;
       if (b.password) { salt = randHex(16); hash = await hashPw(String(b.password), salt); }
