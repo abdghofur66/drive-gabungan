@@ -1,0 +1,12 @@
+{
+  "name": "drive-gabungan",
+  "description": "Gabungkan beberapa akun Google Drive dalam satu penampil",
+  "private": true,
+  "scripts": { "deploy": "wrangler deploy", "dev": "wrangler dev" },
+  "devDependencies": { "wrangler": "^4" },
+  "cloudflare": {
+    "bindings": {
+      "DB": { "description": "Database untuk password pemilik dan token akun Google." }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+name = "drive-gabungan"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
+
+# Database D1 dibuat otomatis saat deploy (tombol Deploy to Cloudflare / wrangler deploy).
+[[d1_databases]]
+binding = "DB"
+database_name = "drive-gabungan"

@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drive Gabungan</title>
+<link rel="icon" href="https://outsiderdev.com/img/ico.png">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1f2937;--mut:#6b7280;--bd:#e5e7eb;--pri:#2563eb;--danger:#dc2626;--hover:#f1f5f9}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--tx:#e5e7eb;--mut:#9ca3af;--bd:#2a2f38;--pri:#60a5fa;--danger:#f87171;--hover:#222731}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:7px 12px}
+button.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.5;cursor:default}
+input,select{border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:8px 10px}
+.hidden{display:none!important}
+/* login */
+.center{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.box h1{margin:0;font-size:20px}
+.err{color:var(--danger);font-size:13px;min-height:1em}
+/* app */
+header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+header h1{font-size:17px;margin:0;white-space:nowrap}
+#menuBtn{display:none}
+.search{position:relative;flex:1;max-width:520px}
+.search input{width:100%;padding-right:34px}
+.search .x{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;padding:4px 8px;color:var(--mut);font-size:16px}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+aside{width:270px;flex-shrink:0;padding:16px;border-right:1px solid var(--bd);background:var(--card);display:flex;flex-direction:column;gap:14px}
+main{flex:1;padding:16px;min-width:0;display:flex;flex-direction:column}
+.total .bar,.acc .bar{height:6px;background:var(--bd);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--pri)}
+.mut{color:var(--mut);font-size:12px}
+.acc{padding:8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.acc:hover{background:var(--hover)}
+.acc.on{border-color:var(--pri)}
+.acc .row{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.acc .em{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc .rm{border:0;background:none;padding:0 4px;color:var(--mut)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.crumbs{flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:200px}
+.crumbs a{color:var(--pri);cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;position:relative;display:flex;flex-direction:column}
+.item:hover{border-color:var(--pri)}
+.thumb{height:100px;display:flex;align-items:center;justify-content:center;font-size:38px;background:var(--hover)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.meta{padding:8px;display:flex;gap:6px;align-items:flex-start}
+.meta .nm{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.more{position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:6px;opacity:.9}
+.empty{color:var(--mut);text-align:center;padding:40px}
+.warn{background:#fef3c7;color:#92400e;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-size:13px}
+/* menu & modal */
+.menu{position:fixed;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:30;display:flex;flex-direction:column;min-width:170px;padding:4px}
+.menu button{border:0;text-align:left;border-radius:6px}
+.menu button:hover{background:var(--hover)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.mbox{background:var(--card);border-radius:12px;width:100%;max-width:960px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.mhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.mhead .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.mbody{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;min-height:200px;background:var(--bg)}
+.mbody img,.mbody video{max-width:100%;max-height:78vh}
+.mbody iframe{width:100%;height:78vh;border:0;background:#fff}
+.small .mbox{max-width:420px}
+.small .mbody{display:block;padding:14px;background:var(--card)}
+.flist{display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow:auto}
+.flist div{padding:8px;border-radius:6px;cursor:pointer}
+.flist div:hover{background:var(--hover)}
+/* uploads */
+#uploads{position:fixed;right:16px;bottom:16px;width:300px;display:flex;flex-direction:column;gap:6px;z-index:20}
+.up{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:8px;z-index:50;font-size:13px;max-width:90vw}
+/* footer */
+footer{margin-top:auto;padding:18px 0 4px;text-align:center;color:var(--mut);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--tx);text-decoration:none}
+footer a:hover{color:var(--pri);text-decoration:none}
+footer img{width:18px;height:18px}
+.drop{outline:3px dashed var(--pri);outline-offset:-8px}
+@media (max-width:780px){
+  #menuBtn{display:inline-block}
+  aside{position:fixed;left:0;top:57px;bottom:0;z-index:15;transform:translateX(-100%);transition:.2s;overflow:auto}
+  aside.open{transform:none}
+  header h1{display:none}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<!-- Halaman login / setup -->
+<div id="authView" class="center hidden">
+  <div class="box">
+    <h1 id="authTitle">Drive Gabungan</h1>
+    <div class="mut" id="authDesc"></div>
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+    <input type="password" id="pw2" placeholder="Ulangi password" class="hidden" autocomplete="new-password">
+    <button class="pri" id="authBtn">Masuk</button>
+    <div class="err" id="authErr"></div>
+  </div>
+  <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
+</div>
+
+<!-- Aplikasi -->
+<div id="appView" class="hidden">
+  <header>
+    <button id="menuBtn">☰</button>
+    <h1>☁️ Drive Gabungan</h1>
+    <div class="search">
+      <input id="q" placeholder="Cari di semua akun…">
+      <button class="x hidden" id="qx" title="Hapus pencarian">✕</button>
+    </div>
+    <select id="type">
+      <option value="">Semua jenis</option>
+      <option value="folder">Folder</option>
+      <option value="image">Gambar</option>
+      <option value="video">Video</option>
+      <option value="audio">Audio</option>
+      <option value="pdf">PDF</option>
+      <option value="doc">Dokumen</option>
+    </select>
+  </header>
+  <div class="layout">
+    <aside id="side">
+      <div class="total">
+        <b>Total penyimpanan</b>
+        <div class="bar"><i id="totBar" style="width:0"></i></div>
+        <div class="mut" id="totTxt">–</div>
+      </div>
+      <div>
+        <div class="acc on" data-id="all"><div class="row"><span class="dot" style="background:var(--pri)"></span><span class="em">Semua akun</span></div></div>
+        <div id="accList"></div>
+      </div>
+      <button class="pri" id="addAcc">+ Hubungkan akun Google</button>
+      <div style="margin-top:auto;display:flex;gap:6px">
+        <button id="chgPw" style="flex:1">Ganti password</button>
+        <button id="logout" class="danger">Keluar</button>
+      </div>
+    </aside>
+    <main id="main">
+      <div id="cfgWarn" class="warn hidden"></div>
+      <div class="toolbar">
+        <div class="crumbs" id="crumbs"></div>
+        <button id="mkdirBtn">+ Folder</button>
+        <button class="pri" id="upBtn">⬆ Upload</button>
+        <input type="file" id="fileIn" multiple class="hidden">
+      </div>
+      <div id="errs"></div>
+      <div class="grid" id="grid"></div>
+      <div class="empty hidden" id="empty">Tidak ada file</div>
+      <footer>Developed by <a href="https://outsiderdev.com" target="_blank" rel="noopener"><img src="https://outsiderdev.com/img/ico.png" alt="">OutsiderDev</a></footer>
+    </main>
+  </div>
+</div>
+
+<div id="uploads"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const FOLDER = 'application/vnd.google-apps.folder';
+const CHUNK = 8 * 1024 * 1024; // kelipatan 256 KB, di bawah batas 100 MB Worker
+let S = { acc: 'all', path: [], files: [], accounts: [], q: '', type: '' };
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function fmt(b) {
+  if (b == null || isNaN(b)) return '';
+  const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; b = Number(b);
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return b.toFixed(i ? 1 : 0) + ' ' + u[i];
+}
+function toast(m) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3500);
+}
+async function api(path, opt = {}) {
+  const r = await fetch(path, { credentials: 'same-origin', ...opt });
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 401 && !path.includes('login')) { showAuth(true); throw new Error(d.error || 'Login dulu'); }
+  if (!r.ok) throw new Error(d.error || 'Error ' + r.status);
+  return d;
+}
+const post = (p, b) => api(p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) });
+function accOf(id) { return S.accounts.find((a) => a.id == id) || {}; }
+function icon(m) {
+  if (m === FOLDER) return '📁';
+  if (m.startsWith('image/')) return '🖼️';
+  if (m.startsWith('video/')) return '🎬';
+  if (m.startsWith('audio/')) return '🎵';
+  if (m === 'application/pdf') return '📕';
+  if (m.includes('spreadsheet') || m.includes('excel')) return '📊';
+  if (m.includes('presentation') || m.includes('powerpoint')) return '📽️';
+  if (m.includes('document') || m.includes('word')) return '📄';
+  if (m.includes('zip') || m.includes('compressed')) return '🗜️';
+  return '📎';
+}
+
+// ---------- auth ----------
+let authMode = 'login';
+function showAuth(setup) {
+  $('#appView').classList.add('hidden'); $('#authView').classList.remove('hidden');
+  authMode = setup === 'setup' ? 'setup' : 'login';
+  $('#pw2').classList.toggle('hidden', authMode !== 'setup');
+  $('#authTitle').textContent = authMode === 'setup' ? 'Buat password pemilik' : 'Drive Gabungan';
+  $('#authDesc').textContent = authMode === 'setup'
+    ? 'Ini pertama kali aplikasi dibuka. Buat password pemilik (minimal 8 karakter). Hanya kamu yang bisa masuk.'
+    : 'Masukkan password pemilik.';
+  $('#authBtn').textContent = authMode === 'setup' ? 'Simpan & masuk' : 'Masuk';
+  $('#pw').focus();
+}
+async function doAuth() {
+  $('#authErr').textContent = '';
+  const pw = $('#pw').value;
+  try {
+    if (authMode === 'setup') {
+      if (pw !== $('#pw2').value) throw new Error('Password tidak sama');
+      await post('/api/setup', { password: pw });
+    } else await post('/api/login', { password: pw });
+    $('#pw').value = $('#pw2').value = '';
+    startApp();
+  } catch (e) { $('#authErr').textContent = e.message; }
+}
+$('#authBtn').onclick = doAuth;
+$('#pw').onkeydown = $('#pw2').onkeydown = (e) => { if (e.key === 'Enter') doAuth(); };
+$('#logout').onclick = async () => { await post('/api/logout', {}); showAuth(); };
+$('#chgPw').onclick = () => {
+  dialog('Ganti password', `<input type="password" id="o" placeholder="Password lama" style="width:100%;margin-bottom:8px">
+    <input type="password" id="n" placeholder="Password baru (min. 8)" style="width:100%">`, async (b) => {
+    await post('/api/password', { old: b.querySelector('#o').value, password: b.querySelector('#n').value });
+    toast('Password diganti');
+  });
+};
+
+// ---------- akun ----------
+async function loadAccounts() {
+  const d = await api('/api/accounts');
+  S.accounts = d.accounts;
+  let lim = 0, use = 0, unlimited = false;
+  $('#accList').innerHTML = d.accounts.map((a) => {
+    if (!a.error) { use += a.usage; if (a.limit == null) unlimited = true; else lim += a.limit; }
+    const pct = a.limit ? Math.min(100, (a.usage / a.limit) * 100) : 0;
+    return `<div class="acc ${S.acc == a.id ? 'on' : ''}" data-id="${a.id}">
+      <div class="row"><span class="dot" style="background:${a.color}"></span><span class="em" title="${esc(a.email)}">${esc(a.email)}</span>
+      <button class="rm" data-rm="${a.id}" title="Putuskan akun">✕</button></div>
+      ${a.error ? `<div class="mut" style="color:var(--danger)">${esc(a.error)}</div>`
+        : `<div class="bar"><i style="width:${pct}%;background:${a.color}"></i></div>
+           <div class="mut">${fmt(a.usage)} dari ${a.limit ? fmt(a.limit) : 'tak terbatas'}</div>`}
+    </div>`;
+  }).join('') || '<div class="mut" style="padding:8px">Belum ada akun. Klik tombol di bawah untuk menghubungkan.</div>';
+  $('#totBar').style.width = lim ? Math.min(100, (use / lim) * 100) + '%' : '0';
+  $('#totTxt').textContent = d.accounts.length
+    ? `${fmt(use)} terpakai dari ${unlimited ? 'tak terbatas' : fmt(lim)} · sisa ${unlimited ? '∞' : fmt(Math.max(0, lim - use))}`
+    : 'Belum ada akun';
+}
+$('#side').onclick = async (e) => {
+  const rm = e.target.closest('[data-rm]');
+  if (rm) {
+    e.stopPropagation();
+    const a = accOf(rm.dataset.rm);
+    if (!confirm(`Putuskan akun ${a.email}? File di Drive-nya tidak terhapus.`)) return;
+    await api('/api/accounts?id=' + a.id, { method: 'DELETE' });
+    if (S.acc == a.id) S.acc = 'all';
+    S.path = []; await loadAccounts(); load(); return;
+  }
+  const el = e.target.closest('.acc');
+  if (!el) return;
+  S.acc = el.dataset.id; S.path = [];
+  document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', x === el));
+  $('#side').classList.remove('open');
+  load();
+};
+$('#addAcc').onclick = () => (S.state && !S.state.configured ? googleSetup() : (location.href = '/oauth/start'));
+function googleSetup() {
+  const ru = S.state.redirectUri;
+  const md = dialog('Hubungkan ke Google Cloud', `
+    <div class="mut" style="margin-bottom:10px;line-height:1.5">
+      Langkah sekali saja. Buat OAuth Client tipe <b>Web application</b> di
+      <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Cloud Console</a>
+      (panduan lengkap ada di README), lalu daftarkan Redirect URI ini:</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px"><input readonly value="${esc(ru)}" style="flex:1;font-size:12px">
+      <button type="button" data-copy>Salin</button></div>
+    <input id="gid" placeholder="Client ID" style="width:100%;margin-bottom:8px">
+    <input id="gsec" type="password" placeholder="Client Secret" style="width:100%">`,
+  async (b) => {
+    await post('/api/config', { id: b.querySelector('#gid').value, secret: b.querySelector('#gsec').value });
+    S.state.configured = true;
+    toast('Tersimpan. Sekarang hubungkan akun Google.');
+  });
+  md.querySelector('[data-copy]').onclick = (e) => {
+    navigator.clipboard.writeText(ru).then(() => (e.target.textContent = 'Tersalin'));
+  };
+}
+$('#menuBtn').onclick = () => $('#side').classList.toggle('open');
+
+// ---------- daftar file ----------
+function cur() { return S.path[S.path.length - 1]; }
+let loadSeq = 0;
+async function load() {
+  const seq = ++loadSeq;
+  renderCrumbs();
+  $('#grid').innerHTML = '<div class="mut">Memuat…</div>'; $('#empty').classList.add('hidden'); $('#errs').innerHTML = '';
+  const c = cur();
+  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : 'root', q: S.q, type: S.type });
+  try {
+    const d = await api('/api/files?' + p);
+    if (seq !== loadSeq) return;
+    S.files = d.files;
+    $('#errs').innerHTML = d.errors.map((x) => `<div class="warn">${esc(x)}</div>`).join('');
+    render();
+  } catch (e) { if (seq === loadSeq) $('#grid').innerHTML = `<div class="warn">${esc(e.message)}</div>`; }
+}
+function renderCrumbs() {
+  const root = S.acc === 'all' ? 'Semua akun' : (accOf(S.acc).email || 'Akun');
+  let h = `<a data-i="-1">${esc(root)}</a>`;
+  S.path.forEach((f, i) => (h += ` › <a data-i="${i}">${esc(f.name)}</a>`));
+  if (S.q) h += ` › <span class="mut">hasil cari "${esc(S.q)}"</span>`;
+  $('#crumbs').innerHTML = h;
+}
+$('#crumbs').onclick = (e) => {
+  const a = e.target.closest('a'); if (!a) return;
+  S.path = S.path.slice(0, Number(a.dataset.i) + 1); clearSearch(false); load();
+};
+function render() {
+  $('#grid').innerHTML = S.files.map((f, i) => {
+    const a = accOf(f.acc);
+    const th = f.hasThumb ? `<img loading="lazy" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.replaceWith(document.createTextNode('${icon(f.mimeType)}'))">` : icon(f.mimeType);
+    return `<div class="item" data-i="${i}" title="${esc(f.name)}">
+      <div class="thumb">${th}</div>
+      <div class="meta"><span class="dot" style="background:${a.color || '#999'};margin-top:4px" title="${esc(a.email)}"></span>
+        <div style="flex:1;min-width:0"><div class="nm">${esc(f.name)}</div><div class="mut">${f.size ? fmt(f.size) : ''}</div></div></div>
+      <button class="more" data-m="${i}">⋮</button></div>`;
+  }).join('');
+  $('#empty').classList.toggle('hidden', S.files.length > 0);
+}
+$('#grid').onclick = (e) => {
+  const m = e.target.closest('[data-m]');
+  if (m) { e.stopPropagation(); return showMenu(S.files[m.dataset.m], m); }
+  const it = e.target.closest('.item'); if (!it) return;
+  open(S.files[it.dataset.i]);
+};
+$('#grid').oncontextmenu = (e) => {
+  const it = e.target.closest('.item'); if (!it) return;
+  e.preventDefault(); showMenu(S.files[it.dataset.i], null, e.clientX, e.clientY);
+};
+function open(f) {
+  if (f.mimeType === FOLDER) { S.path.push({ id: f.id, name: f.name, acc: f.acc }); clearSearch(false); return load(); }
+  preview(f);
+}
+
+// ---------- pencarian (dengan tombol X) ----------
+let qt;
+$('#q').oninput = () => {
+  $('#qx').classList.toggle('hidden', !$('#q').value);
+  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); load(); }, 400);
+};
+function clearSearch(reload = true) {
+  $('#q').value = ''; $('#qx').classList.add('hidden');
+  if (S.q) { S.q = ''; if (reload) load(); }
+}
+$('#qx').onclick = () => { clearSearch(); $('#q').focus(); };
+$('#type').onchange = () => { S.type = $('#type').value; load(); };
+
+// ---------- preview ----------
+function contentUrl(f, dl) { return `/api/content?acc=${f.acc}&id=${encodeURIComponent(f.id)}${dl ? '&dl=1' : ''}`; }
+function preview(f) {
+  const m = f.mimeType, u = contentUrl(f);
+  let inner;
+  if (m.startsWith('image/')) inner = `<img src="${u}">`;
+  else if (m.startsWith('video/')) inner = `<video src="${u}" controls autoplay></video>`;
+  else if (m.startsWith('audio/')) inner = `<audio src="${u}" controls autoplay></audio>`;
+  else if (m === 'application/pdf' || m.startsWith('application/vnd.google-apps.') || m.startsWith('text/'))
+    inner = m.includes('form') || m.includes('site') || m.includes('map') ? noPrev(f) : `<iframe src="${u}"></iframe>`;
+  else inner = noPrev(f);
+  const md = document.createElement('div'); md.className = 'modal';
+  md.innerHTML = `<div class="mbox"><div class="mhead"><span class="dot" style="background:${accOf(f.acc).color}"></span>
+    <span class="t">${esc(f.name)}</span>
+    ${f.webViewLink ? `<a href="${esc(f.webViewLink)}" target="_blank" rel="noopener"><button>Buka di Drive</button></a>` : ''}
+    <a href="${contentUrl(f, 1)}"><button>⬇</button></a><button data-x>✕</button></div>
+    <div class="mbody">${inner}</div></div>`;
+  md.onclick = (e) => { if (e.target === md || e.target.closest('[data-x]')) md.remove(); };
+  document.body.appendChild(md);
+}
+function noPrev(f) { return `<div class="empty">${icon(f.mimeType)}<br>Pratinjau tidak tersedia untuk jenis file ini.<br>Silakan unduh atau buka di Drive.</div>`; }
+
+// ---------- menu aksi ----------
+function closeMenu() { document.querySelectorAll('.menu').forEach((m) => m.remove()); }
+document.addEventListener('click', closeMenu);
+function showMenu(f, btn, x, y) {
+  closeMenu();
+  const m = document.createElement('div'); m.className = 'menu';
+  const isF = f.mimeType === FOLDER;
+  const acts = [
+    [isF ? 'Buka' : 'Pratinjau', () => open(f)],
+    !isF && ['Unduh', () => (location.href = contentUrl(f, 1))],
+    f.webViewLink && ['Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
+    ['Ganti nama', () => rename(f)],
+    ['Pindahkan…', () => move(f)],
+    ['Hapus (ke Sampah)', () => trash(f), 'danger'],
+  ].filter(Boolean);
+  acts.forEach(([t, fn, cls]) => {
+    const b = document.createElement('button'); b.textContent = t; if (cls) b.className = cls;
+    b.onclick = (e) => { e.stopPropagation(); closeMenu(); fn(); }; m.appendChild(b);
+  });
+  m.onclick = (e) => e.stopPropagation();
+  document.body.appendChild(m);
+  const r = btn ? btn.getBoundingClientRect() : { left: x, bottom: y };
+  m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8) + 'px';
+  m.style.top = Math.min(r.bottom + 4, innerHeight - m.offsetHeight - 8) + 'px';
+}
+function dialog(title, html, onOk, okText = 'Simpan') {
+  const md = document.createElement('div'); md.className = 'modal small';
+  md.innerHTML = `<div class="mbox"><div class="mhead"><span class="t">${esc(title)}</span></div>
+    <div class="mbody">${html}<div class="err" data-err></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button data-c>Batal</button>${onOk ? `<button class="pri" data-ok>${esc(okText)}</button>` : ''}</div></div></div>`;
+  const b = md.querySelector('.mbody');
+  md.querySelector('[data-c]').onclick = () => md.remove();
+  md.onclick = (e) => { if (e.target === md) md.remove(); };
+  const ok = md.querySelector('[data-ok]');
+  if (ok) ok.onclick = async () => {
+    ok.disabled = true;
+    try { await onOk(b); md.remove(); } catch (e) { md.querySelector('[data-err]').textContent = e.message; ok.disabled = false; }
+  };
+  b.querySelectorAll('input').forEach((i) => (i.onkeydown = (e) => { if (e.key === 'Enter' && ok) ok.click(); }));
+  document.body.appendChild(md);
+  setTimeout(() => b.querySelector('input')?.focus(), 50);
+  return md;
+}
+function rename(f) {
+  dialog('Ganti nama', `<input id="nn" style="width:100%" value="${esc(f.name)}">`, async (b) => {
+    await post('/api/rename', { acc: f.acc, id: f.id, name: b.querySelector('#nn').value.trim() });
+    toast('Nama diganti'); load();
+  });
+}
+async function trash(f) {
+  if (!confirm(`Pindahkan "${f.name}" ke Sampah Google Drive (${accOf(f.acc).email})?`)) return;
+  try { await post('/api/trash', { acc: f.acc, id: f.id }); toast('Dipindah ke Sampah'); load(); loadAccounts(); }
+  catch (e) { toast(e.message); }
+}
+function move(f) {
+  let stack = [{ id: 'root', name: 'Drive Saya' }];
+  const md = dialog('Pindahkan "' + f.name + '"', `<div class="mut" data-p></div><div class="flist" data-l></div>`, async () => {
+    const to = stack[stack.length - 1];
+    await post('/api/move', { acc: f.acc, id: f.id, to: to.id });
+    toast('Dipindah ke ' + to.name); load();
+  }, 'Pindah ke sini');
+  const b = md.querySelector('.mbody');
+  async function show() {
+    const c = stack[stack.length - 1];
+    b.querySelector('[data-p]').textContent = accOf(f.acc).email + ' / ' + stack.map((s) => s.name).join(' / ');
+    const l = b.querySelector('[data-l]'); l.innerHTML = '<div class="mut">Memuat…</div>';
+    const d = await api(`/api/files?acc=${f.acc}&folder=${encodeURIComponent(c.id)}&type=folder`);
+    const fs = d.files.filter((x) => x.id !== f.id);
+    l.innerHTML = (stack.length > 1 ? '<div data-up>⬅ Kembali</div>' : '') +
+      fs.map((x, i) => `<div data-i="${i}">📁 ${esc(x.name)}</div>`).join('') ||
+      '<div class="mut">Tidak ada subfolder</div>';
+    l.onclick = (e) => {
+      if (e.target.closest('[data-up]')) { stack.pop(); return show(); }
+      const it = e.target.closest('[data-i]'); if (!it) return;
+      const x = fs[it.dataset.i]; stack.push({ id: x.id, name: x.name }); show();
+    };
+  }
+  show();
+}
+
+// ---------- folder & upload ----------
+function target() {
+  const c = cur();
+  if (c) return { acc: c.acc, folder: c.id };
+  if (S.acc !== 'all') return { acc: S.acc, folder: 'root' };
+  return { acc: 'all', folder: 'root' }; // otomatis ke akun paling lega
+}
+$('#mkdirBtn').onclick = () => {
+  dialog('Folder baru', '<input id="fn" style="width:100%" placeholder="Nama folder">', async (b) => {
+    const t = target();
+    await post('/api/mkdir', { acc: t.acc, parent: t.folder, name: b.querySelector('#fn').value.trim() || 'Folder baru' });
+    toast('Folder dibuat'); load();
+  });
+};
+$('#upBtn').onclick = () => $('#fileIn').click();
+$('#fileIn').onchange = () => { uploadAll([...$('#fileIn').files]); $('#fileIn').value = ''; };
+const main = $('#main');
+main.ondragover = (e) => { e.preventDefault(); main.classList.add('drop'); };
+main.ondragleave = () => main.classList.remove('drop');
+main.ondrop = (e) => { e.preventDefault(); main.classList.remove('drop'); uploadAll([...e.dataTransfer.files]); };
+
+async function uploadAll(files) {
+  if (!files.length) return;
+  if (!S.accounts.length) return toast('Hubungkan akun Google dulu');
+  for (const f of files) await uploadOne(f);
+  load(); loadAccounts();
+}
+async function uploadOne(file) {
+  const box = document.createElement('div'); box.className = 'up';
+  box.innerHTML = `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>${esc(file.name)}</b></div>
+    <div class="mut" data-s>Menyiapkan…</div><div class="bar" style="height:5px;background:var(--bd);border-radius:4px;margin-top:6px;overflow:hidden"><i data-b style="display:block;height:100%;width:0;background:var(--pri)"></i></div>`;
+  $('#uploads').appendChild(box);
+  const st = box.querySelector('[data-s]'), bar = box.querySelector('[data-b]');
+  try {
+    const t = target();
+    const init = await post('/api/upload/init', { name: file.name, size: file.size, mimeType: file.type || 'application/octet-stream', acc: t.acc, folder: t.folder });
+    st.textContent = '→ ' + init.email;
+    let start = 0;
+    do {
+      const end = Math.min(start + CHUNK, file.size);
+      const blob = file.slice(start, end);
+      let ok = false, err;
+      for (let tr = 0; tr < 3 && !ok; tr++) {
+        try {
+          const r = await fetch(`/api/upload/chunk?id=${init.id}&start=${start}&total=${file.size}`, { method: 'PUT', body: blob });
+          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Error ' + r.status);
+          ok = true;
+        } catch (e) { err = e; await new Promise((r) => setTimeout(r, 1500)); }
+      }
+      if (!ok) throw err;
+      start = end;
+      const pct = file.size ? (start / file.size) * 100 : 100;
+      bar.style.width = pct + '%';
+      st.textContent = `→ ${init.email} · ${pct.toFixed(0)}%`;
+    } while (start < file.size);
+    st.textContent = '✔ Tersimpan di ' + init.email;
+    setTimeout(() => box.remove(), 4000);
+  } catch (e) {
+    st.style.color = 'var(--danger)'; st.textContent = '✖ ' + e.message;
+    bar.style.background = 'var(--danger)';
+    setTimeout(() => box.remove(), 9000);
+  }
+}
+
+// ---------- start ----------
+async function startApp() {
+  $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden');
+  const st = await api('/api/state');
+  S.state = st;
+  if (!st.configured) googleSetup();
+  try { await loadAccounts(); } catch (e) { toast(e.message); }
+  load();
+}
+(async () => {
+  const msg = new URLSearchParams(location.search).get('msg');
+  if (msg) { toast(msg); history.replaceState(null, '', '/'); }
+  try {
+    const st = await api('/api/state');
+    if (!st.setup) showAuth('setup');
+    else if (!st.loggedIn) showAuth();
+    else startApp();
+  } catch (e) { document.body.innerHTML = '<div class="center"><div class="box"><b>Gagal memuat</b><div class="err">' + esc(e.message) + '</div></div></div>'; }
+})();
+</script>
+</body>
+</html>
