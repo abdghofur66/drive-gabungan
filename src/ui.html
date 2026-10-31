@@ -166,6 +166,42 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 /* list */
 .files.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
 .files.list .group-label{display:none}
+.acc-label{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;margin:14px 2px 2px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.acc-label:first-child{margin-top:0}
+.acc-label .sw{width:12px;height:12px;border-radius:4px}
+.acc-label span:last-child{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--ink2)}
+.files.list .acc-label{margin:0;padding:12px 14px;background:var(--sunk);border-bottom:0}
+.ck{position:absolute;top:8px;left:8px;z-index:2;width:26px;height:26px;border-radius:8px;border:2px solid #fff;background:rgba(10,15,30,.35);color:transparent;display:grid;place-items:center;opacity:0;transition:opacity .15s,background .15s}
+.it:hover .ck,.selecting .ck,.ck:focus-visible{opacity:1}
+.it.sel .ck{background:var(--pri);border-color:var(--pri);color:#fff;opacity:1}
+.it.sel{outline:2px solid var(--pri);outline-offset:-2px}
+.files.list .ck{position:static;opacity:1;border-color:var(--line);background:var(--surface);margin-right:-4px}
+.files.list .it{grid-template-columns:26px 40px 1fr 110px 120px 40px}
+.selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:33;display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);padding:8px 10px 8px 8px;border-radius:999px;box-shadow:var(--shadow-pop);animation:rise .2s var(--ease);max-width:calc(100vw - 20px)}
+.selbar b{padding:0 6px;white-space:nowrap;font-size:14px}
+.selbar .icon-btn{color:var(--bg)}
+.selbar .icon-btn:hover{background:rgba(255,255,255,.12)}
+.selbar .btn{height:36px;background:transparent;border-color:rgba(255,255,255,.25);color:var(--bg)}
+.selbar .btn:hover{background:rgba(255,255,255,.12)}
+.selbar .btn.danger{color:#ff8a8a}
+.sh-sec{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.sh-sec:first-child{border-top:0;padding-top:0}
+.sh-sec>b{font-size:13.5px}
+.sh-sec .btn{align-self:flex-start;height:36px;font-size:13px}
+.sh-row{display:flex;gap:6px}
+.field.sm{height:40px;font-size:13.5px;padding:0 10px}
+.field.role{width:130px;flex-shrink:0}
+.sh-ck{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.sh-ck input{accent-color:var(--pri)}
+.sh-list{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto}
+.sh-p{display:flex;align-items:center;gap:10px}
+.sh-p .av{width:32px;height:32px;border-radius:10px;color:#fff;font-weight:800;display:grid;place-items:center;flex-shrink:0;font-size:13px}
+.sh-p .n{flex:1;min-width:0}
+.sh-p .n b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.sh-p .r{font-size:12.5px;color:var(--ink2)}
+.dialog{max-height:calc(100dvh - 32px);overflow:auto}
+body:has(.selbar) .fab{display:none!important}
 .files.list .it{display:grid;grid-template-columns:40px 1fr 110px 120px 40px;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid var(--line);cursor:pointer;position:relative;transition:background .12s}
 .files.list .it:first-of-type{border-top:0}
 .files.list .it:hover{background:var(--sunk)}
@@ -372,7 +408,13 @@ footer img{width:18px;height:18px}
   .crumbs{font-size:17px}
   .files.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .files.grid .more{opacity:1}
-  .files.list .it{grid-template-columns:40px 1fr 36px}
+  .files.list .it{grid-template-columns:26px 40px 1fr 36px}
+  .ck{opacity:0}
+  .selecting .ck,.it.sel .ck{opacity:1}
+  .selbar{bottom:calc(16px + env(safe-area-inset-bottom));padding:6px}
+  .selbar .btn span,.selbar [data-all]{display:none}
+  .selbar .btn{width:40px;padding:0;justify-content:center}
+  .sh-row{flex-wrap:wrap}.field.role{width:100%}
   .files.list .sz,.files.list .dt{display:none}
   #upBtn,#mkdirBtn{display:none}
   .fab{display:grid;place-items:center;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:25;width:58px;height:58px;border-radius:20px;background:var(--pri);color:#fff;box-shadow:0 10px 26px -6px color-mix(in srgb,var(--pri) 70%,transparent)}
@@ -410,6 +452,7 @@ footer img{width:18px;height:18px}
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
@@ -518,7 +561,7 @@ footer img{width:18px;height:18px}
 const $ = (s) => document.querySelector(s);
 const FOLDER = 'application/vnd.google-apps.folder';
 const CHUNK = 8 * 1024 * 1024;
-const S = { page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
+const S = { sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
   view: store('view') || 'grid', state: null };
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
@@ -844,7 +887,7 @@ function skeleton() {
     S.view === 'grid' ? '<div class="sk" style="aspect-ratio:4/3.9"></div>' : '<div class="sk" style="height:56px;border-radius:0;margin-top:1px"></div>').join('');
 }
 async function load() {
-  const my = ++seq;
+  const my = ++seq; if (S.sel.size) clearSel();
   renderCrumbs(); skeleton(); $('#notes').innerHTML = '';
   const c = cur();
   const typeQ = S.type === 'doc' ? 'doc' : S.type;
@@ -879,27 +922,187 @@ $('#crumbs').onclick = (e) => {
   S.path = S.path.slice(0, Number(b.dataset.i) + 1); clearSearch(false); load();
 };
 let view = [];
+const grouped = () => S.shared && S.acc === 'all' && !S.path.length && !S.q && S.accounts.length > 1;
+const keyOf = (f) => f.acc + ':' + f.id;
 function render() {
   view = sorted();
-  const el = $('#files'); el.className = 'files ' + S.view;
+  if (grouped()) {
+    const order = S.accounts.map((a) => a.id);
+    view.sort((x, y) => order.indexOf(x.acc) - order.indexOf(y.acc));
+  }
+  const el = $('#files'); el.className = 'files ' + S.view + (S.sel.size ? ' selecting' : '');
   if (!view.length) { el.innerHTML = ''; return showEmpty(); }
   $('#empty').classList.add('hidden');
   const folders = view.filter((f) => f.mimeType === FOLDER).length;
+  const small = (id) => ic(id).replace('class="i"', 'class="i" style="width:12px;height:12px"');
   el.innerHTML = view.map((f, i) => {
     const a = accOf(f.acc), isF = f.mimeType === FOLDER;
     const th = f.hasThumb && !isF
       ? `<img loading="lazy" alt="" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.outerHTML=glyph('${esc(f.mimeType)}')">`
       : glyph(f.mimeType);
-    const label = i === 0 && folders && S.view === 'grid' ? '<div class="group-label">Folder</div>' : (i === folders && folders && S.view === 'grid' ? '<div class="group-label">File</div>' : '');
-    return `${label}<div class="it ${isF ? 'folder' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
+    let label = '';
+    if (grouped()) {
+      if (i === 0 || view[i - 1].acc !== f.acc) {
+        const n = view.filter((x) => x.acc === f.acc).length;
+        label = `<div class="acc-label"><span class="sw" style="background:${a.color}"></span>${esc(a.email)}<span>${n} item</span></div>`;
+      }
+    } else if (S.view === 'grid' && folders) {
+      label = i === 0 ? '<div class="group-label">Folder</div>' : i === folders ? '<div class="group-label">File</div>' : '';
+    }
+    const sharer = f.ownedByMe === false ? (f.sharingUser || f.owners?.[0]) : null;
+    const when = S.shared && f.sharedWithMeTime ? dshort(f.sharedWithMeTime) : dshort(f.createdTime);
+    const sel = S.sel.has(keyOf(f));
+    return `${label}<div class="it ${isF ? 'folder' : ''} ${sel ? 'sel' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
+      <button class="ck" data-ck="${i}" aria-label="Pilih ${esc(f.name)}" aria-pressed="${sel}">${small('check')}</button>
       <div class="th">${th}<span class="tag" style="background:${a.color || '#999'}" title="${esc(a.email)}"></span></div>
-      <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>Dibuat ${dshort(f.createdTime)}</small>` : ''}</div>
-      <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${dshort(f.createdTime)}`}${f.ownedByMe === false && f.owners?.[0] ? `<br><span class="own">${ic('share').replace('class="i"', 'class="i" style="width:12px;height:12px"')}${esc(f.owners[0].displayName || f.owners[0].emailAddress)}</span>` : ''}</div>
-      ${S.view === 'list' ? `<div class="dt" title="Dibuat">${dshort(f.createdTime)}</div>` : ''}
+      <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>${S.shared ? 'Dibagikan' : 'Dibuat'} ${when}</small>` : ''}</div>
+      <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${when}`}${sharer ? `<br><span class="own">${small('share')}${esc(sharer.displayName || sharer.emailAddress)}</span>` : ''}</div>
+      ${S.view === 'list' ? `<div class="dt" title="${S.shared ? 'Dibagikan' : 'Dibuat'}">${when}</div>` : ''}
       <button class="icon-btn more" data-m="${i}" aria-label="Aksi untuk ${esc(f.name)}">${ic('dots')}</button>
     </div>`;
   }).join('');
+  selbar();
 }
+
+// ---------- pilih banyak ----------
+function toggleSel(f) {
+  const k = keyOf(f); S.sel.has(k) ? S.sel.delete(k) : S.sel.add(k);
+  S.selItems.set(k, f); if (!S.sel.has(k)) S.selItems.delete(k);
+  render();
+}
+function clearSel() { S.sel.clear(); S.selItems.clear(); if (S.page === 'files') render(); selbar(); }
+function selbar() {
+  let b = $('#selbar');
+  if (!S.sel.size) { b?.remove(); return; }
+  if (!b) {
+    b = document.createElement('div'); b.id = 'selbar'; b.className = 'selbar';
+    b.innerHTML = `<button class="icon-btn" data-x aria-label="Batalkan pilihan">${ic('x')}</button><b data-n></b>
+      <button class="btn ghost" data-all>Pilih semua</button>
+      <button class="btn ghost" data-dl>${ic('down')}<span>Unduh</span></button>
+      <button class="btn ghost danger" data-tr>${ic('trash')}<span>Hapus</span></button>`;
+    b.querySelector('[data-x]').onclick = clearSel;
+    b.querySelector('[data-all]').onclick = () => { view.forEach((f) => { S.sel.add(keyOf(f)); S.selItems.set(keyOf(f), f); }); render(); };
+    b.querySelector('[data-dl]').onclick = () => downloadMany([...S.selItems.values()]);
+    b.querySelector('[data-tr]').onclick = () => trashMany([...S.selItems.values()]);
+    document.body.appendChild(b);
+  }
+  b.querySelector('[data-n]').textContent = S.sel.size + ' dipilih';
+}
+function trashMany(list) {
+  dialog({
+    title: `Pindahkan ${list.length} item ke sampah?`, desc: 'Item dipindah ke Sampah di akun Google masing-masing dan masih bisa dipulihkan dari Google Drive.',
+    ok: 'Pindahkan ke sampah', danger: true,
+    run: async () => {
+      let ok = 0;
+      for (const f of list) { try { await post('/api/trash', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
+      toast(`${ok} dari ${list.length} item dipindah ke sampah`); clearSel(); load(); loadAccounts();
+    },
+  });
+}
+let zipLib;
+async function getZip() {
+  if (zipLib) return zipLib;
+  await new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; sc.onload = res; sc.onerror = () => rej(new Error('Gagal memuat pembuat ZIP')); document.head.appendChild(sc); });
+  return (zipLib = window.JSZip);
+}
+async function collect(f, prefix, out) {
+  if (f.mimeType !== FOLDER) { out.push({ f, path: prefix + f.name }); return; }
+  const d = await api(`/api/files?acc=${f.acc}&folder=${encodeURIComponent(f.id)}`);
+  if (!d.files.length) out.push({ dir: prefix + f.name + '/' });
+  for (const c of d.files) await collect(c, prefix + f.name + '/', out);
+}
+async function downloadMany(list) {
+  if (list.length === 1 && list[0].mimeType !== FOLDER) { location.href = contentUrl(list[0], 1); return clearSel(); }
+  const t = getTray(); t.querySelector('[data-h]').textContent = 'Menyiapkan ZIP';
+  const row = document.createElement('div'); row.className = 'up';
+  row.innerHTML = `<div class="n">Drive Gabungan.zip</div><div class="s">Mendata isi folder…</div><div class="b"><i></i></div>`;
+  t.querySelector('.rows').prepend(row);
+  const st = row.querySelector('.s'), bar = row.querySelector('.b i');
+  try {
+    const JSZip = await getZip();
+    const items = []; for (const f of list) await collect(f, '', items);
+    const files = items.filter((x) => x.f), total = files.reduce((n, x) => n + Number(x.f.size || 0), 0);
+    if (total > 2 * 1024 ** 3) throw new Error('Total lebih dari 2 GB. Pilih lebih sedikit file.');
+    const zip = new JSZip(), used = new Set(); let done = 0, fail = 0;
+    items.filter((x) => x.dir).forEach((x) => zip.folder(x.dir));
+    for (const x of files) {
+      st.textContent = `Mengunduh ${done + 1} dari ${files.length}: ${x.f.name}`;
+      try {
+        const r = await fetch(contentUrl(x.f, 1));
+        if (!r.ok) throw new Error();
+        const cd = r.headers.get('content-disposition') || '';
+        const m = cd.match(/filename\*=UTF-8''([^;]+)/);
+        let name = x.path.replace(/[^/]+$/, '') + (m ? decodeURIComponent(m[1]) : x.f.name);
+        let n = 1, base = name; while (used.has(name)) name = base.replace(/(\.[^./]+)?$/, ` (${n++})$1`);
+        used.add(name); zip.file(name, await r.blob());
+      } catch (e) { fail++; }
+      done++; bar.style.width = (done / files.length) * 90 + '%';
+    }
+    st.textContent = 'Membuat file ZIP…';
+    const blob = await zip.generateAsync({ type: 'blob' }, (m) => (bar.style.width = 90 + m.percent / 10 + '%'));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (list.length === 1 ? list[0].name : 'Drive Gabungan ' + new Date().toISOString().slice(0, 10)) + '.zip';
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    row.classList.add('ok'); st.textContent = `${done - fail} file dalam ZIP (${fmt(blob.size)})${fail ? `, ${fail} gagal` : ''}`;
+    t.querySelector('[data-h]').textContent = 'Unduhan siap';
+    clearSel();
+  } catch (e) { row.classList.add('bad'); bar.style.width = '100%'; st.textContent = e.message; }
+}
+
+// ---------- bagikan ----------
+const ROLE = { reader: 'Pelihat', commenter: 'Pengomentar', writer: 'Editor', owner: 'Pemilik' };
+function share(f) {
+  const md = dialog({ title: 'Bagikan "' + f.name + '"', desc: 'Dari ' + accOf(f.acc).email, body: '<div class="sk" style="height:160px"></div>', cancel: 'Selesai' });
+  const b = md.querySelector('.body');
+  async function draw() {
+    let d;
+    try { d = await api(`/api/share?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); }
+    catch (e) { b.innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+    const anyone = d.permissions.find((x) => x.type === 'anyone');
+    const people = d.permissions.filter((x) => x.type === 'user' || x.type === 'group');
+    const can = d.capabilities?.canShare !== false;
+    const opt = (sel) => ['reader', 'commenter', 'writer'].map((r) => `<option value="${r}" ${r === sel ? 'selected' : ''}>${ROLE[r]}</option>`).join('');
+    b.innerHTML = `
+      ${can ? '' : '<div class="notice">Kamu tidak punya izin untuk membagikan item ini.</div>'}
+      <div class="sh-sec"><b>Akses link</b>
+        <div class="sh-row"><select class="field sm" data-gen ${can ? '' : 'disabled'}><option value="off">Terbatas: hanya orang yang diundang</option><option value="on" ${anyone ? 'selected' : ''}>Siapa saja yang punya link</option></select>
+        ${anyone ? `<select class="field sm role" data-genrole ${can ? '' : 'disabled'}>${opt(anyone.role)}</select>` : ''}</div>
+        <button type="button" class="btn ghost" data-copy>${ic('link')}Salin link</button></div>
+      ${can ? `<div class="sh-sec"><b>Undang orang</b>
+        <div class="sh-row"><input class="field sm" type="email" placeholder="email@contoh.com" data-email><select class="field sm role" data-role>${opt('reader')}</select></div>
+        <label class="sh-ck"><input type="checkbox" checked data-notify> Kirim email pemberitahuan</label>
+        <button type="button" class="btn pri" data-invite>Undang</button></div>` : ''}
+      <div class="sh-sec"><b>Punya akses</b><div class="sh-list">${people.map((x) => `<div class="sh-p"><div class="av" style="background:${accOf(f.acc).color}">${esc((x.displayName || x.emailAddress || '?')[0].toUpperCase())}</div>
+        <div class="n"><b>${esc(x.displayName || x.emailAddress)}</b><span>${esc(x.emailAddress || '')}</span></div><span class="r">${ROLE[x.role] || x.role}</span>
+        ${x.role !== 'owner' && can ? `<button type="button" class="icon-btn" data-rm="${x.id}" title="Cabut akses">${ic('x')}</button>` : ''}</div>`).join('') || '<p class="small muted">Belum dibagikan ke siapa pun.</p>'}</div></div>`;
+    const busy = (fn) => async (e) => { e.currentTarget.disabled = true; try { await fn(); await draw(); } catch (er) { toast(er.message); await draw(); } };
+    b.querySelector('[data-copy]').onclick = () => navigator.clipboard.writeText(d.webViewLink).then(() => toast(anyone ? 'Link disalin' : 'Link disalin. Hanya orang yang diundang yang bisa membukanya.'));
+    const gen = b.querySelector('[data-gen]');
+    if (gen) gen.onchange = busy(async () => {
+      if (gen.value === 'on') await post('/api/share', { acc: f.acc, id: f.id, type: 'anyone', role: 'reader' });
+      else await api(`/api/share?acc=${f.acc}&id=${encodeURIComponent(f.id)}&perm=anyoneWithLink`, { method: 'DELETE' });
+      toast(gen.value === 'on' ? 'Siapa saja yang punya link bisa membuka' : 'Akses link dimatikan');
+    });
+    const gr = b.querySelector('[data-genrole]');
+    if (gr) gr.onchange = busy(async () => {
+      await api(`/api/share?acc=${f.acc}&id=${encodeURIComponent(f.id)}&perm=anyoneWithLink`, { method: 'DELETE' });
+      await post('/api/share', { acc: f.acc, id: f.id, type: 'anyone', role: gr.value });
+      toast('Akses link: ' + ROLE[gr.value]);
+    });
+    const inv = b.querySelector('[data-invite]');
+    if (inv) inv.onclick = busy(async () => {
+      const email = b.querySelector('[data-email]').value.trim();
+      await post('/api/share', { acc: f.acc, id: f.id, type: 'user', email, role: b.querySelector('[data-role]').value, notify: b.querySelector('[data-notify]').checked });
+      toast(email + ' diundang');
+    });
+    b.querySelectorAll('[data-rm]').forEach((x) => (x.onclick = busy(async () => {
+      await api(`/api/share?acc=${f.acc}&id=${encodeURIComponent(f.id)}&perm=${x.dataset.rm}`, { method: 'DELETE' });
+      toast('Akses dicabut');
+    })));
+  }
+  draw();
+}
+
 function showEmpty() {
   const e = $('#empty'); e.classList.remove('hidden');
   if (!S.accounts.length) {
@@ -915,8 +1118,19 @@ function showEmpty() {
 $('#files').addEventListener('click', (e) => {
   const m = e.target.closest('[data-m]');
   if (m) { e.stopPropagation(); return showMenu(view[m.dataset.m], m); }
-  const it = e.target.closest('.it'); if (it) open(view[it.dataset.i]);
+  const ck = e.target.closest('[data-ck]');
+  if (ck) { e.stopPropagation(); return toggleSel(view[ck.dataset.ck]); }
+  const it = e.target.closest('.it'); if (!it) return;
+  if (pressed) { pressed = false; return; }
+  if (S.sel.size || e.ctrlKey || e.metaKey) return toggleSel(view[it.dataset.i]);
+  open(view[it.dataset.i]);
 });
+let pressT, pressed = false;
+$('#files').addEventListener('touchstart', (e) => {
+  const it = e.target.closest('.it'); if (!it || e.target.closest('[data-m],[data-ck]')) return;
+  pressT = setTimeout(() => { pressed = true; navigator.vibrate?.(15); toggleSel(view[it.dataset.i]); }, 480);
+}, { passive: true });
+['touchend', 'touchmove', 'touchcancel'].forEach((ev) => $('#files').addEventListener(ev, () => clearTimeout(pressT), { passive: true }));
 $('#files').addEventListener('contextmenu', (e) => {
   const it = e.target.closest('.it'); if (!it) return;
   e.preventDefault(); showMenu(view[it.dataset.i], null, e.clientX, e.clientY);
@@ -1028,8 +1242,10 @@ function showMenu(f, anchor, x, y) {
   const isF = f.mimeType === FOLDER;
   popMenu([
     [isF ? 'move' : 'eye', isF ? 'Buka' : 'Pratinjau', () => open(f)],
-    !isF && ['down', 'Unduh', () => (location.href = contentUrl(f, 1))],
+    ['down', isF ? 'Unduh sebagai ZIP' : 'Unduh', () => (isF ? downloadMany([f]) : (location.href = contentUrl(f, 1)))],
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
+    ['share', 'Bagikan', () => share(f)],
+    ['check', 'Pilih', () => toggleSel(f)],
     ['edit', 'Ganti nama', () => rename(f)],
     ['move', 'Pindahkan', () => move(f)],
     ['trash', 'Pindahkan ke sampah', () => trash(f), 'danger'],
@@ -1037,11 +1253,11 @@ function showMenu(f, anchor, x, y) {
 }
 
 // ---------- dialog ----------
-function dialog({ title, desc, body = '', ok, run, danger, after }) {
+function dialog({ title, desc, body = '', ok, run, danger, after, cancel }) {
   const md = document.createElement('div'); md.className = 'modal'; md.setAttribute('role', 'dialog');
   md.innerHTML = `<div class="scrim on"></div><form class="dialog"><h3>${esc(title)}</h3>${desc ? `<p class="desc">${esc(desc)}</p>` : ''}
     <div class="body">${body}</div><div class="err" data-err></div>
-    <div class="acts"><button type="button" class="btn ghost" data-c>Batal</button>${ok ? `<button type="submit" class="btn ${danger ? 'pri' : 'pri'}" style="${danger ? 'background:var(--danger)' : ''}" data-ok>${esc(ok)}</button>` : ''}</div></form>`;
+    <div class="acts"><button type="button" class="btn ghost" data-c>${esc(cancel || 'Batal')}</button>${ok ? `<button type="submit" class="btn ${danger ? 'pri' : 'pri'}" style="${danger ? 'background:var(--danger)' : ''}" data-ok>${esc(ok)}</button>` : ''}</div></form>`;
   const close = () => { md.remove(); document.removeEventListener('keydown', key); };
   const key = (e) => { if (e.key === 'Escape') close(); };
   md.querySelector('[data-c]').onclick = close;

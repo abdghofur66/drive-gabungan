@@ -193,10 +193,11 @@ async function listFiles(env, accId, folder, q, type) {
   await Promise.all(accs.map(async (a) => {
     try {
       let pt = '';
-      for (let i = 0; i < 5; i++) {
+      const shared = folder === 'shared' && !q;
+      for (let i = 0; i < (shared ? 1 : 5); i++) {
         const p = new URLSearchParams({
-          q: query, pageSize: '1000', orderBy: 'folder,name',
-          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress))',
+          q: query, pageSize: shared ? '200' : '1000', orderBy: shared ? 'sharedWithMeTime desc' : 'folder,name',
+          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress))',
         });
         if (pt) p.set('pageToken', pt);
         const d = await gjson(env, a, '/files?' + p);
@@ -502,6 +503,34 @@ async function route(req, env) {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: b.name }),
     });
     return json({ ok: true });
+  }
+
+  if (p === '/api/share') {
+    const a = await getAcc(env, qp('acc') || (await body(req.clone())).acc);
+    const id = encodeURIComponent(qp('id') || (await body(req.clone())).id);
+    if (m === 'GET') {
+      const [meta, perms] = await Promise.all([
+        gjson(env, a, `/files/${id}?fields=name,webViewLink,capabilities(canShare)`),
+        gjson(env, a, `/files/${id}/permissions?fields=permissions(id,type,role,emailAddress,displayName)`).catch(() => ({ permissions: [] })),
+      ]);
+      return json({ ...meta, permissions: perms.permissions || [] });
+    }
+    if (m === 'POST') {
+      const b = await body(req);
+      const role = ['reader', 'commenter', 'writer'].includes(b.role) ? b.role : 'reader';
+      if (b.type === 'anyone') {
+        await gjson(env, a, `/files/${id}/permissions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'anyone', role }) });
+      } else {
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email || '')) throw new HttpError(400, 'Alamat email tidak valid');
+        const notify = b.notify === false ? 'false' : 'true';
+        await gjson(env, a, `/files/${id}/permissions?sendNotificationEmail=${notify}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'user', role, emailAddress: b.email }) });
+      }
+      return json({ ok: true });
+    }
+    if (m === 'DELETE') {
+      await gjson(env, a, `/files/${id}/permissions/${encodeURIComponent(qp('perm'))}`, { method: 'DELETE' });
+      return json({ ok: true });
+    }
   }
 
   if (p === '/api/trash' && m === 'POST') {
