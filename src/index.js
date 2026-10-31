@@ -496,6 +496,7 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
           fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
         });
         if (pt) p.set('pageToken', pt);
+        if (q && opt.content) p.delete('orderBy'); // Google: pencarian isi tidak bisa diurutkan
         const d = await gjson(env, a, '/files?' + p);
         for (const { thumbnailLink, ...f } of d.files || []) files.push({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
         pt = d.nextPageToken;
