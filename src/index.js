@@ -573,6 +573,7 @@ async function route(req, env) {
         { src: '/icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
       shortcuts: [{ name: 'Semua file', url: '/?p=files', icons: [{ src: '/icon-192.png', sizes: '192x192' }] }],
+      related_applications: [{ platform: 'webapp', url: url.origin + '/manifest.webmanifest' }],
       share_target: { action: '/share-target', method: 'POST', enctype: 'multipart/form-data', params: { title: 'title', text: 'text', url: 'url', files: [{ name: 'files', accept: ['*/*'] }] } },
     }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'public, max-age=86400' } });
   }

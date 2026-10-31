@@ -1513,7 +1513,7 @@ function showMenu(f, anchor, x, y) {
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
     ['share', 'Bagikan', () => share(f)],
     ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
-    !isF && ['link', 'Buat link berbagi', () => createLink(f), '', 'links'],
+    !isF && ['link', 'Buat link berbagi (Fitur Khusus)', () => createLink(f), '', 'links'],
     isF && ['pin', S.pins.some((x) => x.id === f.id) ? 'Lepas dari sidebar' : 'Sematkan di sidebar', () => { seen('pins'); togglePin(f); }, '', 'pins'],
     isF && S.accounts.filter((a) => !a.error).length > 1 && ['backup', 'Cadangkan folder ini', () => newBackup(f), '', 'backup'],
     ['check', 'Pilih', () => toggleSel(f)],
@@ -1805,7 +1805,11 @@ $('#moreBtn').onclick = (e) => {
 let deferred = null;
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const canInstall = () => !standalone() && (deferred || isIOS());
+// sudah terpasang? (mode aplikasi, pernah dipasang dari perangkat ini, atau terdeteksi browser)
+let installedApp = false;
+const canInstall = () => !standalone() && !installedApp && !store('installed') && (deferred || isIOS());
+if (standalone()) store('installed', 1);
+navigator.getInstalledRelatedApps?.().then((a) => { if (a.length) { installedApp = true; refreshInstallUI(); document.querySelector('.install')?.remove(); } }).catch(() => {});
 function refreshInstallUI() { $('#installSide').classList.toggle('hidden', !canInstall()); }
 async function install() {
   document.querySelector('.install')?.remove();
@@ -1832,8 +1836,8 @@ function installBanner() {
   b.querySelector('[data-n]').onclick = () => { store('install_later', Date.now() + 7 * 864e5); b.remove(); };
   document.body.appendChild(b);
 }
-addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; refreshInstallUI(); setTimeout(installBanner, 2500); });
-addEventListener('appinstalled', () => { deferred = null; refreshInstallUI(); document.querySelector('.install')?.remove(); toast('Drive Gabungan terpasang'); });
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; store('installed', ''); installedApp = false; refreshInstallUI(); setTimeout(installBanner, 2500); });
+addEventListener('appinstalled', () => { store('installed', 1); deferred = null; refreshInstallUI(); document.querySelector('.install')?.remove(); toast('Drive Gabungan terpasang'); });
 $('#installSide').onclick = install;
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 
