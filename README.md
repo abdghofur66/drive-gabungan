@@ -59,3 +59,9 @@ npm install && npx wrangler login && npx wrangler deploy
 - Batas gratis Cloudflare Workers: 100.000 request/hari, lebih dari cukup untuk pemakaian pribadi.
 - Lupa password: Cloudflare → D1 SQLite Database → database aplikasimu → Console, jalankan
   `DELETE FROM settings WHERE key LIKE 'pw_%'; DELETE FROM sessions;` lalu buka aplikasi untuk membuat password baru (akun Google tetap terhubung).
+
+## Lisensi
+
+Open source dengan [lisensi MIT](LICENSE): bebas dipakai, diubah, dan dikembangkan (termasuk komersial) dengan tetap mencantumkan nama pembuat.
+
+📰 Artikel perkenalan: https://outsiderdev.com/news/drive-gabungan-satukan-akun-google-drive
