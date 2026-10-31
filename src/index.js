@@ -122,6 +122,7 @@ async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, action TEXT, detail TEXT, acc_id INTEGER)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, pubkey TEXT, alg INTEGER, name TEXT, created INTEGER, host TEXT)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS links (id TEXT PRIMARY KEY, acc_id INTEGER, file_id TEXT, name TEXT, mime TEXT, size INTEGER, expires INTEGER, pw_salt TEXT, pw_hash TEXT, max_dl INTEGER, dl INTEGER DEFAULT 0, created INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS logins (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, ok INTEGER, method TEXT, ua TEXT, ip TEXT, place TEXT, new_device INTEGER DEFAULT 0)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS push_subs (endpoint TEXT PRIMARY KEY, created INTEGER)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, kind TEXT, title TEXT, body TEXT, url TEXT, seen INTEGER DEFAULT 0)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS backups (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, src_acc INTEGER, src_folder TEXT, dst_acc INTEGER, dst_folder TEXT, mode TEXT, freq TEXT, phase TEXT DEFAULT \'idle\', last_run INTEGER, last_status TEXT, copied INTEGER DEFAULT 0, created INTEGER)'),
@@ -157,7 +158,8 @@ async function isAuthed(req, env) {
   const r = await env.DB.prepare('SELECT expires, seen FROM sessions WHERE token=?').bind(t).first();
   if (!r || r.expires <= Date.now()) return false;
   if (!r.seen || Date.now() - r.seen > 5 * 60000) {
-    await env.DB.prepare('UPDATE sessions SET seen=?, ip=? WHERE token=?').bind(Date.now(), req.headers.get('cf-connecting-ip') || '', t).run();
+    // sesi bergeser: keluar otomatis hanya bila 30 hari tidak dipakai
+    await env.DB.prepare('UPDATE sessions SET seen=?, ip=?, expires=? WHERE token=?').bind(Date.now(), req.headers.get('cf-connecting-ip') || '', Date.now() + 30 * 864e5, t).run();
   }
   return true;
 }
@@ -166,7 +168,32 @@ async function newSessionCookie(env, req) {
   await env.DB.prepare('DELETE FROM sessions WHERE expires<?').bind(Date.now()).run();
   await env.DB.prepare('INSERT INTO sessions(token,expires,ua,ip,created,seen) VALUES(?,?,?,?,?,?)')
     .bind(t, Date.now() + 30 * 864e5, (req?.headers.get('user-agent') || '').slice(0, 300), req?.headers.get('cf-connecting-ip') || '', Date.now(), Date.now()).run();
-  return `sid=${t}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 86400}`;
+  return `sid=${t}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${400 * 86400}`;
+}
+async function recordLogin(env, req, ok, method) {
+  try {
+    const ua = (req.headers.get('user-agent') || '').slice(0, 300);
+    const ip = req.headers.get('cf-connecting-ip') || '';
+    const cf = req.cf || {};
+    const place = [cf.city, cf.country].filter(Boolean).join(', ');
+    let isNew = 0;
+    if (ok) {
+      const seenUa = await env.DB.prepare('SELECT id FROM logins WHERE ok=1 AND ua=? LIMIT 1').bind(ua).first();
+      const any = await env.DB.prepare('SELECT id FROM logins WHERE ok=1 LIMIT 1').first();
+      isNew = any && !seenUa ? 1 : 0;
+    }
+    await env.DB.prepare('INSERT INTO logins(ts,ok,method,ua,ip,place,new_device) VALUES(?,?,?,?,?,?,?)').bind(Date.now(), ok ? 1 : 0, method, ua, ip, place, isNew).run();
+    await env.DB.prepare('DELETE FROM logins WHERE id <= (SELECT id FROM logins ORDER BY id DESC LIMIT 1 OFFSET 300)').run();
+    if (isNew) await addAlert(env, 'login', 'Login dari perangkat baru', `Masuk dengan ${method} dari ${place || ip || 'lokasi tidak diketahui'}. Jika bukan kamu, keluarkan perangkat itu di Keamanan dan ganti password.`, '/');
+    if (!ok) {
+      const fails = await env.DB.prepare('SELECT COUNT(*) n FROM logins WHERE ok=0 AND ts>?').bind(Date.now() - 15 * 60000).first();
+      const lastWarn = Number((await getSetting(env, 'fail_warn')) || 0);
+      if (fails.n >= 5 && Date.now() - lastWarn > 60 * 60000) {
+        await setSetting(env, 'fail_warn', String(Date.now()));
+        await addAlert(env, 'fail', 'Banyak percobaan login gagal', `${fails.n} kali password salah dalam 15 menit terakhir, terakhir dari ${place || ip || 'lokasi tidak diketahui'}.`, '/');
+      }
+    }
+  } catch (e) { /* pencatatan tidak boleh menggagalkan login */ }
 }
 async function logAct(env, action, detail, accId = null) {
   try {
@@ -614,6 +641,7 @@ async function route(req, env) {
     const salt = randHex(16);
     await setSetting(env, 'pw_salt', salt);
     await setSetting(env, 'pw_hash', await hashPw(password, salt));
+    await recordLogin(env, req, true, 'password');
     return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
@@ -622,10 +650,12 @@ async function route(req, env) {
     const salt = await getSetting(env, 'pw_salt');
     const hash = await getSetting(env, 'pw_hash');
     if (!hash || !safeEq(await hashPw(password || '', salt), hash)) {
+      await recordLogin(env, req, false, 'password');
       await new Promise((r) => setTimeout(r, 1000));
       throw new HttpError(401, 'Password salah');
     }
     await logAct(env, 'login', 'Masuk dengan password');
+    await recordLogin(env, req, true, 'password');
     return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
@@ -656,8 +686,9 @@ async function route(req, env) {
       const key = await crypto.subtle.importKey('spki', spki, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
       ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, sig, data);
     }
-    if (!ok) throw new HttpError(401, 'Tanda tangan passkey tidak valid');
+    if (!ok) { await recordLogin(env, req, false, 'passkey'); throw new HttpError(401, 'Tanda tangan passkey tidak valid'); }
     await logAct(env, 'login', 'Masuk dengan passkey: ' + pk.name);
+    await recordLogin(env, req, true, 'passkey');
     return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
@@ -915,6 +946,11 @@ async function route(req, env) {
     }
     const r = (await env.DB.prepare('SELECT rowid AS id, token, ua, ip, created, seen FROM sessions WHERE expires>? ORDER BY seen DESC').bind(Date.now()).all()).results || [];
     return json({ sessions: r.map(({ token, ...x }) => ({ ...x, current: token === me })) });
+  }
+
+  if (p === '/api/logins') {
+    const r = (await env.DB.prepare('SELECT * FROM logins ORDER BY id DESC LIMIT ?').bind(Math.min(300, Number(qp('limit')) || 100)).all()).results || [];
+    return json({ logins: r });
   }
 
   if (p === '/api/passkeys') {

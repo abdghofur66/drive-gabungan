@@ -201,6 +201,14 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sh-p .r{font-size:12.5px;color:var(--ink2)}
 .dialog.wide{max-width:540px}
+.ai.ok{color:var(--ok)}.ai.bad{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,var(--sunk))}
+.lg-r .n b{font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lg-r .n span{font-size:12px;color:var(--ink2)}
+.pill{font-size:10.5px;font-weight:800;color:#b45309;background:#fef3c7;border-radius:99px;padding:1px 7px}
+.lg-sum{display:flex;gap:8px;margin-bottom:10px}
+.lg-sum span{flex:1;background:var(--sunk);border-radius:12px;padding:10px;text-align:center;font-size:12.5px;color:var(--ink2)}
+.lg-sum b{display:block;font-size:20px;color:var(--ink)}
+.lg-sum .bad b{color:var(--danger)}
 .newtag{display:inline-flex;align-items:center;margin-left:8px;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(90deg,#2f6bff,#17a36b);border-radius:99px;padding:2px 7px;vertical-align:middle}
 .menu .newtag{margin-left:auto}
 .nav button .newtag{margin-left:auto}
@@ -2035,16 +2043,32 @@ function uaName(ua) {
   const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : '';
   return [br, os].filter(Boolean).join(' di ');
 }
+function loginRow(x) {
+  return `<div class="sh-p lg-r"><span class="ai ${x.ok ? 'ok' : 'bad'}">${ic(x.ok ? (x.method === 'passkey' ? 'finger' : 'key') : 'x')}</span>
+    <div class="n"><b>${x.ok ? 'Berhasil masuk' : 'Password salah'}${x.method === 'passkey' ? ' (sidik jari/wajah)' : ''}${x.new_device ? ' <span class="pill">Perangkat baru</span>' : ''}</b>
+    <span>${esc(uaName(x.ua || ''))} · ${esc(x.place || x.ip || '')}${x.place && x.ip ? ' · ' + esc(x.ip) : ''} · ${new Date(x.ts).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></div></div>`;
+}
+async function loginHistory() {
+  const md = dialog({ title: 'Riwayat masuk', desc: '100 catatan terakhir, termasuk percobaan yang gagal.', cancel: 'Tutup', body: '<div class="sk" style="height:200px"></div>' });
+  md.querySelector('.dialog').classList.add('wide');
+  const b = md.querySelector('.body');
+  try {
+    const { logins } = await api('/api/logins?limit=100');
+    const fail = logins.filter((x) => !x.ok).length;
+    b.innerHTML = `<div class="lg-sum"><span><b>${logins.length - fail}</b> berhasil</span><span class="${fail ? 'bad' : ''}"><b>${fail}</b> gagal</span><span><b>${new Set(logins.filter((x) => x.ok).map((x) => uaName(x.ua || ''))).size}</b> perangkat</span></div>
+      <div class="sh-list" style="max-height:55vh">${logins.map(loginRow).join('') || '<p class="small muted">Belum ada catatan.</p>'}</div>`;
+  } catch (e) { b.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
 function security() {
   const md = dialog({ title: 'Keamanan', cancel: 'Selesai', body: '<div class="sk" style="height:220px"></div>' });
   md.querySelector('.dialog').classList.add('wide');
   const b = md.querySelector('.body');
   async function draw() {
-    const [{ sessions }, { passkeys }] = await Promise.all([api('/api/sessions'), api('/api/passkeys')]);
+    const [{ sessions }, { passkeys }, { logins }] = await Promise.all([api('/api/sessions'), api('/api/passkeys'), api('/api/logins?limit=6')]);
     const lock = store('lock_min') || '0';
     const here = passkeys.filter((p) => p.host === location.hostname);
     b.innerHTML = `
-      <div class="sh-sec"><b>${ic('lock')} Kunci otomatis</b><p class="small muted">Minta masuk lagi setelah tidak dipakai. Berlaku di perangkat ini.</p>
+      <div class="sh-sec"><b>${ic('lock')} Kunci otomatis</b><p class="small muted">Minta masuk lagi setelah tidak dipakai. Berlaku di perangkat ini. Tanpa ini, kamu tetap keluar otomatis bila aplikasi tidak dibuka 30 hari.</p>
         <select class="field sm" data-lock>${[['0', 'Mati'], ['5', 'Setelah 5 menit'], ['15', 'Setelah 15 menit'], ['30', 'Setelah 30 menit'], ['60', 'Setelah 1 jam']].map(([v, l]) => `<option value="${v}" ${v === lock ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
       <div class="sh-sec"><b>${ic('finger')} Sidik jari / wajah (passkey)</b><p class="small muted">Masuk tanpa mengetik password di ${esc(location.hostname)}.</p>
         <div class="sh-list">${here.map((p) => `<div class="sh-p"><span class="ai">${ic('finger')}</span><div class="n"><b>${esc(p.name)}</b><span>Ditambahkan ${dshort(p.created)}</span></div><button type="button" class="icon-btn" data-pk="${esc(p.id)}" title="Hapus">${ic('x')}</button></div>`).join('') || '<p class="small muted">Belum ada passkey.</p>'}</div>
@@ -2052,9 +2076,13 @@ function security() {
       <div class="sh-sec"><b>${ic('device')} Perangkat yang sedang masuk</b>
         <div class="sh-list">${sessions.map((x) => `<div class="sh-p"><span class="ai">${ic(/Android|iPhone/.test(x.ua || '') ? 'phone' : 'device')}</span><div class="n"><b>${esc(uaName(x.ua || ''))}${x.current ? ' · perangkat ini' : ''}</b><span>Aktif ${ago(x.seen || x.created)}${x.ip ? ' · ' + esc(x.ip) : ''}</span></div>${x.current ? '' : `<button type="button" class="btn ghost" data-out="${x.id}">Keluarkan</button>`}</div>`).join('')}</div>
         ${sessions.length > 1 ? '<button type="button" class="btn ghost danger" data-outall>Keluarkan semua perangkat lain</button>' : ''}</div>
+      <div class="sh-sec"><b>${ic('clock')} Riwayat masuk <span class="newtag">Baru</span></b><p class="small muted">Termasuk percobaan gagal. Kamu diberi tahu bila ada login dari perangkat baru atau banyak password salah.</p>
+        <div class="sh-list">${logins.map(loginRow).join('') || '<p class="small muted">Belum ada catatan.</p>'}</div>
+        <button type="button" class="btn ghost" data-allog>Lihat semua riwayat</button></div>
       <div class="sh-sec"><b>${ic('key')} Ganti password</b>
         <input class="field sm" type="password" data-o placeholder="Password lama"><input class="field sm" type="password" data-n placeholder="Password baru (min. 8)">
         <button type="button" class="btn ghost" data-pw>Ganti password</button></div>`;
+    b.querySelector('[data-allog]').onclick = loginHistory;
     b.querySelector('[data-lock]').onchange = (e) => { store('lock_min', e.target.value); armLock(); toast(e.target.value === '0' ? 'Kunci otomatis dimatikan' : 'Kunci otomatis aktif'); };
     b.querySelector('[data-addpk]')?.addEventListener('click', () => addPasskey().then(draw));
     b.querySelectorAll('[data-pk]').forEach((x) => (x.onclick = async () => { await api('/api/passkeys?id=' + encodeURIComponent(x.dataset.pk), { method: 'DELETE' }); toast('Passkey dihapus'); draw(); }));
@@ -2286,7 +2314,7 @@ $('#bellBtn').onclick = async (e) => {
   const m = document.createElement('div'); m.className = 'menu bellm'; m.onclick = (ev) => ev.stopPropagation();
   const st = await pushState().catch(() => 'unsupported');
   const al = S.alerts || [];
-  const icn = { full: 'bolt', error: 'unlink', backup: 'backup', test: 'bell' };
+  const icn = { full: 'bolt', error: 'unlink', backup: 'backup', test: 'bell', login: 'device', fail: 'lock' };
   m.innerHTML = `<div class="hd"><span>Notifikasi</span></div>
     <div class="bl">${al.map((a) => `<div class="br ${a.seen ? '' : 'new'}"><span class="ai">${ic(icn[a.kind] || 'info')}</span><div class="n"><b>${esc(a.title)}</b><span>${esc(a.body)}</span><small>${ago(a.ts)}</small></div></div>`).join('') || '<p class="small muted" style="padding:10px">Belum ada notifikasi.</p>'}</div>
     ${st === 'unsupported' ? '<p class="small muted" style="padding:8px 10px">Pasang sebagai aplikasi agar notifikasi bisa muncul di perangkat ini.</p>'
