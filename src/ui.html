@@ -346,6 +346,19 @@ body:has(.selbar) .fab{display:none!important}
 .dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 .copyrow{display:flex;gap:6px}
 .copyrow .field{font-size:12.5px;height:42px}
+.lbl{font-size:12.5px;font-weight:700;color:var(--ink2);margin:4px 0 -4px}
+.picker{border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pk-path{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:8px 10px;background:var(--sunk);font-size:13px}
+.pk-path button{padding:2px 6px;border-radius:6px;font-weight:600;color:var(--ink2)}
+.pk-path button:last-child{color:var(--ink)}
+.pk-path button:hover{background:var(--surface)}
+.pk-path span{color:var(--ink3)}
+.picker .flist{max-height:220px;margin:0;padding:4px}
+.accpick{max-width:240px}
+.star{position:absolute;right:46px;top:13px;color:#f5a524;display:grid}
+.star svg{fill:#f5a524}
+.files.grid .it:not(.folder) .star{top:auto;bottom:12px;right:12px}
+.files.list .star{position:static}
 .dests{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
 .dest{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:var(--r);min-width:0}
 .dest .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0}
@@ -409,6 +422,9 @@ footer img{width:18px;height:18px}
   .files.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .files.grid .more{opacity:1}
   .files.list .it{grid-template-columns:26px 40px 1fr 36px}
+  .files.list .star{display:none}
+  .bar{gap:6px}.accpick{max-width:100%;flex:1 1 100%;order:3}
+  #emptyTrash{order:4}
   .ck{opacity:0}
   .selecting .ck,.it.sel .ck{opacity:1}
   .selbar{bottom:calc(16px + env(safe-area-inset-bottom));padding:6px}
@@ -416,7 +432,7 @@ footer img{width:18px;height:18px}
   .selbar .btn{width:40px;padding:0;justify-content:center}
   .sh-row{flex-wrap:wrap}.field.role{width:100%}
   .files.list .sz,.files.list .dt{display:none}
-  #upBtn,#mkdirBtn{display:none}
+  #newBtn{display:none}
   .fab{display:grid;place-items:center;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:25;width:58px;height:58px;border-radius:20px;background:var(--pri);color:#fff;box-shadow:0 10px 26px -6px color-mix(in srgb,var(--pri) 70%,transparent)}
   .fab svg{width:26px;height:26px}
   .menu.sheet{left:0!important;right:0;top:auto!important;bottom:0;border-radius:24px 24px 0 0;padding:8px 10px calc(14px + env(safe-area-inset-bottom));animation:sheet .22s var(--ease)}
@@ -452,6 +468,13 @@ footer img{width:18px;height:18px}
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16"/></symbol>
+  <symbol id="i-slide" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M12 17v3M8 20h8"/></symbol>
+  <symbol id="i-form" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol>
+  <symbol id="i-fup" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 16v-5m0 0-2.2 2.2M12 11l2.2 2.2"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
@@ -490,7 +513,9 @@ footer img{width:18px;height:18px}
     <nav class="nav" aria-label="Halaman">
       <button id="navHome" class="on"><svg class="i"><use href="#i-home"/></svg>Beranda</button>
       <button id="navFiles"><svg class="i"><use href="#i-grid"/></svg>Semua file</button>
-      <button id="navShared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
+      <button id="navShared" data-sp="shared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
+      <button id="navStarred" data-sp="starred"><svg class="i"><use href="#i-star"/></svg>Berbintang</button>
+      <button id="navTrash" data-sp="trash"><svg class="i"><use href="#i-trash"/></svg>Sampah</button>
     </nav>
 
     <section class="store" aria-label="Penyimpanan gabungan">
@@ -524,9 +549,9 @@ footer img{width:18px;height:18px}
         <button class="icon-btn x hidden" id="qx" aria-label="Hapus pencarian" title="Hapus pencarian"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
       <button class="icon-btn" id="moreBtn" aria-label="Menu akun"><svg class="i"><use href="#i-dots"/></svg></button>
-      <button class="btn ghost" id="mkdirBtn"><svg class="i"><use href="#i-fnew"/></svg>Folder</button>
-      <button class="btn pri" id="upBtn"><svg class="i"><use href="#i-up"/></svg>Upload</button>
+      <button class="btn pri" id="newBtn"><svg class="i"><use href="#i-plus"/></svg>Baru</button>
       <input type="file" id="fileIn" multiple class="hidden">
+      <input type="file" id="dirIn" webkitdirectory multiple class="hidden">
     </div>
 
     <div class="content">
@@ -534,6 +559,8 @@ footer img{width:18px;height:18px}
       <div id="filesPage" class="hidden">
       <div class="bar">
         <nav class="crumbs" id="crumbs" aria-label="Lokasi"></nav>
+        <select class="sort accpick hidden" id="accPick" aria-label="Pilih akun"></select>
+        <button class="btn ghost danger hidden" id="emptyTrash"><svg class="i"><use href="#i-trash"/></svg>Kosongkan sampah</button>
         <select class="sort" id="sort" aria-label="Urutkan">
           <option value="name">Nama A–Z</option>
           <option value="new">Terbaru</option>
@@ -561,7 +588,7 @@ footer img{width:18px;height:18px}
 const $ = (s) => document.querySelector(s);
 const FOLDER = 'application/vnd.google-apps.folder';
 const CHUNK = 8 * 1024 * 1024;
-const S = { sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
+const S = { special: null, sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
   view: store('view') || 'grid', state: null };
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
@@ -735,22 +762,46 @@ function disconnect(id) {
   });
 }
 function openAccount(id) {
-  S.shared = false; S.acc = id; S.path = []; clearSearch(false); go('files');
+  S.special = null; S.acc = id; S.path = []; clearSearch(false); go('files');
 }
 function go(page) {
   S.page = page;
   $('#dash').classList.toggle('hidden', page !== 'home');
   $('#filesPage').classList.toggle('hidden', page !== 'files');
   $('#navHome').classList.toggle('on', page === 'home');
-  $('#navFiles').classList.toggle('on', page === 'files' && S.acc === 'all' && !S.shared);
-  $('#navShared').classList.toggle('on', page === 'files' && !!S.shared);
-  document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', page === 'files' && !S.shared && x.dataset.id == S.acc));
+  $('#navFiles').classList.toggle('on', page === 'files' && S.acc === 'all' && !S.special);
+  document.querySelectorAll('.nav [data-sp]').forEach((b) => b.classList.toggle('on', page === 'files' && S.special === b.dataset.sp));
+  document.querySelectorAll('.acc').forEach((x) => x.classList.toggle('on', page === 'files' && !S.special && x.dataset.id == S.acc));
+  specialBar();
   closeSide();
   page === 'home' ? loadDash() : load();
 }
 $('#navHome').onclick = () => go('home');
-$('#navShared').onclick = () => { S.shared = true; S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
-$('#navFiles').onclick = () => { S.shared = false; S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
+function openSpecial(sp) {
+  const ok = S.accounts.filter((a) => !a.error);
+  if (!ok.length) return toast('Hubungkan akun Google dulu');
+  const last = store('acc_' + sp);
+  S.special = sp; S.acc = ok.some((a) => a.id == last) ? Number(last) : ok[0].id;
+  S.path = []; clearSearch(false); go('files');
+}
+document.querySelectorAll('.nav [data-sp]').forEach((b) => (b.onclick = () => openSpecial(b.dataset.sp)));
+function specialBar() {
+  const on = S.page === 'files' && S.special && !S.path.length;
+  const pick = $('#accPick');
+  pick.classList.toggle('hidden', !on);
+  $('#emptyTrash').classList.toggle('hidden', !(on && S.special === 'trash'));
+  if (on) pick.innerHTML = S.accounts.filter((a) => !a.error).map((a) => `<option value="${a.id}" ${a.id == S.acc ? 'selected' : ''}>${esc(a.email)}</option>`).join('');
+}
+$('#accPick').onchange = () => { S.acc = Number($('#accPick').value); store('acc_' + S.special, S.acc); load(); };
+$('#emptyTrash').onclick = () => {
+  const a = accOf(S.acc);
+  dialog({
+    title: 'Kosongkan sampah?', desc: `Semua item di sampah ${a.email} akan dihapus selamanya dan tidak bisa dipulihkan.`,
+    ok: 'Hapus selamanya', danger: true,
+    run: async () => { await post('/api/empty-trash', { acc: a.id }); toast('Sampah ' + a.email + ' dikosongkan'); load(); loadAccounts(); },
+  });
+};
+$('#navFiles').onclick = () => { S.special = null; S.acc = 'all'; S.path = []; clearSearch(false); go('files'); };
 
 // ---------- beranda / dashboard ----------
 let dashSeq = 0;
@@ -891,7 +942,8 @@ async function load() {
   renderCrumbs(); skeleton(); $('#notes').innerHTML = '';
   const c = cur();
   const typeQ = S.type === 'doc' ? 'doc' : S.type;
-  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : (S.shared ? 'shared' : 'root'), q: S.q, type: typeQ });
+  specialBar();
+  const p = new URLSearchParams({ acc: c ? c.acc : S.acc, folder: c ? c.id : (S.special || 'root'), q: S.q, type: typeQ });
   try {
     const d = await api('/api/files?' + p);
     if (my !== seq) return;
@@ -911,7 +963,8 @@ function sorted() {
   return f;
 }
 function renderCrumbs() {
-  const root = (S.shared ? 'Dibagikan ke saya' : 'Semua Drive') + (S.acc === 'all' ? '' : ' · ' + (accOf(S.acc).email || 'Drive').split('@')[0]);
+  const SP = { shared: 'Dibagikan ke saya', starred: 'Berbintang', trash: 'Sampah' };
+  const root = S.special ? SP[S.special] : S.acc === 'all' ? 'Semua Drive' : (accOf(S.acc).email || 'Drive').split('@')[0];
   let h = `<button data-i="-1">${esc(root)}</button>`;
   S.path.forEach((f, i) => (h += `<span class="sep">/</span><button data-i="${i}">${esc(f.name)}</button>`));
   if (S.q) h += `<span class="sep">/</span><button disabled>Hasil untuk “${esc(S.q)}”</button>`;
@@ -922,7 +975,7 @@ $('#crumbs').onclick = (e) => {
   S.path = S.path.slice(0, Number(b.dataset.i) + 1); clearSearch(false); load();
 };
 let view = [];
-const grouped = () => S.shared && S.acc === 'all' && !S.path.length && !S.q && S.accounts.length > 1;
+const grouped = () => false;
 const keyOf = (f) => f.acc + ':' + f.id;
 function render() {
   view = sorted();
@@ -950,14 +1003,16 @@ function render() {
       label = i === 0 ? '<div class="group-label">Folder</div>' : i === folders ? '<div class="group-label">File</div>' : '';
     }
     const sharer = f.ownedByMe === false ? (f.sharingUser || f.owners?.[0]) : null;
-    const when = S.shared && f.sharedWithMeTime ? dshort(f.sharedWithMeTime) : dshort(f.createdTime);
+    const when = S.special === 'shared' && f.sharedWithMeTime ? dshort(f.sharedWithMeTime) : S.special === 'trash' ? dshort(f.modifiedTime) : dshort(f.createdTime);
+    const whenL = S.special === 'shared' ? 'Dibagikan' : S.special === 'trash' ? 'Dihapus' : 'Dibuat';
     const sel = S.sel.has(keyOf(f));
     return `${label}<div class="it ${isF ? 'folder' : ''} ${sel ? 'sel' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
       <button class="ck" data-ck="${i}" aria-label="Pilih ${esc(f.name)}" aria-pressed="${sel}">${small('check')}</button>
       <div class="th">${th}<span class="tag" style="background:${a.color || '#999'}" title="${esc(a.email)}"></span></div>
-      <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>${S.shared ? 'Dibagikan' : 'Dibuat'} ${when}</small>` : ''}</div>
+      <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>${whenL} ${when}</small>` : ''}</div>
       <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${when}`}${sharer ? `<br><span class="own">${small('share')}${esc(sharer.displayName || sharer.emailAddress)}</span>` : ''}</div>
-      ${S.view === 'list' ? `<div class="dt" title="${S.shared ? 'Dibagikan' : 'Dibuat'}">${when}</div>` : ''}
+      ${S.view === 'list' ? `<div class="dt" title="${whenL}">${when}</div>` : ''}
+      ${f.starred && S.special !== 'trash' ? `<span class="star" title="Berbintang">${small('star')}</span>` : ''}
       <button class="icon-btn more" data-m="${i}" aria-label="Aksi untuk ${esc(f.name)}">${ic('dots')}</button>
     </div>`;
   }).join('');
@@ -982,11 +1037,14 @@ function selbar() {
       <button class="btn ghost danger" data-tr>${ic('trash')}<span>Hapus</span></button>`;
     b.querySelector('[data-x]').onclick = clearSel;
     b.querySelector('[data-all]').onclick = () => { view.forEach((f) => { S.sel.add(keyOf(f)); S.selItems.set(keyOf(f), f); }); render(); };
-    b.querySelector('[data-dl]').onclick = () => downloadMany([...S.selItems.values()]);
-    b.querySelector('[data-tr]').onclick = () => trashMany([...S.selItems.values()]);
+    b.querySelector('[data-dl]').onclick = () => (S.special === 'trash' ? restoreMany : downloadMany)([...S.selItems.values()]);
+    b.querySelector('[data-tr]').onclick = () => (S.special === 'trash' ? deleteForever : trashMany)([...S.selItems.values()]);
     document.body.appendChild(b);
   }
   b.querySelector('[data-n]').textContent = S.sel.size + ' dipilih';
+  const tr = S.special === 'trash';
+  b.querySelector('[data-dl]').innerHTML = ic(tr ? 'restore' : 'down') + `<span>${tr ? 'Pulihkan' : 'Unduh'}</span>`;
+  b.querySelector('[data-tr]').innerHTML = ic('trash') + `<span>${tr ? 'Hapus selamanya' : 'Hapus'}</span>`;
 }
 function trashMany(list) {
   dialog({
@@ -1107,8 +1165,14 @@ function showEmpty() {
   const e = $('#empty'); e.classList.remove('hidden');
   if (!S.accounts.length) {
     e.innerHTML = `<div><div class="art">${ic('cloud')}</div><h3>Hubungkan Drive pertamamu</h3><p>Setiap akun Google yang dihubungkan menambah ruang di pita penyimpanan.</p><button class="btn pri" onclick="$('#addAcc').click()">${ic('plus')}Hubungkan akun Google</button></div>`;
-  } else if (S.shared && !S.path.length) {
-    e.innerHTML = `<div><div class="art">${ic('share')}</div><h3>Belum ada yang dibagikan</h3><p>File dan folder yang dibagikan orang lain ke akun-akunmu akan muncul di sini.</p></div>`;
+  } else if (S.special && !S.path.length && !S.q) {
+    const em = esc(accOf(S.acc).email || '');
+    const E = {
+      shared: ['share', 'Belum ada yang dibagikan', `File dan folder yang dibagikan orang lain ke ${em} muncul di sini.`],
+      starred: ['star', 'Belum ada yang berbintang', `Beri bintang lewat menu ⋮ agar file penting di ${em} mudah ditemukan.`],
+      trash: ['trash', 'Sampah kosong', `Item yang dihapus dari ${em} tersimpan di sini sebelum dihapus selamanya.`],
+    }[S.special];
+    e.innerHTML = `<div><div class="art">${ic(E[0])}</div><h3>${E[1]}</h3><p>${E[2]}</p></div>`;
   } else if (S.q) {
     e.innerHTML = `<div><div class="art">${ic('search')}</div><h3>Tidak ada yang cocok</h3><p>Coba kata lain, atau hapus filter jenis file.</p><button class="btn ghost" onclick="clearSearch()">Hapus pencarian</button></div>`;
   } else {
@@ -1142,6 +1206,7 @@ $('#files').addEventListener('keydown', (e) => {
   if (e.key === 'F2') { e.preventDefault(); rename(view[it.dataset.i]); }
 });
 function open(f) {
+  if (S.special === 'trash') { const el = document.querySelector(`.it[data-i="${view.indexOf(f)}"] .more`); return showMenu(f, el); }
   if (f.mimeType === FOLDER) { S.path.push({ id: f.id, name: f.name, acc: f.acc }); clearSearch(false); return load(); }
   viewer(view.indexOf(f));
 }
@@ -1159,7 +1224,7 @@ let qt;
 $('#q').oninput = () => {
   const has = !!$('#q').value;
   $('#qx').classList.toggle('hidden', !has); $('#qk').classList.toggle('hidden', has);
-  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); if (S.page !== 'files') { S.shared = false; S.acc = 'all'; S.path = []; go('files'); } else load(); }, 350);
+  clearTimeout(qt); qt = setTimeout(() => { S.q = $('#q').value.trim(); if (S.page !== 'files' || S.special === 'trash') { S.special = null; S.acc = 'all'; S.path = []; go('files'); } else load(); }, 350);
 };
 function clearSearch(reload = true) {
   $('#q').value = ''; $('#qx').classList.add('hidden'); $('#qk').classList.remove('hidden');
@@ -1240,11 +1305,17 @@ function popMenu(items, anchor, x, y, head) {
 }
 function showMenu(f, anchor, x, y) {
   const isF = f.mimeType === FOLDER;
+  const head = `<span class="sw" style="width:10px;height:10px;border-radius:3px;background:${accOf(f.acc).color};flex-shrink:0"></span><span>${esc(f.name)}</span>`;
+  if (S.special === 'trash') return popMenu([
+    ['restore', 'Pulihkan', () => restoreMany([f])],
+    ['trash', 'Hapus selamanya', () => deleteForever([f]), 'danger'],
+  ], anchor, x, y, head);
   popMenu([
     [isF ? 'move' : 'eye', isF ? 'Buka' : 'Pratinjau', () => open(f)],
     ['down', isF ? 'Unduh sebagai ZIP' : 'Unduh', () => (isF ? downloadMany([f]) : (location.href = contentUrl(f, 1)))],
     f.webViewLink && ['ext', 'Buka di Google Drive', () => window.open(f.webViewLink, '_blank', 'noopener')],
     ['share', 'Bagikan', () => share(f)],
+    ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
     ['check', 'Pilih', () => toggleSel(f)],
     ['edit', 'Ganti nama', () => rename(f)],
     ['move', 'Pindahkan', () => move(f)],
@@ -1322,15 +1393,132 @@ function target() {
   if (S.acc !== 'all') return { acc: S.acc, folder: 'root' };
   return { acc: 'all', folder: 'root' };
 }
-function mkdir() {
+async function star(f) {
+  try { await post('/api/star', { acc: f.acc, id: f.id, starred: !f.starred }); f.starred = !f.starred; toast(f.starred ? 'Diberi bintang' : 'Bintang dihapus'); S.special === 'starred' ? load() : render(); }
+  catch (e) { toast(e.message); }
+}
+async function restoreMany(list) {
+  let ok = 0; for (const f of list) { try { await post('/api/restore', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
+  toast(`${ok} item dipulihkan`); clearSel(); load(); loadAccounts();
+}
+function deleteForever(list) {
   dialog({
-    title: 'Folder baru', body: '<input class="field" id="fn" placeholder="Nama folder" value="Folder baru">', ok: 'Buat folder',
-    run: async (b) => { const t = target(); await post('/api/mkdir', { acc: t.acc, parent: t.folder, name: b.querySelector('#fn').value.trim() || 'Folder baru' }); toast('Folder dibuat'); load(); },
+    title: list.length === 1 ? `Hapus "${list[0].name}" selamanya?` : `Hapus ${list.length} item selamanya?`,
+    desc: 'Item akan hilang permanen dari Google Drive dan tidak bisa dipulihkan.', ok: 'Hapus selamanya', danger: true,
+    run: async () => {
+      let ok = 0; for (const f of list) { try { await post('/api/delete-forever', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
+      toast(`${ok} item dihapus selamanya`); clearSel(); load(); loadAccounts();
+    },
   });
 }
-$('#mkdirBtn').onclick = mkdir;
-$('#upBtn').onclick = () => $('#fileIn').click();
-$('#fab').onclick = (e) => { e.stopPropagation(); popMenu([['up', 'Upload file', () => $('#fileIn').click()], ['fnew', 'Folder baru', mkdir]]); };
+
+// ---------- tujuan: pilih akun + folder ----------
+const freeOf = (a) => (a.limit == null ? Infinity : a.limit - a.usage);
+function destDialog({ title, desc, name, nameLabel, size = 0, ok }) {
+  return new Promise((resolve) => {
+    const accs = S.accounts.filter((a) => !a.error);
+    if (!accs.length) { toast('Hubungkan akun Google dulu'); return resolve(null); }
+    const c = cur();
+    const best = [...accs].sort((x, y) => freeOf(y) - freeOf(x))[0];
+    const st = { acc: c && !S.special ? c.acc : S.acc !== 'all' && !S.special ? S.acc : best.id, stack: [{ id: 'root', name: 'Drive Saya' }] };
+    if (c && !S.special) st.stack = [{ id: 'root', name: 'Drive Saya' }, ...S.path.map((p) => ({ id: p.id, name: p.name }))];
+    let done = false;
+    const md = dialog({
+      title, desc,
+      body: `${name != null ? `<label class="lbl">${esc(nameLabel || 'Nama')}</label><input class="field" data-name value="${esc(name)}">` : ''}
+        <label class="lbl">Simpan di akun</label>
+        <select class="field" data-acc>${accs.map((a) => { const fr = freeOf(a), fit = fr >= size; return `<option value="${a.id}" ${fit ? '' : 'disabled'}>${esc(a.email)} · ${fr === Infinity ? 'tak terbatas' : fmt(fr) + ' kosong'}${a.id === best.id ? ' (paling lega)' : ''}${fit ? '' : ' (tidak cukup)'}</option>`; }).join('')}</select>
+        <label class="lbl">Folder</label>
+        <div class="picker"><div class="pk-path" data-p></div><div class="flist" data-l></div></div>`,
+      ok: ok || 'Simpan',
+      run: async (b) => {
+        const t = st.stack[st.stack.length - 1];
+        const nm = b.querySelector('[data-name]');
+        if (nm && !nm.value.trim()) throw new Error('Nama tidak boleh kosong');
+        if (freeOf(accOf(st.acc)) < size) throw new Error('Ruang di akun ini tidak cukup');
+        done = true;
+        resolve({ acc: st.acc, folder: t.id, folderName: t.name, name: nm ? nm.value.trim() : null });
+      },
+    });
+    const obs = new MutationObserver(() => { if (!document.body.contains(md)) { obs.disconnect(); if (!done) resolve(null); } });
+    obs.observe(document.body, { childList: true });
+    const b = md.querySelector('.body'), sel = b.querySelector('[data-acc]');
+    sel.value = st.acc;
+    sel.onchange = () => { st.acc = Number(sel.value); st.stack = [{ id: 'root', name: 'Drive Saya' }]; show(); };
+    async function show() {
+      const t = st.stack[st.stack.length - 1];
+      b.querySelector('[data-p]').innerHTML = st.stack.map((x, i) => `<button type="button" data-j="${i}">${esc(x.name)}</button>`).join('<span>/</span>');
+      const l = b.querySelector('[data-l]'); l.innerHTML = '<div class="sk" style="height:38px;margin:4px 6px"></div>';
+      try {
+        const d = await api(`/api/files?acc=${st.acc}&folder=${encodeURIComponent(t.id)}&type=folder`);
+        l.innerHTML = d.files.map((x, i) => `<button type="button" data-i="${i}"><svg class="ft" viewBox="0 0 48 48" style="width:20px;height:20px"><use href="#t-folder"/></svg>${esc(x.name)}<svg class="i" style="margin-left:auto;width:16px;height:16px;color:var(--ink3)"><use href="#i-right"/></svg></button>`).join('') ||
+          '<div class="small muted" style="padding:10px">Tidak ada subfolder. Item akan disimpan di sini.</div>';
+        l.onclick = (e) => { const it = e.target.closest('[data-i]'); if (!it) return; const x = d.files[it.dataset.i]; st.stack.push({ id: x.id, name: x.name }); show(); };
+      } catch (e) { l.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+    }
+    b.querySelector('[data-p]').onclick = (e) => { const j = e.target.closest('[data-j]'); if (!j) return; st.stack = st.stack.slice(0, Number(j.dataset.j) + 1); show(); };
+    show();
+  });
+}
+const NEW = {
+  folder: [FOLDER, 'Folder baru', 'Folder tanpa judul', 'Nama folder'],
+  doc: ['application/vnd.google-apps.document', 'Google Dokumen baru', 'Dokumen tanpa judul', 'Nama dokumen'],
+  sheet: ['application/vnd.google-apps.spreadsheet', 'Google Spreadsheet baru', 'Spreadsheet tanpa judul', 'Nama spreadsheet'],
+  slide: ['application/vnd.google-apps.presentation', 'Google Slide baru', 'Presentasi tanpa judul', 'Nama presentasi'],
+  form: ['application/vnd.google-apps.form', 'Google Formulir baru', 'Formulir tanpa judul', 'Nama formulir'],
+};
+async function createNew(kind) {
+  const [mime, title, def, label] = NEW[kind];
+  const d = await destDialog({ title, name: def, nameLabel: label, ok: kind === 'folder' ? 'Buat folder' : 'Buat dan buka' });
+  if (!d) return;
+  const win = kind !== 'folder' ? window.open('about:blank', '_blank') : null;
+  try {
+    const r = await post('/api/create', { acc: d.acc, parent: d.folder, name: d.name, mimeType: mime });
+    toast(`"${r.file.name}" dibuat di ${d.folderName}`);
+    if (win) win.location = r.file.webViewLink;
+    if (S.page === 'files') load(); else loadDash();
+  } catch (e) { win?.close(); toast(e.message); }
+}
+function newMenu(anchor) {
+  popMenu([
+    ['fnew', 'Folder baru', () => createNew('folder')],
+    ['up', 'Upload file', () => $('#fileIn').click()],
+    ['fup', 'Upload folder', () => $('#dirIn').click()],
+    ['doc', 'Google Dokumen', () => createNew('doc')],
+    ['sheet', 'Google Spreadsheet', () => createNew('sheet')],
+    ['slide', 'Google Slide', () => createNew('slide')],
+    ['form', 'Google Formulir', () => createNew('form')],
+  ], anchor);
+}
+$('#newBtn').onclick = (e) => { e.stopPropagation(); newMenu(e.currentTarget); };
+$('#fab').onclick = (e) => { e.stopPropagation(); newMenu(); };
+$('#dirIn').onchange = () => { uploadFolder([...$('#dirIn').files]); $('#dirIn').value = ''; };
+async function uploadFolder(files) {
+  if (!files.length) return;
+  const total = files.reduce((n, f) => n + f.size, 0);
+  const top = files[0].webkitRelativePath.split('/')[0];
+  const d = await destDialog({ title: `Upload folder "${top}"`, desc: `${files.length} file, ${fmt(total)}. Struktur folder ikut dibuat.`, size: total, ok: 'Upload' });
+  if (!d) return;
+  const t = getTray(); t.querySelector('[data-h]').textContent = 'Menyiapkan folder';
+  const ids = { '': d.folder };
+  const dirs = [...new Set(files.flatMap((f) => { const p = f.webkitRelativePath.split('/').slice(0, -1); return p.map((_, i) => p.slice(0, i + 1).join('/')); }))].sort((a, b) => a.split('/').length - b.split('/').length);
+  try {
+    for (const dir of dirs) {
+      const parent = dir.includes('/') ? dir.slice(0, dir.lastIndexOf('/')) : '';
+      const r = await post('/api/create', { acc: d.acc, parent: ids[parent], name: dir.split('/').pop(), mimeType: FOLDER });
+      ids[dir] = r.file.id;
+    }
+  } catch (e) { return toast('Gagal membuat folder: ' + e.message); }
+  let ok = 0;
+  t.querySelector('[data-h]').textContent = `Mengupload ${files.length} file`;
+  for (const f of files) {
+    const dir = f.webkitRelativePath.split('/').slice(0, -1).join('/');
+    if (await uploadOne(f, t, { acc: d.acc, folder: ids[dir] })) ok++;
+  }
+  t.querySelector('[data-h]').textContent = `${ok} dari ${files.length} file terupload`;
+  toast(`Folder "${top}" terupload ke ${accOf(d.acc).email}`);
+  S.page === 'home' ? loadDash() : load(); loadAccounts();
+}
 $('#fileIn').onchange = () => { uploadAll([...$('#fileIn').files]); $('#fileIn').value = ''; };
 let dragN = 0;
 addEventListener('dragenter', (e) => { if (e.dataTransfer?.types.includes('Files') && !$('#appView').classList.contains('hidden')) { dragN++; $('#drop').classList.add('on'); } });
@@ -1346,39 +1534,13 @@ function getTray() {
   tray.querySelector('[data-x]').onclick = () => tray.remove();
   document.body.appendChild(tray); return tray;
 }
-function uploadAll(files) {
+async function uploadAll(files) {
   if (!files.length) return;
   if (!S.accounts.length) return toast('Hubungkan akun Google dulu');
-  const total = files.reduce((s, f) => s + f.size, 0);
+  const total = files.reduce((n, f) => n + f.size, 0);
   const names = files.length === 1 ? `"${files[0].name}"` : files.length + ' file';
-  const c = cur();
-  if (c) {
-    const a = accOf(c.acc);
-    return dialog({
-      title: 'Upload ' + names, desc: `${fmt(total)} akan disimpan di folder ini.`,
-      body: `<div class="dest"><span class="sw" style="background:${a.color}"></span><div><b>${esc(c.name)}</b><div class="small muted">${esc(a.email)}</div></div></div>`,
-      ok: 'Upload', run: async () => { doUpload(files, { acc: c.acc, folder: c.id }); },
-    });
-  }
-  const ok = S.accounts.filter((a) => !a.error);
-  const free = (a) => (a.limit == null ? Infinity : a.limit - a.usage);
-  const best = [...ok].sort((x, y) => free(y) - free(x))[0];
-  const pre = S.acc !== 'all' ? S.acc : best?.id;
-  const rows = ok.map((a) => {
-    const fr = free(a), fits = fr >= total;
-    return `<label class="dest pick ${fits ? '' : 'no'}"><input type="radio" name="dst" value="${a.id}" ${a.id == pre ? 'checked' : ''} ${fits ? '' : 'disabled'}>
-      <span class="sw" style="background:${a.color}"></span>
-      <div style="flex:1;min-width:0"><b class="em1">${esc(a.email)}</b><div class="small muted">${fr === Infinity ? 'Ruang tak terbatas' : fmt(fr) + ' kosong'}${a.id === best?.id ? ' · paling lega' : ''}${fits ? '' : ' · tidak cukup'}</div></div></label>`;
-  }).join('');
-  dialog({
-    title: 'Upload ' + names, desc: `${fmt(total)} akan disimpan di root Drive akun yang dipilih.`,
-    body: `<div class="dests">${rows}</div>`, ok: 'Upload',
-    run: async (b) => {
-      const v = b.querySelector('input[name=dst]:checked');
-      if (!v) throw new Error('Tidak ada akun dengan ruang yang cukup');
-      doUpload(files, { acc: v.value, folder: 'root' });
-    },
-  });
+  const d = await destDialog({ title: 'Upload ' + names, desc: fmt(total) + '. Pilih akun dan folder tujuan.', size: total, ok: 'Upload' });
+  if (d) doUpload(files, { acc: d.acc, folder: d.folder });
 }
 async function doUpload(files, tg) {
   const t = getTray(); let done = 0;

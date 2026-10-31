@@ -182,9 +182,11 @@ async function pickAccount(env, size) {
 
 async function listFiles(env, accId, folder, q, type) {
   const accs = accId === 'all' ? await allAcc(env) : [await getAcc(env, accId)];
-  const parts = ['trashed=false'];
+  const parts = [folder === 'trash' && !q ? 'trashed=true' : 'trashed=false'];
   if (q) parts.push(`name contains '${qesc(q)}'`);
   else if (folder === 'shared') parts.push('sharedWithMe = true');
+  else if (folder === 'starred') parts.push('starred = true');
+  else if (folder === 'trash') { /* semua isi sampah */ }
   else parts.push(`'${qesc(folder || 'root')}' in parents`);
   if (TYPE_Q[type]) parts.push(TYPE_Q[type]);
   const query = parts.join(' and ');
@@ -194,10 +196,12 @@ async function listFiles(env, accId, folder, q, type) {
     try {
       let pt = '';
       const shared = folder === 'shared' && !q;
-      for (let i = 0; i < (shared ? 1 : 5); i++) {
+      const special = ['shared', 'trash', 'starred'].includes(folder) && !q;
+      for (let i = 0; i < (special ? 1 : 5); i++) {
         const p = new URLSearchParams({
-          q: query, pageSize: shared ? '200' : '1000', orderBy: shared ? 'sharedWithMeTime desc' : 'folder,name',
-          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress))',
+          q: query, pageSize: special ? '300' : '1000',
+          orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : 'folder,name',
+          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress))',
         });
         if (pt) p.set('pageToken', pt);
         const d = await gjson(env, a, '/files?' + p);
@@ -494,6 +498,51 @@ async function route(req, env) {
       body: JSON.stringify({ name: b.name || 'Folder baru', mimeType: FOLDER, parents: [inAcc ? b.parent || 'root' : 'root'] }),
     });
     return json({ ok: true, file: f });
+  }
+
+  if (p === '/api/create' && m === 'POST') {
+    const b = await body(req);
+    const ok = [FOLDER, 'application/vnd.google-apps.document', 'application/vnd.google-apps.spreadsheet',
+      'application/vnd.google-apps.presentation', 'application/vnd.google-apps.form'];
+    if (!ok.includes(b.mimeType)) throw new HttpError(400, 'Jenis item tidak didukung');
+    const a = await getAcc(env, b.acc);
+    const f = await gjson(env, a, '/files?fields=id,name,mimeType,webViewLink', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: (b.name || '').trim() || 'Tanpa judul', mimeType: b.mimeType, parents: [b.parent || 'root'] }),
+    });
+    return json({ ok: true, file: { ...f, acc: a.id } });
+  }
+
+  if (p === '/api/star' && m === 'POST') {
+    const b = await body(req);
+    const a = await getAcc(env, b.acc);
+    await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=id`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ starred: !!b.starred }),
+    });
+    return json({ ok: true });
+  }
+
+  if (p === '/api/restore' && m === 'POST') {
+    const b = await body(req);
+    const a = await getAcc(env, b.acc);
+    await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=id`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trashed: false }),
+    });
+    return json({ ok: true });
+  }
+
+  if (p === '/api/delete-forever' && m === 'POST') {
+    const b = await body(req);
+    const a = await getAcc(env, b.acc);
+    await gjson(env, a, `/files/${encodeURIComponent(b.id)}`, { method: 'DELETE' });
+    return json({ ok: true });
+  }
+
+  if (p === '/api/empty-trash' && m === 'POST') {
+    const b = await body(req);
+    const a = await getAcc(env, b.acc);
+    await gjson(env, a, '/files/trash', { method: 'DELETE' });
+    return json({ ok: true });
   }
 
   if (p === '/api/rename' && m === 'POST') {
