@@ -13,6 +13,10 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 - Tombol **Baru**: folder, upload file/folder, Google Dokumen/Spreadsheet/Slide/Formulir, dengan pilihan akun & folder tujuan
 - Menu **Dibagikan ke saya**, **Berbintang**, **Sampah** (pulihkan, hapus selamanya, kosongkan) dengan pilihan akun
 - Bagikan file/folder, pilih banyak, unduh sebagai ZIP, ganti nama, pindah, hapus
+- Beranda: ringkasan ruang, donut per akun, saran merapikan (file kembar, akun hampir penuh, file besar terbengkalai), aktivitas terbaru
+- Pindah/salin file & folder **antar akun** (juga lewat seret ke akun di sidebar), seret ke folder untuk memindah
+- Panel detail, galeri foto, durasi video, foto profil akun
+- Keamanan: kunci otomatis, masuk dengan sidik jari/wajah (passkey), daftar perangkat yang login, pintasan keyboard (tekan `?`), urungkan hapus
 - Login satu password pemilik; token Google disimpan di D1 milikmu sendiri
 
 ## Pasang (sekali klik)

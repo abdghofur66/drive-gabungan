@@ -87,7 +87,12 @@ async function ensureSchema(env) {
     env.DB.prepare('CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, expires INTEGER)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, name TEXT, color TEXT, refresh_token TEXT, access_token TEXT, token_exp INTEGER DEFAULT 0, created INTEGER)'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, acc_id INTEGER, url TEXT, created INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, action TEXT, detail TEXT, acc_id INTEGER)'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, pubkey TEXT, alg INTEGER, name TEXT, created INTEGER, host TEXT)'),
   ]);
+  for (const col of ['ua TEXT', 'ip TEXT', 'created INTEGER', 'seen INTEGER']) {
+    await env.DB.prepare('ALTER TABLE sessions ADD COLUMN ' + col).run().catch(() => {});
+  }
   schemaReady = true;
 }
 async function getSetting(env, k) {
@@ -110,14 +115,43 @@ async function getAcc(env, id) {
 async function isAuthed(req, env) {
   const t = getCookie(req, 'sid');
   if (!t) return false;
-  const r = await env.DB.prepare('SELECT expires FROM sessions WHERE token=?').bind(t).first();
-  return !!r && r.expires > Date.now();
+  const r = await env.DB.prepare('SELECT expires, seen FROM sessions WHERE token=?').bind(t).first();
+  if (!r || r.expires <= Date.now()) return false;
+  if (!r.seen || Date.now() - r.seen > 5 * 60000) {
+    await env.DB.prepare('UPDATE sessions SET seen=?, ip=? WHERE token=?').bind(Date.now(), req.headers.get('cf-connecting-ip') || '', t).run();
+  }
+  return true;
 }
-async function newSessionCookie(env) {
+async function newSessionCookie(env, req) {
   const t = randHex(32);
   await env.DB.prepare('DELETE FROM sessions WHERE expires<?').bind(Date.now()).run();
-  await env.DB.prepare('INSERT INTO sessions(token,expires) VALUES(?,?)').bind(t, Date.now() + 30 * 864e5).run();
+  await env.DB.prepare('INSERT INTO sessions(token,expires,ua,ip,created,seen) VALUES(?,?,?,?,?,?)')
+    .bind(t, Date.now() + 30 * 864e5, (req?.headers.get('user-agent') || '').slice(0, 300), req?.headers.get('cf-connecting-ip') || '', Date.now(), Date.now()).run();
   return `sid=${t}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 86400}`;
+}
+async function logAct(env, action, detail, accId = null) {
+  try {
+    await env.DB.prepare('INSERT INTO activity(ts,action,detail,acc_id) VALUES(?,?,?,?)').bind(Date.now(), action, String(detail || '').slice(0, 300), accId).run();
+    if (Math.random() < 0.05) await env.DB.prepare('DELETE FROM activity WHERE id <= (SELECT id FROM activity ORDER BY id DESC LIMIT 1 OFFSET 500)').run();
+  } catch (e) { /* riwayat tidak boleh menggagalkan aksi */ }
+}
+
+// ---------- passkey (WebAuthn) ----------
+function b64u(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64u(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), (c) => c.charCodeAt(0)); }
+function derToRaw(der) {
+  // ECDSA DER -> r||s (64 byte)
+  let i = 2; if (der[1] & 0x80) i += der[1] & 0x7f;
+  const read = () => { i++; let len = der[i++]; let v = der.slice(i, i + len); i += len; while (v.length > 32 && v[0] === 0) v = v.slice(1); const o = new Uint8Array(32); o.set(v, 32 - v.length); return o; };
+  const r = read(), s2 = read(); const out = new Uint8Array(64); out.set(r); out.set(s2, 32); return out;
+}
+async function checkClient(cdj, type, env, url, key) {
+  const c = JSON.parse(new TextDecoder().decode(cdj));
+  const want = await getSetting(env, key);
+  await setSetting(env, key, '');
+  if (c.type !== type) throw new HttpError(400, 'Jenis permintaan passkey tidak cocok');
+  if (!want || c.challenge !== want.split('|')[0] || Date.now() - Number(want.split('|')[1]) > 5 * 60000) throw new HttpError(400, 'Permintaan passkey kedaluwarsa, ulangi');
+  if (c.origin !== url.origin) throw new HttpError(400, 'Asal passkey tidak cocok');
 }
 
 // ---------- Google ----------
@@ -160,10 +194,10 @@ async function quotas(env) {
   return Promise.all(accs.map(async (a) => {
     const base = { id: a.id, email: a.email, name: a.name, color: a.color };
     try {
-      const d = await gjson(env, a, '/about?fields=storageQuota');
+      const d = await gjson(env, a, '/about?fields=storageQuota,user(photoLink)');
       const q = d.storageQuota || {};
       return {
-        ...base, limit: q.limit ? Number(q.limit) : null, usage: Number(q.usage || 0),
+        ...base, photo: d.user?.photoLink || null, limit: q.limit ? Number(q.limit) : null, usage: Number(q.usage || 0),
         drive: Number(q.usageInDrive || 0), trash: Number(q.usageInDriveTrash || 0),
       };
     } catch (e) {
@@ -201,7 +235,7 @@ async function listFiles(env, accId, folder, q, type) {
         const p = new URLSearchParams({
           q: query, pageSize: special ? '300' : '1000',
           orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : 'folder,name',
-          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress))',
+          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
         });
         if (pt) p.set('pageToken', pt);
         const d = await gjson(env, a, '/files?' + p);
@@ -257,6 +291,7 @@ async function route(req, env) {
   if (p === '/api/state') {
     return json({
       setup: !!(await getSetting(env, 'pw_hash')),
+      passkey: !!(await env.DB.prepare('SELECT id FROM passkeys WHERE host=? LIMIT 1').bind(url.hostname).first()),
       loggedIn: await isAuthed(req, env),
       configured: await gcfg(env).then((g) => !!(g.id && g.secret)),
       fromEnv: !!env.GOOGLE_CLIENT_ID,
@@ -271,7 +306,7 @@ async function route(req, env) {
     const salt = randHex(16);
     await setSetting(env, 'pw_salt', salt);
     await setSetting(env, 'pw_hash', await hashPw(password, salt));
-    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env) });
+    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
   if (p === '/api/login' && m === 'POST') {
@@ -282,7 +317,40 @@ async function route(req, env) {
       await new Promise((r) => setTimeout(r, 1000));
       throw new HttpError(401, 'Password salah');
     }
-    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env) });
+    await logAct(env, 'login', 'Masuk dengan password');
+    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
+  }
+
+  // passkey: masuk tanpa password
+  if (p === '/api/passkey/login-options' && m === 'POST') {
+    const ch = b64u(crypto.getRandomValues(new Uint8Array(32)));
+    await setSetting(env, 'pk_login', ch + '|' + Date.now());
+    const ids = (await env.DB.prepare('SELECT id FROM passkeys WHERE host=?').bind(url.hostname).all()).results || [];
+    return json({ challenge: ch, rpId: url.hostname, allow: ids.map((x) => x.id) });
+  }
+  if (p === '/api/passkey/login' && m === 'POST') {
+    const b = await body(req);
+    const pk = await env.DB.prepare('SELECT * FROM passkeys WHERE id=? AND host=?').bind(b.id, url.hostname).first();
+    if (!pk) throw new HttpError(401, 'Passkey tidak dikenal di alamat ini');
+    const cdj = unb64u(b.clientDataJSON), ad = unb64u(b.authenticatorData), sig = unb64u(b.signature);
+    await checkClient(cdj, 'webauthn.get', env, url, 'pk_login');
+    const rpHash = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(url.hostname)));
+    if (!rpHash.every((v, i) => v === ad[i])) throw new HttpError(401, 'Passkey untuk alamat lain');
+    if ((ad[32] & 5) !== 5) throw new HttpError(401, 'Verifikasi pengguna gagal');
+    const data = new Uint8Array(ad.length + 32);
+    data.set(ad); data.set(new Uint8Array(await crypto.subtle.digest('SHA-256', cdj)), ad.length);
+    const spki = unb64u(pk.pubkey);
+    let ok;
+    if (pk.alg === -7) {
+      const key = await crypto.subtle.importKey('spki', spki, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+      ok = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, derToRaw(sig), data);
+    } else {
+      const key = await crypto.subtle.importKey('spki', spki, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+      ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, sig, data);
+    }
+    if (!ok) throw new HttpError(401, 'Tanda tangan passkey tidak valid');
+    await logAct(env, 'login', 'Masuk dengan passkey: ' + pk.name);
+    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
   if (p === '/api/logout' && m === 'POST') {
@@ -306,7 +374,7 @@ async function route(req, env) {
     await setSetting(env, 'pw_salt', ns);
     await setSetting(env, 'pw_hash', await hashPw(password, ns));
     await env.DB.prepare('DELETE FROM sessions').run();
-    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env) });
+    return json({ ok: true }, 200, { 'set-cookie': await newSessionCookie(env, req) });
   }
 
   if (p === '/api/config' && m === 'POST') {
@@ -371,6 +439,131 @@ async function route(req, env) {
 
   if (p === '/api/accounts' && m === 'GET') return json({ accounts: await quotas(env) });
 
+  if (p === '/api/details') {
+    const a = await getAcc(env, qp('acc'));
+    const id = encodeURIComponent(qp('id'));
+    const f = await gjson(env, a, `/files/${id}?fields=id,name,mimeType,size,createdTime,modifiedTime,viewedByMeTime,starred,shared,description,webViewLink,parents,owners(displayName,emailAddress,photoLink),lastModifyingUser(displayName),imageMediaMetadata(width,height,cameraMake,cameraModel,time),videoMediaMetadata(width,height,durationMillis),capabilities(canEdit,canShare,canTrash)`);
+    const path = [];
+    try {
+      const root = (await gjson(env, a, '/files/root?fields=id')).id;
+      let par = f.parents?.[0];
+      for (let i = 0; par && i < 12; i++) {
+        if (par === root) { path.unshift('Drive Saya'); break; }
+        const x = await gjson(env, a, `/files/${par}?fields=name,parents`);
+        path.unshift(x.name); par = x.parents?.[0];
+        if (!par) path.unshift('Dibagikan ke saya');
+      }
+    } catch (e) { /* lokasi opsional */ }
+    const perms = await gjson(env, a, `/files/${id}/permissions?fields=permissions(type,role,emailAddress,displayName)`).catch(() => ({ permissions: [] }));
+    return json({ ...f, acc: a.id, path, permissions: perms.permissions || [] });
+  }
+
+  if (p === '/api/transfer' && m === 'POST') {
+    const b = await body(req);
+    const src = await getAcc(env, b.from), dst = await getAcc(env, b.to);
+    const id = encodeURIComponent(b.id);
+    const meta = await gjson(env, src, `/files/${id}?fields=name,mimeType,size`);
+    if (meta.mimeType === FOLDER) throw new HttpError(400, 'Folder dipindah per isi, bukan sekaligus');
+    let file;
+    if (meta.mimeType.startsWith('application/vnd.google-apps.')) {
+      const ex = EXPORT_DL[meta.mimeType];
+      if (!ex || meta.mimeType.endsWith('drawing')) throw new HttpError(400, `"${meta.name}" (jenis ini) tidak bisa dipindah antar akun. Salin manual dari Google Drive.`);
+      const r = await gapi(env, src, `/files/${id}/export?mimeType=${encodeURIComponent(ex[0])}`);
+      if (!r.ok) throw new HttpError(r.status, 'Gagal mengekspor ' + meta.name);
+      const data = await r.arrayBuffer();
+      const bd = 'dg' + randHex(8);
+      const head = `--${bd}\r\ncontent-type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name: meta.name, mimeType: meta.mimeType, parents: [b.folder || 'root'] })}\r\n--${bd}\r\ncontent-type: ${ex[0]}\r\n\r\n`;
+      const mp = new Blob([head, data, `\r\n--${bd}--`]);
+      file = await gjson(env, dst, 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        method: 'POST', headers: { 'content-type': 'multipart/related; boundary=' + bd }, body: mp,
+      });
+    } else {
+      const size = Number(meta.size || 0);
+      const init = await gapi(env, dst, 'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=UTF-8', 'x-upload-content-type': meta.mimeType, 'x-upload-content-length': String(size) },
+        body: JSON.stringify({ name: meta.name, parents: [b.folder || 'root'] }),
+      });
+      if (!init.ok) { const d = await init.json().catch(() => ({})); throw new HttpError(init.status, d.error?.message || 'Akun tujuan menolak'); }
+      const loc = init.headers.get('location');
+      let up;
+      if (size === 0) up = await fetch(loc, { method: 'PUT', headers: { 'content-range': 'bytes */0' } });
+      else {
+        const r = await gapi(env, src, `/files/${id}?alt=media`);
+        if (!r.ok) throw new HttpError(r.status, 'Gagal mengambil ' + meta.name);
+        const { readable, writable } = new FixedLengthStream(size);
+        r.body.pipeTo(writable);
+        up = await fetch(loc, { method: 'PUT', body: readable });
+      }
+      if (!up.ok) { const d = await up.json().catch(() => ({})); throw new HttpError(up.status, d.error?.message || 'Upload ke akun tujuan gagal'); }
+      file = await up.json();
+    }
+    if (b.mode === 'move') {
+      await gjson(env, src, `/files/${id}?fields=id`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trashed: true }) });
+    }
+    await logAct(env, b.mode === 'move' ? 'transfer' : 'copy', `${meta.name}: ${src.email} → ${dst.email}`, dst.id);
+    return json({ ok: true, file });
+  }
+
+  if (p === '/api/insights') {
+    const accs = await allAcc(env);
+    const all = [], errors = [];
+    const q = encodeURIComponent(`trashed=false and mimeType!='${FOLDER}' and 'me' in owners`);
+    await Promise.all(accs.map(async (a) => {
+      try {
+        const d = await gjson(env, a, `/files?q=${q}&orderBy=quotaBytesUsed desc&pageSize=400&fields=files(id,name,mimeType,size,md5Checksum,viewedByMeTime,modifiedTime,createdTime,thumbnailLink,webViewLink)`);
+        for (const { thumbnailLink, ...f } of d.files || []) all.push({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
+      } catch (e) { errors.push(`${a.email}: ${e.message}`); }
+    }));
+    const groups = {};
+    for (const f of all) if (f.md5Checksum && Number(f.size) > 0) (groups[f.md5Checksum + f.size] ||= []).push(f);
+    const dupes = Object.values(groups).filter((g) => g.length > 1)
+      .map((g) => ({ size: Number(g[0].size), waste: Number(g[0].size) * (g.length - 1), files: g }))
+      .sort((x, y) => y.waste - x.waste).slice(0, 30);
+    const year = Date.now() - 365 * 864e5;
+    const stale = all.filter((f) => Number(f.size) >= 20 * 1024 * 1024 && new Date(f.viewedByMeTime || f.modifiedTime) < year)
+      .sort((x, y) => Number(y.size) - Number(x.size)).slice(0, 30);
+    return json({ dupes, stale, errors });
+  }
+
+  if (p === '/api/activity') {
+    const r = (await env.DB.prepare('SELECT a.ts, a.action, a.detail, a.acc_id FROM activity a ORDER BY a.id DESC LIMIT 60').all()).results || [];
+    return json({ items: r });
+  }
+
+  if (p === '/api/sessions') {
+    const me = getCookie(req, 'sid');
+    if (m === 'DELETE') {
+      if (qp('all') === '1') await env.DB.prepare('DELETE FROM sessions WHERE token<>?').bind(me).run();
+      else await env.DB.prepare('DELETE FROM sessions WHERE rowid=? AND token<>?').bind(Number(qp('id')), me).run();
+      await logAct(env, 'sessions', qp('all') === '1' ? 'Mengeluarkan semua perangkat lain' : 'Mengeluarkan satu perangkat');
+      return json({ ok: true });
+    }
+    const r = (await env.DB.prepare('SELECT rowid AS id, token, ua, ip, created, seen FROM sessions WHERE expires>? ORDER BY seen DESC').bind(Date.now()).all()).results || [];
+    return json({ sessions: r.map(({ token, ...x }) => ({ ...x, current: token === me })) });
+  }
+
+  if (p === '/api/passkeys') {
+    if (m === 'DELETE') { await env.DB.prepare('DELETE FROM passkeys WHERE id=?').bind(qp('id')).run(); return json({ ok: true }); }
+    const r = (await env.DB.prepare('SELECT id, name, created, host FROM passkeys ORDER BY created DESC').all()).results || [];
+    return json({ passkeys: r });
+  }
+  if (p === '/api/passkey/register-options' && m === 'POST') {
+    const ch = b64u(crypto.getRandomValues(new Uint8Array(32)));
+    await setSetting(env, 'pk_reg', ch + '|' + Date.now());
+    const ex = (await env.DB.prepare('SELECT id FROM passkeys WHERE host=?').bind(url.hostname).all()).results || [];
+    return json({ challenge: ch, rpId: url.hostname, userId: b64u(enc.encode('owner')), exclude: ex.map((x) => x.id) });
+  }
+  if (p === '/api/passkey/register' && m === 'POST') {
+    const b = await body(req);
+    await checkClient(unb64u(b.clientDataJSON), 'webauthn.create', env, url, 'pk_reg');
+    if (![-7, -257].includes(b.alg)) throw new HttpError(400, 'Jenis kunci passkey tidak didukung');
+    await env.DB.prepare('INSERT OR REPLACE INTO passkeys(id,pubkey,alg,name,created,host) VALUES(?,?,?,?,?,?)')
+      .bind(b.id, b.publicKey, b.alg, String(b.name || 'Perangkat').slice(0, 60), Date.now(), url.hostname).run();
+    await logAct(env, 'passkey', 'Passkey ditambahkan: ' + (b.name || 'Perangkat'));
+    return json({ ok: true });
+  }
+
   if (p === '/api/overview') {
     const accs = await allAcc(env);
     const recent = [], largest = [], errors = [];
@@ -396,6 +589,7 @@ async function route(req, env) {
     const a = await getAcc(env, qp('id'));
     fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(a.refresh_token), { method: 'POST' }).catch(() => {});
     await env.DB.prepare('DELETE FROM accounts WHERE id=?').bind(a.id).run();
+    await logAct(env, 'disconnect', a.email);
     return json({ ok: true });
   }
 
@@ -483,7 +677,9 @@ async function route(req, env) {
     if (r.status === 308) return json({ done: false });
     if (r.ok) {
       await env.DB.prepare('DELETE FROM uploads WHERE id=?').bind(up.id).run();
-      return json({ done: true, file: await r.json().catch(() => ({})) });
+      const file = await r.json().catch(() => ({}));
+      await logAct(env, 'upload', file.name || 'file', up.acc_id);
+      return json({ done: true, file });
     }
     const d = await r.json().catch(() => ({}));
     throw new HttpError(r.status, d.error?.message || 'Upload gagal');
@@ -510,6 +706,7 @@ async function route(req, env) {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: (b.name || '').trim() || 'Tanpa judul', mimeType: b.mimeType, parents: [b.parent || 'root'] }),
     });
+    await logAct(env, 'create', f.name, a.id);
     return json({ ok: true, file: { ...f, acc: a.id } });
   }
 
@@ -528,6 +725,7 @@ async function route(req, env) {
     await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=id`, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trashed: false }),
     });
+    await logAct(env, 'restore', b.name || 'item', a.id);
     return json({ ok: true });
   }
 
@@ -535,6 +733,7 @@ async function route(req, env) {
     const b = await body(req);
     const a = await getAcc(env, b.acc);
     await gjson(env, a, `/files/${encodeURIComponent(b.id)}`, { method: 'DELETE' });
+    await logAct(env, 'delete', b.name || 'item', a.id);
     return json({ ok: true });
   }
 
@@ -542,6 +741,7 @@ async function route(req, env) {
     const b = await body(req);
     const a = await getAcc(env, b.acc);
     await gjson(env, a, '/files/trash', { method: 'DELETE' });
+    await logAct(env, 'empty', a.email, a.id);
     return json({ ok: true });
   }
 
@@ -551,6 +751,7 @@ async function route(req, env) {
     await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=id`, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: b.name }),
     });
+    await logAct(env, 'rename', b.name, a.id);
     return json({ ok: true });
   }
 
@@ -574,6 +775,7 @@ async function route(req, env) {
         const notify = b.notify === false ? 'false' : 'true';
         await gjson(env, a, `/files/${id}/permissions?sendNotificationEmail=${notify}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'user', role, emailAddress: b.email }) });
       }
+      await logAct(env, 'share', (b.type === 'anyone' ? 'Link publik: ' : b.email + ': ') + (b.name || ''), a.id);
       return json({ ok: true });
     }
     if (m === 'DELETE') {
@@ -588,6 +790,7 @@ async function route(req, env) {
     await gjson(env, a, `/files/${encodeURIComponent(b.id)}?fields=id`, {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trashed: true }),
     });
+    await logAct(env, 'trash', b.name || 'item', a.id);
     return json({ ok: true });
   }
 

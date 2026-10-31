@@ -200,6 +200,83 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .sh-p .n b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sh-p .n span{font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sh-p .r{font-size:12.5px;color:var(--ink2)}
+.dialog.wide{max-width:520px}
+.avt{border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-grid;place-items:center;color:#fff;font-weight:800;line-height:1}
+.files .th .tag{background:none!important;box-shadow:none!important;width:auto!important;height:auto!important;display:inline-flex}
+.files.grid .th .tag{left:8px;bottom:8px}
+.files.grid .it.folder .th .tag{margin-left:-14px;margin-top:16px}
+.files.list .th .tag{right:-4px;bottom:-4px}
+.rows .th .tag{display:none}
+.dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:11.5px;font-weight:700;padding:2px 6px;border-radius:6px}
+.files.list .dur{display:none}
+.files.gallery{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px}
+.files.gallery .it{border-radius:6px;border:0}
+.files.gallery .th{aspect-ratio:1}
+.files.gallery .nm,.files.gallery .sz{position:absolute;left:0;right:0;color:#fff;opacity:0;transition:opacity .15s;pointer-events:none}
+.files.gallery .nm{bottom:16px;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:18px 10px 0}
+.files.gallery .sz{bottom:0;background:rgba(0,0,0,.6);padding:0 10px 6px;color:#ddd}
+.files.gallery .it:hover .nm,.files.gallery .it:hover .sz{opacity:1}
+.files.gallery .group-label{display:none}
+.drop-on{outline:2.5px dashed var(--pri)!important;outline-offset:-2px;background:var(--pri-soft)!important}
+body.dragging #side .acc[data-id]:not([data-id="all"]){outline:1.5px dashed var(--line)}
+.toast{display:flex;align-items:center;gap:14px}
+.toast button{color:var(--pri);font-weight:800;background:none;filter:brightness(1.5)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:360px;max-width:100vw;z-index:38;background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow-pop);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s var(--ease)}
+.drawer.on{transform:none}
+.drawer.hidden{display:flex!important;transform:translateX(102%);visibility:hidden}
+.dr-h{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px 20px;border-bottom:1px solid var(--line)}
+.dr-b{flex:1;overflow:auto;padding:18px 20px 30px}
+.dr-th{height:170px;border-radius:16px;background:var(--sunk);display:grid;place-items:center;overflow:hidden;margin-bottom:14px}
+.dr-th img{width:100%;height:100%;object-fit:contain}
+.dr-th .ft{width:64px;height:64px}
+.dr-n{margin:0 0 8px;font-size:17px;word-break:break-word}
+.dr-acc{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2);margin-bottom:14px}
+.dr-acts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.dr-acts .btn{height:36px;font-size:13px}
+.dr-sec{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.dr-sec h4{margin:0 0 10px;font-size:13.5px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:10px;font-size:13px;padding:5px 0}
+.kv span{color:var(--ink2);display:flex;align-items:center}
+.kv b{font-weight:600;word-break:break-word}
+.kv svg.i{width:16px;height:16px}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg2 label{border:1.5px solid var(--line);border-radius:var(--r);padding:10px 12px;cursor:pointer;font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:2px}
+.seg2 label:has(input:checked){border-color:var(--pri);background:var(--pri-soft)}
+.seg2 input{accent-color:var(--pri);position:absolute;opacity:0}
+.seg2 small{font-weight:500;font-size:12px;color:var(--ink2)}
+.c-tips{grid-column:span 7}.c-act{grid-column:span 5}
+.tips{display:flex;flex-direction:column;gap:8px}
+.tip-i{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:var(--sunk)}
+.tip-i>svg{width:22px;height:22px;color:var(--pri);flex-shrink:0}
+.tip-i.warn>svg{color:#f5a524}.tip-i.ok>svg{color:var(--ok)}
+.tip-i div{flex:1;min-width:0}
+.tip-i b{display:block;font-size:13.5px}
+.tip-i span{font-size:12.5px;color:var(--ink2)}
+.tip-i .btn{height:34px;font-size:12.5px;flex-shrink:0}
+.act-l{display:flex;flex-direction:column;gap:2px;max-height:330px;overflow:auto}
+.act-r,.sh-p{display:flex;align-items:center;gap:10px;padding:6px 0}
+.ai{width:32px;height:32px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;flex-shrink:0;color:var(--ink2)}
+.ai svg{width:16px;height:16px}
+.act-r .n{min-width:0;flex:1}
+.act-r .n b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-r .n span{font-size:12px;color:var(--ink2)}
+.sh-sec>b{display:flex;align-items:center;gap:8px}
+.sh-sec>b svg{width:18px;height:18px;color:var(--pri)}
+.sh-sec p{margin:-4px 0 2px}
+.rv{display:flex;flex-direction:column;gap:2px;max-height:52vh;overflow:auto;margin:0 -6px}
+.rv-g{font-size:12.5px;font-weight:700;color:var(--ink2);padding:10px 8px 4px}
+.rv-r{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+.rv-r:hover{background:var(--sunk)}
+.rv-r input{accent-color:var(--danger);width:16px;height:16px}
+.rv-r .n{flex:1;min-width:0}
+.rv-r .n b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-r .n span{font-size:12px;color:var(--ink2)}
+.kbl{display:flex;flex-direction:column}
+.kbl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.kbl div:last-child{border:0}
+kbd{font:700 12px/1 inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:3px 7px;background:var(--sunk)}
+#pkBtn{height:46px;justify-content:center}
+@media (max-width:1100px){.c-tips,.c-act{grid-column:1/-1}}
 .dialog{max-height:calc(100dvh - 32px);overflow:auto;z-index:1;animation:dlg .18s var(--ease)}
 .modal>.scrim{z-index:0}
 @keyframes dlg{from{opacity:0;transform:translateY(10px)}}
@@ -470,6 +547,16 @@ footer img{width:18px;height:18px}
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></symbol>
+  <symbol id="i-finger" viewBox="0 0 24 24"><path d="M12 11v3a8 8 0 0 1-1.5 4.6M8.5 7.5A5 5 0 0 1 17 11v1.5M7 12.5c0 2-.4 3.6-1.3 5M12 4a7 7 0 0 1 7 7v2M5 9.5A7 7 0 0 1 8.5 5M15.5 15.5c-.3 1.6-.9 3-1.7 4.3"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 8-10h-6z"/></symbol>
+  <symbol id="i-dup" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-device" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
   <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
@@ -500,6 +587,7 @@ footer img{width:18px;height:18px}
       <input class="field" type="password" id="pw" placeholder="Password" autocomplete="current-password" required>
       <input class="field hidden" type="password" id="pw2" placeholder="Ulangi password" autocomplete="new-password">
       <button class="btn pri" id="authBtn" type="submit">Masuk</button>
+      <button class="btn ghost hidden" id="pkBtn" type="button"><svg class="i"><use href="#i-finger"/></svg>Masuk dengan sidik jari / wajah</button>
       <div class="err" id="authErr"></div>
     </form>
     <p class="small muted" style="margin-top:14px">Ingin memasang Drive Gabungan sendiri? <a href="/panduan" style="color:var(--pri);font-weight:600;text-decoration:none">Lihat panduan</a></p>
@@ -536,7 +624,7 @@ footer img{width:18px;height:18px}
     <button class="add-acc hidden" id="installSide"><svg class="i"><use href="#i-down"/></svg>Pasang sebagai aplikasi</button>
     <div class="side-foot">
       <button class="icon-btn" id="themeBtn" title="Ganti tema"><svg class="i"><use href="#i-moon"/></svg></button>
-      <button class="icon-btn" id="chgPw" title="Ganti password"><svg class="i"><use href="#i-key"/></svg></button>
+      <button class="icon-btn" id="chgPw" title="Keamanan"><svg class="i"><use href="#i-key"/></svg></button>
       <button class="btn ghost danger" id="logout"><svg class="i"><use href="#i-out"/></svg>Keluar</button>
     </div>
   </aside>
@@ -584,6 +672,7 @@ footer img{width:18px;height:18px}
 </div>
 
 <button class="fab hidden" id="fab" aria-label="Tambah"><svg class="i"><use href="#i-plus"/></svg></button>
+<aside class="drawer hidden" id="drawer" aria-label="Detail"></aside>
 <div class="drop" id="drop"><div><svg class="i" style="width:34px;height:34px;color:var(--pri)"><use href="#i-up"/></svg><br>Lepaskan untuk upload</div></div>
 
 <script>
@@ -612,11 +701,25 @@ function ago(d) {
 function dshort(d) { return d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
 function ic(id) { return `<svg class="i"><use href="#i-${id}"/></svg>`; }
 let toastT;
-function toast(m) {
+function toast(m, action) {
   document.querySelectorAll('.toast').forEach((t) => t.remove());
-  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; t.setAttribute('role', 'status');
-  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200);
+  const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
+  t.textContent = m;
+  if (action) {
+    const b = document.createElement('button'); b.textContent = action[0];
+    b.onclick = () => { t.remove(); action[1](); }; t.appendChild(b);
+  }
+  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), action ? 6500 : 3200);
 }
+// avatar akun: foto Google bila ada, inisial berwarna bila tidak
+function avatar(a, size = 28, ring = true) {
+  if (!a || !a.email) return `<span class="avt" style="width:${size}px;height:${size}px;background:#999"></span>`;
+  const st = `width:${size}px;height:${size}px;${ring ? `box-shadow:0 0 0 2px ${a.color}` : ''}`;
+  return a.photo
+    ? `<img class="avt" src="${esc(a.photo)}" alt="" referrerpolicy="no-referrer" style="${st}" title="${esc(a.email)}" onerror="this.outerHTML='<span class=&quot;avt&quot; style=&quot;${st};background:${a.color}&quot;>${esc(a.email[0].toUpperCase())}</span>'">`
+    : `<span class="avt" style="${st};background:${a.color};font-size:${Math.round(size * 0.45)}px" title="${esc(a.email)}">${esc(a.email[0].toUpperCase())}</span>`;
+}
+const dur = (ms) => { if (!ms) return ''; const t = Math.round(ms / 1000), h = Math.floor(t / 3600), m2 = Math.floor((t % 3600) / 60), s2 = String(t % 60).padStart(2, '0'); return h ? `${h}:${String(m2).padStart(2, '0')}:${s2}` : `${m2}:${s2}`; };
 async function api(path, opt = {}) {
   const r = await fetch(path, { credentials: 'same-origin', ...opt });
   const d = await r.json().catch(() => ({}));
@@ -684,6 +787,8 @@ function showAuth(mode) {
     ? 'Instance ini baru. Password ini hanya untukmu, minimal 8 karakter.'
     : 'Masukkan password pemilik.';
   $('#authBtn').textContent = authMode === 'setup' ? 'Simpan dan masuk' : 'Masuk';
+  if (mode === 'locked') { $('#authTitle').textContent = 'Terkunci'; $('#authDesc').textContent = 'Dikunci otomatis karena tidak aktif. Masuk lagi untuk melanjutkan.'; }
+  api('/api/state').then((st) => $('#pkBtn').classList.toggle('hidden', !(st.passkey && authMode !== 'setup' && window.PublicKeyCredential))).catch(() => {});
   setTimeout(() => $('#pw').focus(), 50);
 }
 $('#authForm').onsubmit = async (e) => {
@@ -704,12 +809,7 @@ $('#logout').onclick = () => dialog({
   ok: 'Keluar', danger: true,
   run: async () => { await post('/api/logout', {}); closeSide(); showAuth(); },
 });
-$('#chgPw').onclick = () => dialog({
-  title: 'Ganti password',
-  body: `<input class="field" type="password" id="o" placeholder="Password lama"><input class="field" type="password" id="n" placeholder="Password baru (min. 8)">`,
-  ok: 'Ganti password',
-  run: async (b) => { await post('/api/password', { old: b.querySelector('#o').value, password: b.querySelector('#n').value }); toast('Password diganti'); },
-});
+$('#chgPw').onclick = () => security();
 
 // ---------- akun & pita penyimpanan ----------
 async function loadAccounts() {
@@ -731,7 +831,7 @@ async function loadAccounts() {
   $('#accList').innerHTML = accounts.map((a) => {
     const pct = a.limit ? Math.min(100, (a.usage / a.limit) * 100) : 0;
     return `<div class="acc ${S.page === 'files' && S.acc == a.id ? 'on' : ''} ${a.error ? 'err' : ''}" data-id="${a.id}" tabindex="0" role="button">
-      <span class="sw" style="background:${a.color}"></span>
+      ${avatar(a, 30)}
       <div class="meta"><div class="em" title="${esc(a.email)}">${esc(a.email)}</div>
         ${a.error ? `<div class="sub">Perlu dihubungkan ulang</div>`
           : `<div class="mini"><i style="width:${pct}%;background:${a.color}"></i></div><div class="sub">${fmt(a.usage)} dari ${a.limit ? fmt(a.limit) : '∞'}</div>`}
@@ -873,16 +973,20 @@ async function loadDash() {
     <div class="card c-list"><h3>File terbesar</h3><p class="sub">Kandidat yang paling melegakan jika dipindah atau dihapus.</p>
       <div class="rows">${d.largest.map((f, i) => fileRow(f, d.recent.length + i, fmt(f.size), `<div class="bigbar"><i style="width:${(Number(f.size || 0) / maxBig) * 100}%;background:${accOf(f.acc).color}"></i></div>`)).join('') || '<p class="muted small">Belum ada file.</p>'}</div></div>
 
+    <div class="card c-tips" id="tips"><h3>Saran merapikan ruang</h3><p class="sub">Menganalisis file di semua akun…</p><div class="sk" style="height:90px"></div></div>
+    <div class="card c-act" id="actv"><h3>Aktivitas terbaru</h3><p class="sub">Yang dilakukan lewat Drive Gabungan.</p><div class="sk" style="height:90px"></div></div>
+
     <div class="card c-acc"><h3>Kelola akun</h3><p class="sub">Lihat isi, hubungkan ulang jika bermasalah, atau putuskan akun yang tidak dipakai lagi.</p>
       <div class="acct">${acc.map((a) => {
         const p2 = a.limit ? Math.min(100, (a.usage / a.limit) * 100) : 0;
-        return `<div class="a ${a.error ? 'bad' : ''}"><div class="top2"><div class="av" style="background:${a.color}">${esc((a.email || '?')[0].toUpperCase())}</div>
+        return `<div class="a ${a.error ? 'bad' : ''}"><div class="top2">${avatar(a, 38)}
           <div style="min-width:0"><div class="em">${esc(a.email)}</div><div class="nm">${esc(a.name || '')}</div></div></div>
           ${a.error ? `<div class="warn">Akses terputus. Hubungkan ulang akun ini.</div>` : `<div class="mini"><i style="width:${p2}%;background:${a.color}"></i></div><div class="small muted">${fmt(a.usage)} dari ${a.limit ? fmt(a.limit) : 'tak terbatas'} · ${a.limit ? fmt(Math.max(0, a.limit - a.usage)) + ' kosong' : ''}</div>`}
           <div class="acts">${a.error ? '' : `<button class="btn ghost" data-open="${a.id}">${ic('grid')}Lihat file</button>`}
             <button class="btn ghost" data-re="${a.id}">${ic('link')}Hubungkan ulang</button>
             <button class="btn ghost danger" data-dc="${a.id}">${ic('unlink')}Putuskan</button></div></div>`;
       }).join('')}<button class="new" data-add><div style="text-align:center">${ic('plus')}<br>Hubungkan akun Google</div></button></div></div>`;
+  loadInsights(my); loadActivity();
   if (d.errors.length) d$.insertAdjacentHTML('afterbegin', d.errors.map((x) => `<div class="notice" style="grid-column:1/-1">${esc(x)}</div>`).join(''));
 }
 $('#dash').addEventListener('click', (e) => {
@@ -985,7 +1089,7 @@ function render() {
     const order = S.accounts.map((a) => a.id);
     view.sort((x, y) => order.indexOf(x.acc) - order.indexOf(y.acc));
   }
-  const el = $('#files'); el.className = 'files ' + S.view + (S.sel.size ? ' selecting' : '');
+  const el = $('#files'); el.className = 'files ' + S.view + (S.sel.size ? ' selecting' : '') + (S.type === 'image' && S.view === 'grid' ? ' gallery' : '');
   if (!view.length) { el.innerHTML = ''; return showEmpty(); }
   $('#empty').classList.add('hidden');
   const folders = view.filter((f) => f.mimeType === FOLDER).length;
@@ -1008,9 +1112,10 @@ function render() {
     const when = S.special === 'shared' && f.sharedWithMeTime ? dshort(f.sharedWithMeTime) : S.special === 'trash' ? dshort(f.modifiedTime) : dshort(f.createdTime);
     const whenL = S.special === 'shared' ? 'Dibagikan' : S.special === 'trash' ? 'Dihapus' : 'Dibuat';
     const sel = S.sel.has(keyOf(f));
-    return `${label}<div class="it ${isF ? 'folder' : ''} ${sel ? 'sel' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}">
+    const dm = f.videoMediaMetadata?.durationMillis;
+    return `${label}<div class="it ${isF ? 'folder' : ''} ${sel ? 'sel' : ''}" data-i="${i}" tabindex="0" title="${esc(f.name)}" draggable="${S.special === 'trash' ? 'false' : 'true'}">
       <button class="ck" data-ck="${i}" aria-label="Pilih ${esc(f.name)}" aria-pressed="${sel}">${small('check')}</button>
-      <div class="th">${th}<span class="tag" style="background:${a.color || '#999'}" title="${esc(a.email)}"></span></div>
+      <div class="th">${th}${dm ? `<span class="dur">${dur(Number(dm))}</span>` : ''}<span class="tag">${avatar(a, S.view === 'list' ? 14 : 20)}</span></div>
       <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>${whenL} ${when}</small>` : ''}</div>
       <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${when}`}${sharer ? `<br><span class="own">${small('share')}${esc(sharer.displayName || sharer.emailAddress)}</span>` : ''}</div>
       ${S.view === 'list' ? `<div class="dt" title="${whenL}">${when}</div>` : ''}
@@ -1036,10 +1141,12 @@ function selbar() {
     b.innerHTML = `<button class="icon-btn" data-x aria-label="Batalkan pilihan">${ic('x')}</button><b data-n></b>
       <button class="btn ghost" data-all>Pilih semua</button>
       <button class="btn ghost" data-dl>${ic('down')}<span>Unduh</span></button>
+      <button class="btn ghost" data-tf>${ic('swap')}<span>Pindah akun</span></button>
       <button class="btn ghost danger" data-tr>${ic('trash')}<span>Hapus</span></button>`;
     b.querySelector('[data-x]').onclick = clearSel;
     b.querySelector('[data-all]').onclick = () => { view.forEach((f) => { S.sel.add(keyOf(f)); S.selItems.set(keyOf(f), f); }); render(); };
     b.querySelector('[data-dl]').onclick = () => (S.special === 'trash' ? restoreMany : downloadMany)([...S.selItems.values()]);
+    b.querySelector('[data-tf]').onclick = () => { const l = [...S.selItems.values()]; if (new Set(l.map((f) => f.acc)).size > 1) return toast('Pilih item dari satu akun saja'); transferDialog(l); };
     b.querySelector('[data-tr]').onclick = () => (S.special === 'trash' ? deleteForever : trashMany)([...S.selItems.values()]);
     document.body.appendChild(b);
   }
@@ -1047,6 +1154,7 @@ function selbar() {
   const tr = S.special === 'trash';
   b.querySelector('[data-dl]').innerHTML = ic(tr ? 'restore' : 'down') + `<span>${tr ? 'Pulihkan' : 'Unduh'}</span>`;
   b.querySelector('[data-tr]').innerHTML = ic('trash') + `<span>${tr ? 'Hapus selamanya' : 'Hapus'}</span>`;
+  b.querySelector('[data-tf]').classList.toggle('hidden', tr || S.accounts.filter((a) => !a.error).length < 2);
 }
 function trashMany(list) {
   dialog({
@@ -1054,8 +1162,10 @@ function trashMany(list) {
     ok: 'Pindahkan ke sampah', danger: true,
     run: async () => {
       let ok = 0;
-      for (const f of list) { try { await post('/api/trash', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
-      toast(`${ok} dari ${list.length} item dipindah ke sampah`); clearSel(); load(); loadAccounts();
+      const done = [];
+      for (const f of list) { try { await post('/api/trash', { acc: f.acc, id: f.id, name: f.name }); ok++; done.push(f); } catch (e) {} }
+      toast(`${ok} dari ${list.length} item dipindah ke sampah`, ['Urungkan', async () => { for (const f of done) await post('/api/restore', { acc: f.acc, id: f.id, name: f.name }).catch(() => {}); toast('Dipulihkan'); load(); loadAccounts(); }]);
+      clearSel(); load(); loadAccounts();
     },
   });
 }
@@ -1206,6 +1316,9 @@ $('#files').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') open(view[it.dataset.i]);
   if (e.key === 'Delete') trash(view[it.dataset.i]);
   if (e.key === 'F2') { e.preventDefault(); rename(view[it.dataset.i]); }
+  if (e.key === 'i') details(view[it.dataset.i]);
+  if (e.key === 's') star(view[it.dataset.i]);
+  if (e.key === ' ') { e.preventDefault(); toggleSel(view[it.dataset.i]); }
 });
 function open(f) {
   if (S.special === 'trash') { const el = document.querySelector(`.it[data-i="${view.indexOf(f)}"] .more`); return showMenu(f, el); }
@@ -1319,6 +1432,8 @@ function showMenu(f, anchor, x, y) {
     ['share', 'Bagikan', () => share(f)],
     ['star', f.starred ? 'Hapus bintang' : 'Beri bintang', () => star(f)],
     ['check', 'Pilih', () => toggleSel(f)],
+    ['info', 'Detail', () => details(f)],
+    S.accounts.filter((a) => !a.error).length > 1 && ['swap', 'Pindah/salin ke akun lain', () => transferDialog([f])],
     ['edit', 'Ganti nama', () => rename(f)],
     ['move', 'Pindahkan', () => move(f)],
     ['trash', 'Pindahkan ke sampah', () => trash(f), 'danger'],
@@ -1357,7 +1472,11 @@ function trash(f) {
   dialog({
     title: 'Pindahkan ke sampah?', desc: `"${f.name}" dipindah ke Sampah di ${accOf(f.acc).email}. Masih bisa dipulihkan dari Google Drive.`,
     ok: 'Pindahkan ke sampah', danger: true,
-    run: async () => { await post('/api/trash', { acc: f.acc, id: f.id }); toast('Dipindahkan ke sampah'); load(); loadAccounts(); },
+    run: async () => {
+      await post('/api/trash', { acc: f.acc, id: f.id, name: f.name });
+      toast(`"${f.name}" dipindahkan ke sampah`, ['Urungkan', async () => { await post('/api/restore', { acc: f.acc, id: f.id, name: f.name }); toast('Dipulihkan'); load(); loadAccounts(); }]);
+      load(); loadAccounts();
+    },
   });
 }
 function move(f) {
@@ -1400,7 +1519,7 @@ async function star(f) {
   catch (e) { toast(e.message); }
 }
 async function restoreMany(list) {
-  let ok = 0; for (const f of list) { try { await post('/api/restore', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
+  let ok = 0; for (const f of list) { try { await post('/api/restore', { acc: f.acc, id: f.id, name: f.name }); ok++; } catch (e) {} }
   toast(`${ok} item dipulihkan`); clearSel(); load(); loadAccounts();
 }
 function deleteForever(list) {
@@ -1408,7 +1527,7 @@ function deleteForever(list) {
     title: list.length === 1 ? `Hapus "${list[0].name}" selamanya?` : `Hapus ${list.length} item selamanya?`,
     desc: 'Item akan hilang permanen dari Google Drive dan tidak bisa dipulihkan.', ok: 'Hapus selamanya', danger: true,
     run: async () => {
-      let ok = 0; for (const f of list) { try { await post('/api/delete-forever', { acc: f.acc, id: f.id }); ok++; } catch (e) {} }
+      let ok = 0; for (const f of list) { try { await post('/api/delete-forever', { acc: f.acc, id: f.id, name: f.name }); ok++; } catch (e) {} }
       toast(`${ok} item dihapus selamanya`); clearSel(); load(); loadAccounts();
     },
   });
@@ -1416,18 +1535,18 @@ function deleteForever(list) {
 
 // ---------- tujuan: pilih akun + folder ----------
 const freeOf = (a) => (a.limit == null ? Infinity : a.limit - a.usage);
-function destDialog({ title, desc, name, nameLabel, size = 0, ok }) {
+function destDialog({ title, desc, name, nameLabel, size = 0, ok, exclude, extra }) {
   return new Promise((resolve) => {
-    const accs = S.accounts.filter((a) => !a.error);
+    const accs = S.accounts.filter((a) => !a.error && a.id != exclude);
     if (!accs.length) { toast('Hubungkan akun Google dulu'); return resolve(null); }
     const c = cur();
     const best = [...accs].sort((x, y) => freeOf(y) - freeOf(x))[0];
-    const st = { acc: c && !S.special ? c.acc : S.acc !== 'all' && !S.special ? S.acc : best.id, stack: [{ id: 'root', name: 'Drive Saya' }] };
+    const st = { acc: c && !S.special && c.acc != exclude ? c.acc : S.acc !== 'all' && !S.special && S.acc != exclude ? S.acc : best.id, stack: [{ id: 'root', name: 'Drive Saya' }] };
     if (c && !S.special) st.stack = [{ id: 'root', name: 'Drive Saya' }, ...S.path.map((p) => ({ id: p.id, name: p.name }))];
     let done = false;
     const md = dialog({
       title, desc,
-      body: `${name != null ? `<label class="lbl">${esc(nameLabel || 'Nama')}</label><input class="field" data-name value="${esc(name)}">` : ''}
+      body: `${extra || ''}${name != null ? `<label class="lbl">${esc(nameLabel || 'Nama')}</label><input class="field" data-name value="${esc(name)}">` : ''}
         <label class="lbl">Simpan di akun</label>
         <select class="field" data-acc>${accs.map((a) => { const fr = freeOf(a), fit = fr >= size; return `<option value="${a.id}" ${fit ? '' : 'disabled'}>${esc(a.email)} · ${fr === Infinity ? 'tak terbatas' : fmt(fr) + ' kosong'}${a.id === best.id ? ' (paling lega)' : ''}${fit ? '' : ' (tidak cukup)'}</option>`; }).join('')}</select>
         <label class="lbl">Folder</label>
@@ -1439,7 +1558,7 @@ function destDialog({ title, desc, name, nameLabel, size = 0, ok }) {
         if (nm && !nm.value.trim()) throw new Error('Nama tidak boleh kosong');
         if (freeOf(accOf(st.acc)) < size) throw new Error('Ruang di akun ini tidak cukup');
         done = true;
-        resolve({ acc: st.acc, folder: t.id, folderName: t.name, name: nm ? nm.value.trim() : null });
+        resolve({ acc: st.acc, folder: t.id, folderName: t.name, name: nm ? nm.value.trim() : null, mode: b.querySelector('input[name=mode]:checked')?.value });
       },
     });
     const obs = new MutationObserver(() => { if (!document.body.contains(md)) { obs.disconnect(); if (!done) resolve(null); } });
@@ -1591,7 +1710,8 @@ $('#moreBtn').onclick = (e) => {
   popMenu([
     canInstall() && ['down', 'Pasang sebagai aplikasi', install],
     ['moon', dark ? 'Mode terang' : 'Mode gelap', toggleTheme],
-    ['key', 'Ganti password', () => $('#chgPw').click()],
+    ['key', 'Keamanan', () => security()],
+    ['kbd', 'Pintasan keyboard', () => shortcuts()],
     ['out', 'Keluar', () => $('#logout').click(), 'danger'],
   ], e.currentTarget);
 };
@@ -1630,6 +1750,284 @@ addEventListener('appinstalled', () => { deferred = null; refreshInstallUI(); do
 $('#installSide').onclick = install;
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 
+// ---------- panel detail ----------
+async function details(f) {
+  const d$ = $('#drawer'); d$.classList.remove('hidden');
+  const a = accOf(f.acc);
+  d$.innerHTML = `<div class="dr-h"><b>Detail</b><button class="icon-btn" data-x aria-label="Tutup">${ic('x')}</button></div><div class="dr-b"><div class="sk" style="height:180px"></div></div>`;
+  d$.querySelector('[data-x]').onclick = () => d$.classList.add('hidden');
+  requestAnimationFrame(() => d$.classList.add('on'));
+  let x;
+  try { x = await api(`/api/details?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); }
+  catch (e) { d$.querySelector('.dr-b').innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  const isF = x.mimeType === FOLDER, im = x.imageMediaMetadata, vm = x.videoMediaMetadata;
+  const row = (k, v) => (v ? `<div class="kv"><span>${k}</span><b>${v}</b></div>` : '');
+  const type = isF ? 'Folder' : (x.mimeType.split('/').pop().replace('vnd.google-apps.', 'Google ').replace('vnd.openxmlformats-officedocument.', '').toUpperCase());
+  const people = x.permissions.filter((p) => p.type !== 'anyone');
+  const anyone = x.permissions.find((p) => p.type === 'anyone');
+  d$.querySelector('.dr-b').innerHTML = `
+    <div class="dr-th">${f.hasThumb && !isF ? `<img src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" alt="">` : glyph(x.mimeType)}</div>
+    <h3 class="dr-n">${esc(x.name)}</h3>
+    <div class="dr-acc">${avatar(a, 22)}<span>${esc(a.email)}</span></div>
+    <div class="dr-acts">${x.webViewLink ? `<a class="btn ghost" href="${esc(x.webViewLink)}" target="_blank" rel="noopener">${ic('ext')}Buka di Drive</a>` : ''}<button class="btn ghost" data-sh>${ic('share')}Bagikan</button></div>
+    <div class="dr-sec"><h4>Info</h4>
+      ${row('Jenis', esc(type))}${row('Ukuran', isF ? '' : fmt(x.size))}
+      ${row('Lokasi', esc(x.path.join(' / ')))}
+      ${row('Pemilik', esc(x.owners?.[0]?.displayName || x.owners?.[0]?.emailAddress || ''))}
+      ${row('Dibuat', new Date(x.createdTime).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }))}
+      ${row('Diubah', new Date(x.modifiedTime).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) + (x.lastModifyingUser ? ' oleh ' + esc(x.lastModifyingUser.displayName) : ''))}
+      ${row('Terakhir dibuka', x.viewedByMeTime ? ago(x.viewedByMeTime) : '')}
+      ${row('Resolusi', im?.width ? `${im.width} × ${im.height}` : vm?.width ? `${vm.width} × ${vm.height}` : '')}
+      ${row('Durasi', vm?.durationMillis ? dur(Number(vm.durationMillis)) : '')}
+      ${row('Kamera', im?.cameraModel ? esc([im.cameraMake, im.cameraModel].filter(Boolean).join(' ')) : '')}
+      ${row('Berbintang', x.starred ? 'Ya' : '')}
+    </div>
+    <div class="dr-sec"><h4>Akses</h4>
+      ${anyone ? `<div class="kv"><span>${ic('link')}</span><b>Siapa saja yang punya link (${ROLE[anyone.role] || anyone.role})</b></div>` : '<p class="small muted">Terbatas: hanya orang yang diundang.</p>'}
+      ${people.map((p) => `<div class="kv"><span>${esc(ROLE[p.role] || p.role)}</span><b>${esc(p.displayName || p.emailAddress || '')}</b></div>`).join('')}
+    </div>
+    ${x.description ? `<div class="dr-sec"><h4>Deskripsi</h4><p class="small">${esc(x.description)}</p></div>` : ''}`;
+  d$.querySelector('[data-sh]').onclick = () => share(f);
+}
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('.modal,.viewer')) $('#drawer').classList.add('hidden'); });
+
+// ---------- pindah/salin antar akun ----------
+async function transferDialog(list) {
+  const from = list[0].acc;
+  const others = S.accounts.filter((a) => !a.error && a.id != from);
+  if (!others.length) return toast('Hubungkan akun lain dulu');
+  const total = list.reduce((n, f) => n + Number(f.size || 0), 0);
+  const prevAcc = S.acc, prevSp = S.special, prevPath = S.path;
+  // destDialog memakai lokasi saat ini sebagai bawaan; arahkan ke akun lain yang paling lega
+  S.special = null; S.path = []; S.acc = [...others].sort((x, y) => freeOf(y) - freeOf(x))[0].id;
+  const d = await destDialog({
+    title: list.length === 1 ? `Pindah/salin "${list[0].name}"` : `Pindah/salin ${list.length} item`,
+    desc: `Dari ${accOf(from).email}${total ? ' · ' + fmt(total) : ''}. Pilih akun dan folder tujuan.`,
+    size: total, ok: 'Lanjut', exclude: from,
+    extra: `<label class="lbl">Cara</label><div class="seg2"><label><input type="radio" name="mode" value="move" checked> Pindahkan<small>Hapus dari akun asal (ke sampah)</small></label><label><input type="radio" name="mode" value="copy"> Salin<small>Tetap ada di akun asal</small></label></div>`,
+  });
+  S.acc = prevAcc; S.special = prevSp; S.path = prevPath;
+  if (!d) return;
+  runTransfer(list, d.acc, d.folder, d.mode || 'move', d.folderName);
+}
+async function runTransfer(list, to, folder, mode, folderName) {
+  const t = getTray(); t.querySelector('[data-h]').textContent = mode === 'move' ? 'Memindahkan antar akun' : 'Menyalin antar akun';
+  const row = document.createElement('div'); row.className = 'up';
+  row.innerHTML = `<div class="n">${list.length === 1 ? esc(list[0].name) : list.length + ' item'} → ${esc(accOf(to).email)}</div><div class="s">Menyiapkan…</div><div class="b"><i></i></div>`;
+  t.querySelector('.rows').prepend(row);
+  const st = row.querySelector('.s'), bar = row.querySelector('.b i');
+  // susun daftar file (folder dibuat ulang di tujuan)
+  const jobs = []; let fail = 0, done = 0;
+  async function plan(f, parent) {
+    if (f.mimeType !== FOLDER) { jobs.push({ f, parent }); return; }
+    const r = await post('/api/create', { acc: to, parent, name: f.name, mimeType: FOLDER });
+    const kids = await api(`/api/files?acc=${f.acc}&folder=${encodeURIComponent(f.id)}`);
+    for (const k of kids.files) await plan(k, r.file.id);
+    jobs.push({ folder: f });
+  }
+  try { for (const f of list) await plan(f, folder); } catch (e) { row.classList.add('bad'); st.textContent = e.message; return; }
+  const files = jobs.filter((j) => j.f);
+  for (const j of files) {
+    st.textContent = `${done + 1} dari ${files.length}: ${j.f.name}`;
+    try { await post('/api/transfer', { from: j.f.acc, id: j.f.id, to, folder: j.parent, mode }); }
+    catch (e) { fail++; st.textContent = e.message; await new Promise((r) => setTimeout(r, 1200)); }
+    done++; bar.style.width = (done / files.length) * 100 + '%';
+  }
+  if (mode === 'move' && !fail) for (const j of jobs.filter((x) => x.folder)) await post('/api/trash', { acc: j.folder.acc, id: j.folder.id, name: j.folder.name }).catch(() => {});
+  row.classList.add(fail ? 'bad' : 'ok');
+  st.textContent = `${done - fail} file ${mode === 'move' ? 'dipindah' : 'disalin'} ke ${folderName}${fail ? `, ${fail} gagal` : ''}`;
+  t.querySelector('[data-h]').textContent = 'Selesai';
+  clearSel(); S.page === 'home' ? loadDash() : load(); loadAccounts();
+}
+
+// ---------- seret item ke folder / akun ----------
+let dragItem = null;
+$('#files').addEventListener('dragstart', (e) => {
+  const it = e.target.closest('.it'); if (!it) return;
+  const f = view[it.dataset.i];
+  dragItem = S.sel.size && S.sel.has(keyOf(f)) ? [...S.selItems.values()] : [f];
+  e.dataTransfer.setData('application/x-dg', '1'); e.dataTransfer.effectAllowed = 'move';
+  document.body.classList.add('dragging');
+});
+addEventListener('dragend', () => { dragItem = null; document.body.classList.remove('dragging'); document.querySelectorAll('.drop-on').forEach((x) => x.classList.remove('drop-on')); });
+function dropTarget(e) {
+  if (!dragItem) return null;
+  const fo = e.target.closest('.it.folder');
+  if (fo) { const f = view[fo.dataset.i]; if (f.acc == dragItem[0].acc && !dragItem.includes(f)) return { el: fo, kind: 'folder', f }; }
+  const ac = e.target.closest('.acc[data-id]');
+  if (ac && ac.dataset.id !== 'all' && ac.dataset.id != dragItem[0].acc) return { el: ac, kind: 'acc', id: ac.dataset.id };
+  const cr = e.target.closest('#crumbs button[data-i]');
+  if (cr && S.acc !== 'all' || cr && S.path.length) { const i = Number(cr.dataset.i); const tgt = i < 0 ? { id: 'root', name: 'Drive Saya' } : S.path[i]; if (tgt && tgt.id !== cur()?.id) return { el: cr, kind: 'folder', f: { id: tgt.id, name: tgt.name, acc: dragItem[0].acc } }; }
+  return null;
+}
+addEventListener('dragover', (e) => {
+  const t = dropTarget(e);
+  document.querySelectorAll('.drop-on').forEach((x) => x !== t?.el && x.classList.remove('drop-on'));
+  if (t) { e.preventDefault(); t.el.classList.add('drop-on'); }
+});
+addEventListener('drop', async (e) => {
+  const t = dropTarget(e); if (!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const items = dragItem; dragItem = null;
+  document.querySelectorAll('.drop-on').forEach((x) => x.classList.remove('drop-on'));
+  if (t.kind === 'folder') {
+    let ok = 0; for (const f of items) { try { await post('/api/move', { acc: f.acc, id: f.id, to: t.f.id }); ok++; } catch (er) { toast(er.message); } }
+    toast(`${ok} item dipindah ke ${t.f.name}`); clearSel(); load();
+  } else {
+    S.acc = t.id; const a = accOf(t.id);
+    dialog({
+      title: `Pindahkan ke ${a.email}?`, desc: `${items.length} item akan disalin ke root Drive akun ini lalu dihapus dari akun asal (masuk sampah).`,
+      ok: 'Pindahkan', run: async () => runTransfer(items, a.id, 'root', 'move', 'Drive Saya'),
+    });
+  }
+}, true);
+
+// ---------- saran merapikan & aktivitas ----------
+async function loadInsights(my) {
+  const box = $('#tips'); if (!box) return;
+  let d; try { d = await api('/api/insights'); } catch (e) { box.querySelector('.sub').textContent = e.message; box.querySelector('.sk')?.remove(); return; }
+  if (my !== dashSeq || !document.body.contains(box)) return;
+  const full = S.accounts.filter((a) => !a.error && a.limit && a.usage / a.limit >= 0.9);
+  const waste = d.dupes.reduce((n, g) => n + g.waste, 0), staleSize = d.stale.reduce((n, f) => n + Number(f.size || 0), 0);
+  S.tips = d;
+  const tips = [];
+  full.forEach((a) => tips.push(`<div class="tip-i warn">${ic('bolt')}<div><b>${esc(a.email)} hampir penuh (${Math.round((a.usage / a.limit) * 100)}%)</b><span>Pindahkan file besarnya ke akun yang lebih lega.</span></div><button class="btn ghost" data-full="${a.id}">Lihat file besar</button></div>`));
+  if (d.dupes.length) tips.push(`<div class="tip-i">${ic('dup')}<div><b>${d.dupes.length} file kembar · ${fmt(waste)} bisa dihemat</b><span>File dengan isi sama di satu atau beberapa akun.</span></div><button class="btn ghost" data-dupes>Tinjau</button></div>`);
+  if (d.stale.length) tips.push(`<div class="tip-i">${ic('clock')}<div><b>${d.stale.length} file besar tidak dibuka setahun · ${fmt(staleSize)}</b><span>Kandidat untuk dipindah atau dihapus.</span></div><button class="btn ghost" data-stale>Tinjau</button></div>`);
+  box.innerHTML = `<h3>Saran merapikan ruang</h3><p class="sub">${tips.length ? 'Berdasarkan 400 file terbesar di tiap akun.' : 'Semua rapi. Tidak ada file kembar, akun penuh, atau file besar yang terbengkalai.'}</p><div class="tips">${tips.join('') || `<div class="tip-i ok">${ic('check')}<div><b>Tidak ada yang perlu dirapikan</b><span>Cek lagi nanti setelah menambah banyak file.</span></div></div>`}</div>`;
+}
+function reviewList(title, desc, groups) {
+  // groups: [{label, files}]
+  const all = groups.flatMap((g) => g.files);
+  const md = dialog({
+    title, desc, cancel: 'Tutup', ok: 'Pindahkan yang dicentang ke sampah', danger: true,
+    body: `<div class="rv">${groups.map((g, gi) => `${g.label ? `<div class="rv-g">${g.label}</div>` : ''}${g.files.map((f) => { const i = all.indexOf(f); return `<label class="rv-r"><input type="checkbox" data-k="${i}" ${g.pre?.includes(f) ? 'checked' : ''}>${avatar(accOf(f.acc), 22)}<div class="n"><b>${esc(f.name)}</b><span>${esc(accOf(f.acc).email || '')} · ${fmt(f.size)} · ${dshort(f.modifiedTime)}</span></div><button type="button" class="icon-btn" data-v="${i}" title="Pratinjau">${ic('eye')}</button></label>`; }).join('')}`).join('')}</div>`,
+    run: async (b) => {
+      const pick = [...b.querySelectorAll('input[data-k]:checked')].map((x) => all[x.dataset.k]);
+      if (!pick.length) throw new Error('Belum ada yang dicentang');
+      let ok = 0; for (const f of pick) { try { await post('/api/trash', { acc: f.acc, id: f.id, name: f.name }); ok++; } catch (e) {} }
+      toast(`${ok} file dipindah ke sampah`, ['Urungkan', async () => { for (const f of pick) await post('/api/restore', { acc: f.acc, id: f.id, name: f.name }).catch(() => {}); toast('Dipulihkan'); loadDash(); }]);
+      loadAccounts(); loadDash();
+    },
+  });
+  md.querySelector('.rv').onclick = (e) => { const v = e.target.closest('[data-v]'); if (v) { e.preventDefault(); view = all; viewer(Number(v.dataset.v)); } };
+  if (all.length) md.querySelector('.acts').insertAdjacentHTML('afterbegin', S.accounts.filter((a) => !a.error).length > 1 ? `<button type="button" class="btn ghost" data-mv style="margin-right:auto">${ic('swap')}Pindah akun</button>` : '');
+  md.querySelector('[data-mv]')?.addEventListener('click', () => {
+    const pick = [...md.querySelectorAll('input[data-k]:checked')].map((x) => all[x.dataset.k]);
+    if (!pick.length) return toast('Centang file dulu');
+    if (new Set(pick.map((f) => f.acc)).size > 1) return toast('Pilih file dari satu akun saja untuk dipindah');
+    md.remove(); transferDialog(pick);
+  });
+}
+$('#dash').addEventListener('click', (e) => {
+  const d = S.tips; if (!d) return;
+  if (e.target.closest('[data-dupes]')) reviewList('File kembar', 'Satu salinan tiap kelompok sudah dibiarkan tidak dicentang. Centang yang ingin dibuang.', d.dupes.map((g) => ({ label: `${g.files.length} salinan · ${fmt(g.size)} masing-masing`, files: g.files, pre: g.files.slice(1) })));
+  if (e.target.closest('[data-stale]')) reviewList('File besar yang lama tidak dibuka', 'Tidak dibuka lebih dari setahun. Centang untuk dibuang, atau pindahkan ke akun lain.', [{ files: d.stale }]);
+  const fu = e.target.closest('[data-full]');
+  if (fu) reviewList('File terbesar di ' + accOf(fu.dataset.full).email, 'Centang lalu pindahkan ke akun yang lebih lega.', [{ files: [...d.stale, ...d.dupes.flatMap((g) => g.files)].filter((f, i, arr) => f.acc == fu.dataset.full && arr.findIndex((x) => x.id === f.id) === i).sort((x, y) => y.size - x.size).slice(0, 25) }]);
+}, true);
+const ACT = { upload: ['up', 'Mengupload'], create: ['plus', 'Membuat'], trash: ['trash', 'Membuang'], restore: ['restore', 'Memulihkan'], delete: ['trash', 'Menghapus selamanya'], rename: ['edit', 'Mengganti nama jadi'], share: ['share', 'Membagikan'], transfer: ['swap', 'Memindahkan'], copy: ['dup', 'Menyalin'], empty: ['trash', 'Mengosongkan sampah'], disconnect: ['unlink', 'Memutus akun'], login: ['key', ''], passkey: ['finger', ''], sessions: ['device', ''] };
+async function loadActivity() {
+  const box = $('#actv'); if (!box) return;
+  try {
+    const { items } = await api('/api/activity');
+    box.innerHTML = `<h3>Aktivitas terbaru</h3><p class="sub">Yang dilakukan lewat Drive Gabungan.</p><div class="act-l">${items.slice(0, 12).map((x) => {
+      const [icn, verb] = ACT[x.action] || ['info', x.action]; const a = x.acc_id ? accOf(x.acc_id) : null;
+      return `<div class="act-r"><span class="ai">${ic(icn)}</span><div class="n"><b>${esc(verb ? verb + ' ' : '')}${esc(x.detail)}</b><span>${ago(x.ts)}${a?.email ? ' · ' + esc(a.email) : ''}</span></div></div>`;
+    }).join('') || '<p class="small muted">Belum ada aktivitas.</p>'}</div>`;
+  } catch (e) { box.querySelector('.sub').textContent = e.message; box.querySelector('.sk')?.remove(); }
+}
+
+// ---------- keamanan: password, kunci otomatis, passkey, perangkat ----------
+function uaName(ua) {
+  const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'Perangkat';
+  const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : '';
+  return [br, os].filter(Boolean).join(' di ');
+}
+function security() {
+  const md = dialog({ title: 'Keamanan', cancel: 'Selesai', body: '<div class="sk" style="height:220px"></div>' });
+  md.querySelector('.dialog').classList.add('wide');
+  const b = md.querySelector('.body');
+  async function draw() {
+    const [{ sessions }, { passkeys }] = await Promise.all([api('/api/sessions'), api('/api/passkeys')]);
+    const lock = store('lock_min') || '0';
+    const here = passkeys.filter((p) => p.host === location.hostname);
+    b.innerHTML = `
+      <div class="sh-sec"><b>${ic('lock')} Kunci otomatis</b><p class="small muted">Minta masuk lagi setelah tidak dipakai. Berlaku di perangkat ini.</p>
+        <select class="field sm" data-lock>${[['0', 'Mati'], ['5', 'Setelah 5 menit'], ['15', 'Setelah 15 menit'], ['30', 'Setelah 30 menit'], ['60', 'Setelah 1 jam']].map(([v, l]) => `<option value="${v}" ${v === lock ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="sh-sec"><b>${ic('finger')} Sidik jari / wajah (passkey)</b><p class="small muted">Masuk tanpa mengetik password di ${esc(location.hostname)}.</p>
+        <div class="sh-list">${here.map((p) => `<div class="sh-p"><span class="ai">${ic('finger')}</span><div class="n"><b>${esc(p.name)}</b><span>Ditambahkan ${dshort(p.created)}</span></div><button type="button" class="icon-btn" data-pk="${esc(p.id)}" title="Hapus">${ic('x')}</button></div>`).join('') || '<p class="small muted">Belum ada passkey.</p>'}</div>
+        ${window.PublicKeyCredential ? `<button type="button" class="btn ghost" data-addpk>${ic('plus')}Tambah passkey perangkat ini</button>` : '<p class="small muted">Browser ini belum mendukung passkey.</p>'}</div>
+      <div class="sh-sec"><b>${ic('device')} Perangkat yang sedang masuk</b>
+        <div class="sh-list">${sessions.map((x) => `<div class="sh-p"><span class="ai">${ic(/Android|iPhone/.test(x.ua || '') ? 'phone' : 'device')}</span><div class="n"><b>${esc(uaName(x.ua || ''))}${x.current ? ' · perangkat ini' : ''}</b><span>Aktif ${ago(x.seen || x.created)}${x.ip ? ' · ' + esc(x.ip) : ''}</span></div>${x.current ? '' : `<button type="button" class="btn ghost" data-out="${x.id}">Keluarkan</button>`}</div>`).join('')}</div>
+        ${sessions.length > 1 ? '<button type="button" class="btn ghost danger" data-outall>Keluarkan semua perangkat lain</button>' : ''}</div>
+      <div class="sh-sec"><b>${ic('key')} Ganti password</b>
+        <input class="field sm" type="password" data-o placeholder="Password lama"><input class="field sm" type="password" data-n placeholder="Password baru (min. 8)">
+        <button type="button" class="btn ghost" data-pw>Ganti password</button></div>`;
+    b.querySelector('[data-lock]').onchange = (e) => { store('lock_min', e.target.value); armLock(); toast(e.target.value === '0' ? 'Kunci otomatis dimatikan' : 'Kunci otomatis aktif'); };
+    b.querySelector('[data-addpk]')?.addEventListener('click', () => addPasskey().then(draw));
+    b.querySelectorAll('[data-pk]').forEach((x) => (x.onclick = async () => { await api('/api/passkeys?id=' + encodeURIComponent(x.dataset.pk), { method: 'DELETE' }); toast('Passkey dihapus'); draw(); }));
+    b.querySelectorAll('[data-out]').forEach((x) => (x.onclick = async () => { await api('/api/sessions?id=' + x.dataset.out, { method: 'DELETE' }); toast('Perangkat dikeluarkan'); draw(); }));
+    b.querySelector('[data-outall]')?.addEventListener('click', async () => { await api('/api/sessions?all=1', { method: 'DELETE' }); toast('Semua perangkat lain dikeluarkan'); draw(); });
+    b.querySelector('[data-pw]').onclick = async () => {
+      try { await post('/api/password', { old: b.querySelector('[data-o]').value, password: b.querySelector('[data-n]').value }); toast('Password diganti. Perangkat lain dikeluarkan.'); draw(); }
+      catch (e) { toast(e.message); }
+    };
+  }
+  draw().catch((e) => (b.innerHTML = `<div class="err">${esc(e.message)}</div>`));
+}
+async function addPasskey() {
+  try {
+    const o = await post('/api/passkey/register-options', {});
+    const u8 = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: u8(o.challenge), rp: { id: o.rpId, name: 'Drive Gabungan' },
+      user: { id: u8(o.userId), name: 'pemilik', displayName: 'Pemilik Drive Gabungan' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { userVerification: 'required', residentKey: 'preferred' },
+      excludeCredentials: o.exclude.map((id) => ({ type: 'public-key', id: u8(id) })), timeout: 60000,
+    } });
+    const r = cred.response, enc64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    if (!r.getPublicKey) throw new Error('Browser ini belum bisa menyimpan passkey. Coba Chrome, Edge, atau Safari terbaru.');
+    await post('/api/passkey/register', { id: enc64(cred.rawId), clientDataJSON: enc64(r.clientDataJSON), publicKey: enc64(r.getPublicKey()), alg: r.getPublicKeyAlgorithm(), name: uaName(navigator.userAgent) });
+    toast('Passkey ditambahkan. Lain kali bisa masuk dengan sidik jari / wajah.');
+  } catch (e) { if (e.name !== 'NotAllowedError') toast(e.message); }
+}
+$('#pkBtn').onclick = async () => {
+  $('#authErr').textContent = '';
+  try {
+    const o = await post('/api/passkey/login-options', {});
+    const u8 = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
+    const enc64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const cred = await navigator.credentials.get({ publicKey: { challenge: u8(o.challenge), rpId: o.rpId, userVerification: 'required', allowCredentials: o.allow.map((id) => ({ type: 'public-key', id: u8(id) })), timeout: 60000 } });
+    const r = cred.response;
+    await post('/api/passkey/login', { id: enc64(cred.rawId), clientDataJSON: enc64(r.clientDataJSON), authenticatorData: enc64(r.authenticatorData), signature: enc64(r.signature) });
+    startApp();
+  } catch (e) { if (e.name !== 'NotAllowedError') $('#authErr').textContent = e.message; }
+};
+let lockT;
+function armLock() {
+  clearTimeout(lockT);
+  const min = Number(store('lock_min') || 0);
+  if (!min || $('#appView').classList.contains('hidden')) return;
+  lockT = setTimeout(async () => { await post('/api/logout', {}).catch(() => {}); document.querySelectorAll('.modal,.viewer,.menu').forEach((x) => x.remove()); showAuth('locked'); }, min * 60000);
+}
+['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((ev) => addEventListener(ev, () => { if (lockT) armLock(); }, { passive: true }));
+
+// ---------- pintasan keyboard ----------
+function shortcuts() {
+  const k = [['/', 'Cari'], ['Esc', 'Tutup / hapus pencarian'], ['Enter', 'Buka item'], ['Spasi', 'Pilih item'], ['Ctrl + klik', 'Pilih beberapa'], ['F2', 'Ganti nama'], ['Delete', 'Pindahkan ke sampah'], ['i', 'Detail item'], ['s', 'Beri/hapus bintang'], ['← →', 'File sebelumnya/berikutnya di pratinjau'], ['g lalu h', 'Ke Beranda'], ['g lalu f', 'Ke Semua file'], ['n', 'Menu Baru'], ['?', 'Daftar pintasan ini']];
+  dialog({ title: 'Pintasan keyboard', cancel: 'Tutup', body: `<div class="kbl">${k.map(([a, b]) => `<div><span>${b}</span><span>${a.split(' ').map((x) => (/^(lalu|\+)$/.test(x) ? x : `<kbd>${x}</kbd>`)).join(' ')}</span></div>`).join('')}</div>` });
+}
+let gPrefix = 0;
+addEventListener('keydown', (e) => {
+  if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || document.querySelector('.modal,.viewer') || $('#appView').classList.contains('hidden')) return;
+  if (e.key === '?') { e.preventDefault(); return shortcuts(); }
+  if (e.key === 'n' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); return newMenu(mobile() ? null : $('#newBtn')); }
+  if (e.key === 'g') { gPrefix = Date.now(); return; }
+  if (Date.now() - gPrefix < 900) { if (e.key === 'h') go('home'); if (e.key === 'f') $('#navFiles').click(); gPrefix = 0; }
+});
+
 // ---------- mulai ----------
 async function startApp() {
   $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden'); $('#fab').classList.remove('hidden');
@@ -1640,7 +2038,7 @@ async function startApp() {
   const pg = new URLSearchParams(location.search).get('p');
   if (pg) history.replaceState(null, '', '/');
   go(pg === 'files' ? 'files' : 'home');
-  refreshInstallUI();
+  refreshInstallUI(); armLock();
   if (isIOS()) setTimeout(installBanner, 4000);
   if (!S.state.configured) googleSetup();
 }
