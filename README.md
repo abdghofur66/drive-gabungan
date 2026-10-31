@@ -64,4 +64,4 @@ npm install && npx wrangler login && npx wrangler deploy
 
 Open source dengan [lisensi MIT](LICENSE): bebas dipakai, diubah, dan dikembangkan (termasuk komersial) dengan tetap mencantumkan nama pembuat.
 
-📰 Artikel perkenalan: https://outsiderdev.com/news/drive-gabungan-satukan-akun-google-drive
+📰 Artikel perkenalan: https://outsiderdev.com/artikel/drive-gabungan-satukan-akun-google-drive
