@@ -3,6 +3,7 @@
 // Developed by OutsiderDev — https://outsiderdev.com
 import HTML from './ui.html';
 import PANDUAN from './panduan.html';
+import * as ICONS from './icons.js';
 
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/drive';
 const FOLDER = 'application/vnd.google-apps.folder';
@@ -21,6 +22,18 @@ const EXPORT_DL = {
   'application/vnd.google-apps.presentation': ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'pptx'],
   'application/vnd.google-apps.drawing': ['image/png', 'png'],
 };
+
+// Service worker: halaman tetap bisa dibuka saat sinyal buruk; data API selalu dari jaringan.
+const SW = `const C = 'dg-v1';
+self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['/', '/icon-192.png'])).then(() => self.skipWaiting())); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((x) => x !== C).map((x) => caches.delete(x)))).then(() => self.clients.claim())); });
+self.addEventListener('fetch', (e) => {
+  const u = new URL(e.request.url);
+  if (e.request.method !== 'GET' || u.origin !== location.origin || u.pathname.startsWith('/api') || u.pathname.startsWith('/oauth')) return;
+  if (e.request.mode === 'navigate') {
+    e.respondWith(fetch(e.request).then((r) => { if (u.pathname === '/' && r.ok) { const cp = r.clone(); caches.open(C).then((c) => c.put('/', cp)); } return r; }).catch(() => caches.match(u.pathname === '/' ? '/' : e.request)));
+  }
+});`;
 
 class HttpError extends Error {
   constructor(status, msg) { super(msg); this.status = status; }
@@ -207,6 +220,28 @@ async function route(req, env) {
 
   if (p === '/' || p === '/index.html') {
     return new Response(HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'x-frame-options': 'DENY' } });
+  }
+
+  if (p === '/manifest.webmanifest') {
+    return new Response(JSON.stringify({
+      name: 'Drive Gabungan', short_name: 'Drive Gabungan', id: '/', start_url: '/', scope: '/',
+      display: 'standalone', background_color: '#0d1322', theme_color: '#2f6bff', lang: 'id',
+      description: 'Gabungkan beberapa akun Google Drive dalam satu tampilan.',
+      icons: [
+        { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: '/icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+      shortcuts: [{ name: 'Semua file', url: '/?p=files', icons: [{ src: '/icon-192.png', sizes: '192x192' }] }],
+    }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'public, max-age=86400' } });
+  }
+  const ICON = { '/icon-192.png': 'i192', '/icon-512.png': 'i512', '/icon-maskable.png': 'm512', '/apple-touch-icon.png': 'a180' }[p];
+  if (ICON) {
+    const bin = Uint8Array.from(atob(ICONS[ICON]), (c) => c.charCodeAt(0));
+    return new Response(bin, { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
+  }
+  if (p === '/sw.js') {
+    return new Response(SW, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache' } });
   }
 
   if (p === '/panduan' || p === '/panduan/') {

@@ -7,7 +7,12 @@
 <meta name="theme-color" content="#0d1322" media="(prefers-color-scheme: dark)">
 <title>Drive Gabungan</title>
 <link rel="icon" href="https://outsiderdev.com/img/ico.png">
-<link rel="apple-touch-icon" href="https://outsiderdev.com/img/ico.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Drive Gabungan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -71,7 +76,7 @@ svg.i{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-
 
 /* ===== Shell ===== */
 .shell{display:grid;grid-template-columns:288px 1fr;min-height:100%}
-aside{position:sticky;top:0;height:100vh;padding:20px 16px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--line);background:var(--surface);overflow:auto}
+aside{position:sticky;top:0;height:100vh;height:100dvh;padding:20px 16px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--line);background:var(--surface);overflow:auto}
 .brand{display:flex;align-items:center;gap:10px;padding:0 6px;font-weight:800;font-size:17px;letter-spacing:-.01em}
 .brand .logo{width:34px;height:34px;border-radius:11px;background:var(--pri);display:grid;place-items:center;color:#fff}
 .brand .logo svg{width:18px;height:18px}
@@ -107,7 +112,7 @@ aside{position:sticky;top:0;height:100vh;padding:20px 16px;display:flex;flex-dir
 /* ===== Main ===== */
 main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:14px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px)}
-#menuBtn{display:none}
+#menuBtn,#moreBtn{display:none}
 .search{position:relative;flex:1;max-width:620px}
 .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink3)}
 .search input{width:100%;height:48px;border-radius:999px;border:1.5px solid transparent;background:var(--surface);box-shadow:var(--shadow);padding:0 46px 0 48px;outline:none;transition:border-color .15s}
@@ -179,6 +184,17 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .empty p{margin:0 0 18px;color:var(--ink2)}
 
 .fab{display:none}
+.install{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:35;width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-pop);padding:14px;display:flex;gap:12px;align-items:center;animation:rise .25s var(--ease)}
+.install img{width:48px;height:48px;border-radius:12px;flex-shrink:0}
+.install .tx{flex:1;min-width:0}
+.install .tx b{display:block;font-size:14.5px}
+.install .tx span{font-size:12.5px;color:var(--ink2)}
+.install .ac{display:flex;flex-direction:column;gap:6px}
+.install .btn{height:34px;padding:0 14px;font-size:13px;justify-content:center}
+.ios-steps{display:flex;flex-direction:column;gap:10px;font-size:14px}
+.ios-steps div{display:flex;gap:10px;align-items:center}
+.ios-steps b{width:26px;height:26px;border-radius:9px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;flex-shrink:0;font-size:13px}
+#installSide{justify-content:flex-start}
 
 /* nav */
 .nav{display:flex;flex-direction:column;gap:2px}
@@ -337,10 +353,13 @@ footer img{width:18px;height:18px}
 
 /* ===== Mobile ===== */
 @media (max-width:860px){
+  .install{bottom:calc(92px + env(safe-area-inset-bottom))}
   .shell{grid-template-columns:1fr}
   aside{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:42;transform:translateX(-102%);transition:transform .25s var(--ease);box-shadow:var(--shadow-pop)}
   aside.open{transform:none}
-  #menuBtn{display:inline-grid}
+  #menuBtn,#moreBtn{display:inline-grid}
+  aside{padding-bottom:calc(20px + env(safe-area-inset-bottom));height:100dvh}
+  .top{padding-top:calc(10px + env(safe-area-inset-top))}
   .top{padding:10px 14px}
   .search input{height:44px}
   .search kbd{display:none}
@@ -437,6 +456,7 @@ footer img{width:18px;height:18px}
     <div class="acc-list" id="accList"></div>
     <button class="add-acc" id="addAcc"><svg class="i"><use href="#i-plus"/></svg>Hubungkan akun Google</button>
 
+    <button class="add-acc hidden" id="installSide"><svg class="i"><use href="#i-down"/></svg>Pasang sebagai aplikasi</button>
     <div class="side-foot">
       <button class="icon-btn" id="themeBtn" title="Ganti tema"><svg class="i"><use href="#i-moon"/></svg></button>
       <button class="icon-btn" id="chgPw" title="Ganti password"><svg class="i"><use href="#i-key"/></svg></button>
@@ -453,6 +473,7 @@ footer img{width:18px;height:18px}
         <kbd id="qk">/</kbd>
         <button class="icon-btn x hidden" id="qx" aria-label="Hapus pencarian" title="Hapus pencarian"><svg class="i"><use href="#i-x"/></svg></button>
       </div>
+      <button class="icon-btn" id="moreBtn" aria-label="Menu akun"><svg class="i"><use href="#i-dots"/></svg></button>
       <button class="btn ghost" id="mkdirBtn"><svg class="i"><use href="#i-fnew"/></svg>Folder</button>
       <button class="btn pri" id="upBtn"><svg class="i"><use href="#i-up"/></svg>Upload</button>
       <input type="file" id="fileIn" multiple class="hidden">
@@ -1170,6 +1191,53 @@ async function uploadOne(file, t, tg) {
   }
 }
 
+// ---------- menu HP & PWA ----------
+function toggleTheme() { $('#themeBtn').click(); }
+$('#moreBtn').onclick = (e) => {
+  e.stopPropagation();
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  popMenu([
+    canInstall() && ['down', 'Pasang sebagai aplikasi', install],
+    ['moon', dark ? 'Mode terang' : 'Mode gelap', toggleTheme],
+    ['key', 'Ganti password', () => $('#chgPw').click()],
+    ['out', 'Keluar', () => $('#logout').click(), 'danger'],
+  ], e.currentTarget);
+};
+let deferred = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const canInstall = () => !standalone() && (deferred || isIOS());
+function refreshInstallUI() { $('#installSide').classList.toggle('hidden', !canInstall()); }
+async function install() {
+  document.querySelector('.install')?.remove();
+  if (deferred) {
+    deferred.prompt();
+    const { outcome } = await deferred.userChoice;
+    deferred = null; refreshInstallUI();
+    if (outcome === 'accepted') toast('Drive Gabungan sedang dipasang');
+    return;
+  }
+  if (isIOS()) dialog({
+    title: 'Pasang di iPhone atau iPad',
+    body: `<div class="ios-steps"><div><b>1</b>Buka halaman ini di Safari.</div><div><b>2</b>Ketuk tombol Bagikan (kotak dengan panah ke atas).</div><div><b>3</b>Pilih "Tambah ke Layar Utama", lalu "Tambah".</div></div>`,
+  });
+}
+function installBanner() {
+  if (!canInstall() || document.querySelector('.install') || $('#appView').classList.contains('hidden')) return;
+  const until = Number(store('install_later') || 0);
+  if (Date.now() < until) return;
+  const b = document.createElement('div'); b.className = 'install'; b.setAttribute('role', 'dialog');
+  b.innerHTML = `<img src="/icon-192.png" alt=""><div class="tx"><b>Pasang Drive Gabungan</b><span>Buka langsung dari layar utama, seperti aplikasi.</span></div>
+    <div class="ac"><button class="btn pri" data-y>Pasang</button><button class="btn ghost" data-n>Nanti</button></div>`;
+  b.querySelector('[data-y]').onclick = install;
+  b.querySelector('[data-n]').onclick = () => { store('install_later', Date.now() + 7 * 864e5); b.remove(); };
+  document.body.appendChild(b);
+}
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; refreshInstallUI(); setTimeout(installBanner, 2500); });
+addEventListener('appinstalled', () => { deferred = null; refreshInstallUI(); document.querySelector('.install')?.remove(); toast('Drive Gabungan terpasang'); });
+$('#installSide').onclick = install;
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+
 // ---------- mulai ----------
 async function startApp() {
   $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden'); $('#fab').classList.remove('hidden');
@@ -1177,7 +1245,11 @@ async function startApp() {
   setView(S.view); renderChips();
   S.state = await api('/api/state');
   try { await loadAccounts(); } catch (e) { toast(e.message); }
-  go('home');
+  const pg = new URLSearchParams(location.search).get('p');
+  if (pg) history.replaceState(null, '', '/');
+  go(pg === 'files' ? 'files' : 'home');
+  refreshInstallUI();
+  if (isIOS()) setTimeout(installBanner, 4000);
   if (!S.state.configured) googleSetup();
 }
 (async () => {
