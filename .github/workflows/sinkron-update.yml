@@ -1,0 +1,45 @@
+# Mengambil update terbaru Drive Gabungan dari repo sumber.
+# Berjalan otomatis seminggu sekali, atau manual: tab Actions → "Sinkron update" → Run workflow.
+# Hanya kode aplikasi yang diperbarui (src/, README, workflow ini).
+# wrangler.toml milikmu (nama Worker & database) tidak disentuh.
+name: Sinkron update
+
+on:
+  schedule:
+    - cron: "17 1 * * 1" # Senin 08:17 WIB
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM: abdghofur66/drive-gabungan
+
+jobs:
+  sync:
+    # Jangan jalan di repo sumbernya sendiri
+    if: github.repository != 'abdghofur66/drive-gabungan'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ambil versi terbaru dari repo sumber
+        run: git clone --depth 1 "https://github.com/${UPSTREAM}.git" /tmp/upstream
+
+      - name: Salin kode aplikasi
+        run: |
+          rsync -a --delete /tmp/upstream/src/ src/
+          cp /tmp/upstream/README.md README.md
+          cp /tmp/upstream/package.json package.json
+
+      - name: Commit jika ada perubahan
+        run: |
+          if git diff --quiet; then
+            echo "Sudah versi terbaru."
+            exit 0
+          fi
+          git config user.name "drive-gabungan-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Update dari ${UPSTREAM}@$(git -C /tmp/upstream rev-parse --short HEAD)"
+          git push

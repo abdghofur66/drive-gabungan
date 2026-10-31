@@ -149,7 +149,10 @@ async function quotas(env) {
     try {
       const d = await gjson(env, a, '/about?fields=storageQuota');
       const q = d.storageQuota || {};
-      return { ...base, limit: q.limit ? Number(q.limit) : null, usage: Number(q.usage || 0) };
+      return {
+        ...base, limit: q.limit ? Number(q.limit) : null, usage: Number(q.usage || 0),
+        drive: Number(q.usageInDrive || 0), trash: Number(q.usageInDriveTrash || 0),
+      };
     } catch (e) {
       return { ...base, error: e.message };
     }
@@ -326,6 +329,27 @@ async function route(req, env) {
   }
 
   if (p === '/api/accounts' && m === 'GET') return json({ accounts: await quotas(env) });
+
+  if (p === '/api/overview') {
+    const accs = await allAcc(env);
+    const recent = [], largest = [], errors = [];
+    const F = 'files(id,name,mimeType,size,modifiedTime,thumbnailLink,webViewLink)';
+    const q = encodeURIComponent(`trashed=false and mimeType!='${FOLDER}'`);
+    await Promise.all(accs.map(async (a) => {
+      try {
+        const [r, l] = await Promise.all([
+          gjson(env, a, `/files?q=${q}&orderBy=modifiedTime desc&pageSize=8&fields=${F}`),
+          gjson(env, a, `/files?q=${q}&orderBy=quotaBytesUsed desc&pageSize=8&fields=${F}`),
+        ]);
+        const tag = ({ thumbnailLink, ...f }) => ({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
+        recent.push(...(r.files || []).map(tag));
+        largest.push(...(l.files || []).map(tag));
+      } catch (e) { errors.push(`${a.email}: ${e.message}`); }
+    }));
+    recent.sort((x, y) => new Date(y.modifiedTime) - new Date(x.modifiedTime));
+    largest.sort((x, y) => Number(y.size || 0) - Number(x.size || 0));
+    return json({ accounts: await quotas(env), recent: recent.slice(0, 8), largest: largest.slice(0, 8), errors });
+  }
 
   if (p === '/api/accounts' && m === 'DELETE') {
     const a = await getAcc(env, qp('id'));
