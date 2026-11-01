@@ -1,6 +1,6 @@
 # Mengambil update terbaru Drive Gabungan dari repo sumber.
 # Berjalan otomatis seminggu sekali, atau manual: tab Actions → "Sinkron update" → Run workflow.
-# Hanya kode aplikasi yang diperbarui (src/, README, workflow ini).
+# Hanya kode aplikasi yang diperbarui (src/, README, package.json).
 # wrangler.toml milikmu (nama Worker & database) tidak disentuh.
 name: Sinkron update
 
@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 env:
   UPSTREAM: abdghofur66/drive-gabungan
@@ -22,6 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # GitHub mematikan jadwal otomatis jika repo 60 hari tanpa aktivitas.
+      # Langkah ini meminta GitHub tetap mengaktifkan workflow ini, tanpa membuat commit.
+      - name: Jaga jadwal tetap aktif
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/sinkron-update.yml/enable" || echo "Lewati (tidak berpengaruh pada sinkron)."
 
       - name: Ambil versi terbaru dari repo sumber
         run: git clone --depth 1 "https://github.com/${UPSTREAM}.git" /tmp/upstream
