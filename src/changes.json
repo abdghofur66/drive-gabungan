@@ -1,15 +1,5 @@
 [
   {
-    "v": "2026.11.02e",
-    "date": "2026-11-02",
-    "title": "Pembaruan sekali klik",
-    "items": [
-      "Notifikasi muncul saat ada versi baru Drive Gabungan",
-      "Tombol Perbarui sekarang menjalankan pembaruan langsung dari aplikasi",
-      "Cukup atur sekali: nama repo dan token GitHub dengan izin Actions"
-    ]
-  },
-  {
     "v": "2026.11.02d",
     "date": "2026-11-02",
     "title": "Tampilan laptop lebih rapi",

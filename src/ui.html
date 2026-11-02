@@ -237,10 +237,6 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:99px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
 .bellm{width:340px;max-width:calc(100vw - 16px)}
 .bellm.sheet{width:auto;max-width:none}
-.upd-act{display:flex;align-items:center;gap:12px;margin-top:8px}
-.upd-act .btn.sm{height:32px;padding:0 14px;font-size:13px}
-.upd-steps{margin:0 0 12px;padding-left:18px;display:grid;gap:4px;font-size:13.5px;color:var(--ink2)}
-.upd-steps a{color:var(--pri)}
 .bellm .allupd{font-size:12.5px;font-weight:700;color:var(--pri);padding:6px 10px 10px;text-align:left}
 .chg{display:grid;gap:14px;max-height:60vh;overflow:auto}
 .chg-i b{display:block;font-size:15px}
@@ -2194,7 +2190,7 @@ $('#dash').addEventListener('click', (e) => {
   const fu = e.target.closest('[data-full]');
   if (fu) reviewList('File terbesar di ' + accOf(fu.dataset.full).email, 'Centang lalu pindahkan ke akun yang lebih lega.', [{ files: [...d.stale, ...d.dupes.flatMap((g) => g.files)].filter((f, i, arr) => f.acc == fu.dataset.full && arr.findIndex((x) => x.id === f.id) === i).sort((x, y) => y.size - x.size).slice(0, 25) }]);
 }, true);
-const ACT = { upload: ['up', 'Mengupload'], create: ['plus', 'Membuat'], trash: ['trash', 'Membuang'], restore: ['restore', 'Memulihkan'], delete: ['trash', 'Menghapus selamanya'], rename: ['edit', 'Mengganti nama jadi'], share: ['share', 'Membagikan'], transfer: ['swap', 'Memindahkan'], copy: ['dup', 'Menyalin'], empty: ['trash', 'Mengosongkan sampah'], disconnect: ['unlink', 'Memutus akun'], login: ['key', ''], passkey: ['finger', ''], sessions: ['device', ''], update: ['restore', ''] };
+const ACT = { upload: ['up', 'Mengupload'], create: ['plus', 'Membuat'], trash: ['trash', 'Membuang'], restore: ['restore', 'Memulihkan'], delete: ['trash', 'Menghapus selamanya'], rename: ['edit', 'Mengganti nama jadi'], share: ['share', 'Membagikan'], transfer: ['swap', 'Memindahkan'], copy: ['dup', 'Menyalin'], empty: ['trash', 'Mengosongkan sampah'], disconnect: ['unlink', 'Memutus akun'], login: ['key', ''], passkey: ['finger', ''], sessions: ['device', ''] };
 async function loadActivity() {
   const box = $('#actv'); if (!box) return;
   try {
@@ -2460,41 +2456,8 @@ const updUnseen = () => {
   const i = CHANGES.findIndex((c) => c.v === last);
   return last ? (i < 0 ? CHANGES.length : i) : 1; // pengguna baru: tampilkan pembaruan terakhir saja
 };
-async function checkUpdate(force) {
-  try { S.upd = await api('/api/update' + (force ? '?force=1' : '')); } catch (e) { S.upd = null; }
-  bellBadge();
-}
-function updSetupDialog() {
-  const u = S.upd || {};
-  dialog({
-    title: 'Pembaruan sekali klik',
-    desc: 'Agar tombol Perbarui bisa menjalankan pembaruan, aplikasi perlu izin terbatas ke repo GitHub Anda. Cukup diatur sekali.',
-    body: `<ol class="upd-steps">
-        <li>Buka <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained token baru</a>.</li>
-        <li><b>Repository access</b>: pilih <i>Only select repositories</i> → repo aplikasi ini.</li>
-        <li><b>Permissions → Actions</b>: <i>Read and write</i>. Lalu <b>Generate token</b> dan salin.</li>
-      </ol>
-      <label class="small muted">Repo aplikasi ini</label><input class="field" id="updRepo" placeholder="akun/nama-repo" value="${esc(u.repo || '')}">
-      <label class="small muted" style="margin-top:10px;display:block">Token GitHub ${u.hasToken ? '(kosongkan untuk tetap memakai token lama)' : ''}</label><input class="field" id="updTok" type="password" autocomplete="off" placeholder="github_pat_…">
-      <p class="small muted" style="margin-top:8px">Token disimpan di database Cloudflare milik Anda dan hanya dipakai untuk menjalankan workflow Sinkron update.</p>`,
-    ok: 'Simpan',
-    run: async (b) => {
-      await post('/api/update/config', { repo: b.querySelector('#updRepo').value, token: b.querySelector('#updTok').value });
-      toast('Pembaruan sekali klik siap'); await checkUpdate();
-    },
-  });
-}
-async function runUpdate() {
-  if (!S.upd?.repo || !S.upd?.hasToken) return updSetupDialog();
-  dialog({
-    title: 'Perbarui aplikasi sekarang?',
-    desc: `Versi terbaru akan diambil dari repo sumber dan dipasang ke ${S.upd.repo}. Data dan akun Google Anda tidak berubah. Prosesnya sekitar 2 menit.`,
-    ok: 'Perbarui sekarang',
-    run: async () => { await post('/api/update/run', {}); toast('Pembaruan berjalan. Muat ulang aplikasi sekitar 2 menit lagi.'); await checkUpdate(); },
-  });
-}
 function bellBadge() {
-  const n = (S.alertsUnseen || 0) + updUnseen() + (S.upd?.available ? 1 : 0);
+  const n = (S.alertsUnseen || 0) + updUnseen();
   $('#bellN').textContent = n > 9 ? '9+' : n;
   $('#bellN').classList.toggle('hidden', !n);
 }
@@ -2537,16 +2500,12 @@ $('#bellBtn').onclick = async (e) => {
   const al = S.alerts || [];
   const icn = { full: 'bolt', error: 'unlink', backup: 'backup', test: 'bell', login: 'device', fail: 'lock' };
   const nu = updUnseen(), up = CHANGES.slice(0, Math.max(1, Math.min(nu, 3)));
-  const U = S.upd, recent = U?.running && Date.now() - U.running < 10 * 60e3;
-  const avail = U?.available ? `<div class="br new upd-av"><span class="ai">${ic('restore')}</span><div class="n"><b>Pembaruan tersedia: ${esc(U.newer[0].title)}</b><span>${U.newer.length > 1 ? U.newer.length + ' pembaruan baru · ' : ''}${U.newer[0].items.map(esc).join(' · ')}</span>
-      ${recent ? '<small>Sedang dipasang… muat ulang beberapa menit lagi</small>' : `<div class="upd-act"><button class="btn pri sm" data-updrun>Perbarui sekarang</button>${U.repo ? `<a class="small" href="https://github.com/${esc(U.repo)}/actions/workflows/sinkron-update.yml" target="_blank" rel="noopener">Buka di GitHub</a>` : ''}</div>`}</div></div>` : '';
   m.innerHTML = `<div class="hd"><span>Notifikasi</span></div>
-    <div class="bl">${avail}${up.map((c, k) => `<div class="br upd ${k < nu ? 'new' : ''}"><span class="ai">${ic('bolt')}</span><div class="n"><b>Pembaruan: ${esc(c.title)}</b><span>${c.items.map(esc).join(' · ')}</span><small>${dshort(c.date)}</small></div></div>`).join('')}
+    <div class="bl">${up.map((c, k) => `<div class="br upd ${k < nu ? 'new' : ''}"><span class="ai">${ic('bolt')}</span><div class="n"><b>Pembaruan: ${esc(c.title)}</b><span>${c.items.map(esc).join(' · ')}</span><small>${dshort(c.date)}</small></div></div>`).join('')}
     <button class="allupd" data-allupd>Lihat semua pembaruan</button>${al.map((a) => `<div class="br ${a.seen ? '' : 'new'}"><span class="ai">${ic(icn[a.kind] || 'info')}</span><div class="n"><b>${esc(a.title)}</b><span>${esc(a.body)}</span><small>${ago(a.ts)}</small></div></div>`).join('') || '<p class="small muted" style="padding:10px">Belum ada notifikasi.</p>'}</div>
     ${st === 'unsupported' ? '<p class="small muted" style="padding:8px 10px">Pasang sebagai aplikasi agar notifikasi bisa muncul di perangkat ini.</p>'
       : st === 'denied' ? '<p class="small muted" style="padding:8px 10px">Notifikasi diblokir di browser ini.</p>'
       : `<button data-push>${ic('bell')}${st === 'on' ? 'Matikan notifikasi di perangkat ini' : 'Aktifkan notifikasi di perangkat ini'}</button>`}`;
-  m.querySelector('[data-updrun]')?.addEventListener('click', () => { closeMenu(); runUpdate(); });
   m.querySelector('[data-allupd]').addEventListener('click', () => { closeMenu(); changesDialog(); });
   m.querySelector('[data-push]')?.addEventListener('click', () => { closeMenu(); togglePush().catch((er) => toast(er.message)); });
   if (mobile()) { const sc = document.createElement('div'); sc.className = 'scrim on menu-s'; sc.onclick = closeMenu; document.body.appendChild(sc); m.classList.add('sheet'); document.body.appendChild(m); }
@@ -2662,7 +2621,6 @@ async function startApp() {
   refreshInstallUI(); armLock();
   document.querySelectorAll('[data-new]').forEach((x) => { if (!isNew(x.dataset.new)) x.remove(); });
   loadPins(); loadAlerts(true); setInterval(() => loadAlerts(), 5 * 60000); takeShared();
-  checkUpdate(); setInterval(() => checkUpdate(), 6 * 3600e3);
   if (isIOS()) setTimeout(installBanner, 4000);
   if (!S.state.configured) googleSetup();
 }

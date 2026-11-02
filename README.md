@@ -47,9 +47,7 @@ Developed by [OutsiderDev](https://outsiderdev.com)
    ⚠️ Jangan biarkan di *Testing*: token kedaluwarsa tiap 7 hari. Tidak perlu mengajukan verifikasi.
 
 ### Pembaruan
-- Otomatis setiap Senin lewat GitHub Action **Sinkron update** di repo-mu.
-- Saat ada versi baru, lonceng notifikasi di aplikasi menampilkan **Pembaruan tersedia**. Tombol **Perbarui sekarang** langsung menjalankan sinkron, setelah diatur sekali: isi nama repo (`akun/nama-repo`) dan **fine-grained token** GitHub yang hanya diberi akses ke repo itu dengan izin **Actions: Read and write**.
-- Tanpa token: buka tab **Actions → Sinkron update → Run workflow** di repo-mu.
+Otomatis setiap Senin lewat GitHub Action **Sinkron update** di repo-mu; tidak perlu melakukan apa pun. Daftar perubahan bisa dilihat di lonceng notifikasi aplikasi. Ingin lebih cepat: tab **Actions → Sinkron update → Run workflow**.
 
 ### Domain sendiri (opsional)
 Jika domainmu sudah dikelola di Cloudflare:
