@@ -1165,6 +1165,7 @@ async function load() {
     S.files = d.files;
     $('#notes').innerHTML = d.errors.map((x) => `<div class="notice">${esc(x)}</div>`).join('');
     render();
+    if (S.found && !S.found.scrolled) { toast('File tidak ditemukan di folder ini'); S.found = null; }
   } catch (e) {
     if (my === seq) { $('#files').innerHTML = ''; $('#notes').innerHTML = `<div class="notice">${esc(e.message)}</div>`; }
   }
@@ -1239,7 +1240,7 @@ function render() {
 // ---------- buka lokasi file (dari beranda) ----------
 async function openLocation(f) {
   if (!f) return;
-  toast('Membuka lokasi…');
+  toast('Mencari lokasi file…');
   let chain = [], shared = false;
   try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; } catch (e) { return toast(e.message); }
   if (shared) {
@@ -1250,6 +1251,7 @@ async function openLocation(f) {
   S.special = null; S.acc = f.acc; S.path = chain.map((c) => ({ id: c.id, name: c.name, acc: f.acc }));
   // Sorotan bertahan selama berada di folder ini; filter jenis direset agar file pasti terlihat
   S.found = { id: f.id, acc: f.acc, folder: chain.length ? chain[chain.length - 1].id : 'root', scrolled: false };
+  toast(chain.length ? 'Lokasi: ' + chain.map((c) => c.name).join(' / ') : 'File ini ada di folder utama Drive Saya');
   if (S.type) { S.type = ''; renderChips(); }
   clearSearch(false); go('files');
 }
