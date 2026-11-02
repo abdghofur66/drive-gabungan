@@ -113,8 +113,7 @@ aside{position:sticky;top:0;height:100vh;height:100dvh;padding:20px 16px;display
 main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:14px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px)}
 #menuBtn,#moreBtn{display:none}
-.search{position:relative;flex:1;max-width:620px}
-.top #bellBtn{margin-left:auto}
+.search{position:relative;flex:1;min-width:0}
 .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink3)}
 .search input{width:100%;height:48px;border-radius:999px;border:1.5px solid transparent;background:var(--surface);box-shadow:var(--shadow);padding:0 46px 0 48px;outline:none;transition:border-color .15s}
 .search input:focus{border-color:var(--pri)}
@@ -2436,7 +2435,7 @@ $('#navLinks').onclick = () => { seen('links'); closeSide(); manageLinks(); };
 // ---------- catatan pembaruan aplikasi (terbaru di atas; tambahkan entri baru setiap rilis) ----------
 const CHANGES = [
   { v: '2026.11.02d', date: '2026-11-02', title: 'Tampilan laptop lebih rapi', items: [
-    'Tombol notifikasi dan Baru di bagian atas kini rata kanan',
+    'Kolom pencarian melebar mengikuti ukuran layar, tombol di kanan sejajar',
     'Persentase kuota besar (TB) tampil <1%, bukan 0%',
   ] },
   { v: '2026.11.02c', date: '2026-11-02', title: 'Dibagikan ke saya lebih lengkap & cepat', items: [
