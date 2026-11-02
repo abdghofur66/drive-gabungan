@@ -421,6 +421,12 @@ body:has(.selbar) .fab{display:none!important}
 .rows{display:flex;flex-direction:column}
 .rows .r{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:8px;border-radius:12px;cursor:pointer;text-align:left;width:100%}
 .rows .r:hover{background:var(--sunk)}
+.rows .rw{display:flex;align-items:center;gap:2px}
+.rows .rw .r{flex:1;min-width:0}
+.rows .loc{flex:none;color:var(--ink2)}
+.rows .loc:hover{color:var(--pri)}
+.it.flash{animation:flash 2.2s var(--ease)}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--pri);border-color:var(--pri)}100%{box-shadow:0 0 0 0 transparent}}
 .rows .th{width:38px;height:38px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;overflow:hidden;position:relative}
 .rows .th img{width:100%;height:100%;object-fit:cover}
 .rows .th .ft{width:22px;height:22px}
@@ -961,13 +967,20 @@ function openSpecial(sp) {
 }
 document.querySelectorAll('.nav [data-sp]').forEach((b) => (b.onclick = () => openSpecial(b.dataset.sp)));
 function specialBar() {
-  const on = S.page === 'files' && S.special && !S.path.length;
+  const root = S.page === 'files' && !S.path.length;
+  const on = root && S.special, allOn = root && !S.special;
   const pick = $('#accPick');
-  pick.classList.toggle('hidden', !on);
+  pick.classList.toggle('hidden', !(on || allOn));
   $('#emptyTrash').classList.toggle('hidden', !(on && S.special === 'trash'));
-  if (on) pick.innerHTML = S.accounts.filter((a) => !a.error).map((a) => `<option value="${a.id}" ${a.id == S.acc ? 'selected' : ''}>${esc(a.email)}</option>`).join('');
+  const opts = S.accounts.filter((a) => !a.error).map((a) => `<option value="${a.id}" ${a.id == S.acc ? 'selected' : ''}>${esc(a.email)}</option>`).join('');
+  if (on) pick.innerHTML = opts;
+  else if (allOn) pick.innerHTML = `<option value="all" ${S.acc === 'all' ? 'selected' : ''}>Semua akun</option>` + opts;
 }
-$('#accPick').onchange = () => { S.acc = Number($('#accPick').value); store('acc_' + S.special, S.acc); load(); };
+$('#accPick').onchange = () => {
+  const v = $('#accPick').value;
+  if (!S.special) { S.acc = v === 'all' ? 'all' : Number(v); clearSearch(false); return go('files'); }
+  S.acc = Number(v); store('acc_' + S.special, S.acc); load();
+};
 $('#emptyTrash').onclick = () => {
   const a = accOf(S.acc);
   dialog({
@@ -984,8 +997,9 @@ function greet() { const h = new Date().getHours(); return h < 11 ? 'Selamat pag
 function fileRow(f, i, meta, bar) {
   const a = accOf(f.acc);
   const th = f.hasThumb ? `<img loading="lazy" alt="" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.outerHTML=glyph('${esc(f.mimeType)}')">` : glyph(f.mimeType);
-  return `<button class="r" data-v="${i}"><div class="th">${th}<span class="tag" style="background:${a.color}"></span></div>
-    <div class="n"><b>${esc(f.name)}</b><span>${esc((a.email || '').split('@')[0])}</span>${bar || ''}</div><div class="m">${meta}</div></button>`;
+  return `<div class="rw"><button class="r" data-v="${i}"><div class="th">${th}<span class="tag" style="background:${a.color}"></span></div>
+    <div class="n"><b>${esc(f.name)}</b><span>${esc((a.email || '').split('@')[0])}</span>${bar || ''}</div><div class="m">${meta}</div></button>
+    <button class="icon-btn loc" data-loc="${i}" title="Buka lokasi file" aria-label="Buka lokasi ${esc(f.name)}">${ic('move')}</button></div>`;
 }
 async function loadDash() {
   const my = ++dashSeq; const d$ = $('#dash');
@@ -1083,6 +1097,7 @@ $('#dash').addEventListener('click', (e) => {
   if (t.dataset.open) return openAccount(t.dataset.open);
   if (t.dataset.dc) return disconnect(t.dataset.dc);
   if (t.dataset.re) return (location.href = '/oauth/start');
+  if (t.dataset.loc != null) return openLocation(S.dashFiles[Number(t.dataset.loc)]);
   if (t.dataset.v != null) { view = S.dashFiles; return viewer(Number(t.dataset.v)); }
   if (t.dataset.a) openAccount(t.dataset.a);
 });
@@ -1217,6 +1232,27 @@ function render() {
     </div>`;
   }).join('');
   selbar();
+  focusItem();
+}
+
+// ---------- buka lokasi file (dari beranda) ----------
+async function openLocation(f) {
+  if (!f) return;
+  toast('Membuka lokasi…');
+  let chain = [];
+  try { chain = (await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`)).path || []; } catch (e) { return toast(e.message); }
+  S.special = null; S.acc = f.acc; S.path = chain.map((c) => ({ id: c.id, name: c.name, acc: f.acc }));
+  S.focus = f.id; clearSearch(false); go('files');
+}
+function focusItem() {
+  if (!S.focus) return;
+  const i = view.findIndex((x) => x.id === S.focus);
+  S.focus = null;
+  if (i < 0) return;
+  const el = $(`#files .it[data-i="${i}"]`);
+  if (!el) return;
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2400);
 }
 
 // ---------- pilih banyak ----------

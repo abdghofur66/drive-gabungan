@@ -1098,6 +1098,21 @@ async function route(req, env) {
     return json({ ok: true });
   }
 
+  // Rantai folder induk sebuah file (untuk "Buka lokasi"), tanpa folder root Drive Saya
+  if (p === '/api/path') {
+    const a = await getAcc(env, qp('acc'));
+    const f = await gjson(env, a, `/files/${encodeURIComponent(qp('id'))}?fields=parents`);
+    const path = [];
+    let pid = f.parents?.[0];
+    for (let n = 0; pid && n < 25; n++) {
+      const d = await gjson(env, a, `/files/${encodeURIComponent(pid)}?fields=id,name,parents`).catch(() => null);
+      if (!d || !d.parents?.length) break; // root Drive Saya, atau folder yang tidak bisa diakses
+      path.unshift({ id: d.id, name: d.name });
+      pid = d.parents[0];
+    }
+    return json({ path });
+  }
+
   if (p === '/api/overview') {
     const accs = await allAcc(env);
     const recent = [], largest = [], errors = [];
