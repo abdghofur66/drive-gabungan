@@ -677,16 +677,17 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
   const query = parts.join(' and ');
   const files = [];
   const errors = [];
+  let next = null;
   await Promise.all(accs.map(async (a) => {
     try {
-      let pt = '';
       const shared = folder === 'shared' && !q;
       const orphan = folder === 'orphan';
       const special = ['shared', 'trash', 'starred'].includes(folder) && !q;
-      // Dibagikan ke saya bisa berisi ribuan item: ambil sampai 5 halaman, bukan hanya 300 terbaru
-      for (let i = 0; i < (shared ? 5 : special ? 1 : orphan ? 10 : 5); i++) {
+      // Dibagikan ke saya: satu halaman 200 item per permintaan; sisanya dimuat saat digulir (opt.page)
+      let pt = shared ? opt.page || '' : '';
+      for (let i = 0; i < (special ? 1 : orphan ? 10 : 5); i++) {
         const p = new URLSearchParams({
-          q: query, pageSize: special && !shared ? '300' : '1000',
+          q: query, pageSize: shared ? '200' : special ? '300' : '1000',
           orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : orphan ? 'quotaBytesUsed desc' : 'folder,name',
           fields: 'nextPageToken,files(parents,id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
         });
@@ -698,6 +699,7 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
           files.push({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
         }
         pt = d.nextPageToken;
+        if (shared) next = pt || null;
         if (!pt) break;
       }
     } catch (e) {
@@ -705,8 +707,8 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
     }
   }));
   if (folder === 'orphan') files.sort((x, y) => Number(y.size || 0) - Number(x.size || 0));
-  else files.sort((x, y) => (y.mimeType === FOLDER) - (x.mimeType === FOLDER) || x.name.localeCompare(y.name, 'id', { numeric: true }));
-  return { files, errors };
+  else if (!(folder === 'shared' && !q)) files.sort((x, y) => (y.mimeType === FOLDER) - (x.mimeType === FOLDER) || x.name.localeCompare(y.name, 'id', { numeric: true }));
+  return { files, errors, next };
 }
 
 // ---------- router ----------
@@ -1160,7 +1162,7 @@ async function route(req, env) {
   }
 
   if (p === '/api/files') {
-    return json(await listFiles(env, qp('acc') || 'all', qp('folder'), (qp('q') || '').trim(), qp('type'), { content: qp('content') === '1', after: qp('after'), owner: qp('owner') }));
+    return json(await listFiles(env, qp('acc') || 'all', qp('folder'), (qp('q') || '').trim(), qp('type'), { content: qp('content') === '1', after: qp('after'), owner: qp('owner'), page: qp('page') }));
   }
 
   if (p === '/api/thumb') {
