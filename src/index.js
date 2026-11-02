@@ -671,6 +671,7 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
   else if (folder === 'shared') parts.push('sharedWithMe = true');
   else if (folder === 'starred') parts.push('starred = true');
   else if (folder === 'trash') { /* semua isi sampah */ }
+  else if (folder === 'orphan') parts.push(`'me' in owners`, `mimeType != '${FOLDER}'`); // disaring: tanpa folder induk
   else parts.push(`'${qesc(folder || 'root')}' in parents`);
   if (TYPE_Q[type]) parts.push(TYPE_Q[type]);
   const query = parts.join(' and ');
@@ -680,17 +681,21 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
     try {
       let pt = '';
       const shared = folder === 'shared' && !q;
+      const orphan = folder === 'orphan';
       const special = ['shared', 'trash', 'starred'].includes(folder) && !q;
-      for (let i = 0; i < (special ? 1 : 5); i++) {
+      for (let i = 0; i < (special ? 1 : orphan ? 10 : 5); i++) {
         const p = new URLSearchParams({
           q: query, pageSize: special ? '300' : '1000',
-          orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : 'folder,name',
-          fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
+          orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : orphan ? 'quotaBytesUsed desc' : 'folder,name',
+          fields: 'nextPageToken,files(parents,id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
         });
         if (pt) p.set('pageToken', pt);
         if (q && opt.content) p.delete('orderBy'); // Google: pencarian isi tidak bisa diurutkan
         const d = await gjson(env, a, '/files?' + p);
-        for (const { thumbnailLink, ...f } of d.files || []) files.push({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
+        for (const { thumbnailLink, parents, ...f } of d.files || []) {
+          if (orphan && parents?.length) continue;
+          files.push({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
+        }
         pt = d.nextPageToken;
         if (!pt) break;
       }
@@ -698,7 +703,8 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
       errors.push(`${a.email}: ${e.message}`);
     }
   }));
-  files.sort((x, y) => (y.mimeType === FOLDER) - (x.mimeType === FOLDER) || x.name.localeCompare(y.name, 'id', { numeric: true }));
+  if (folder === 'orphan') files.sort((x, y) => Number(y.size || 0) - Number(x.size || 0));
+  else files.sort((x, y) => (y.mimeType === FOLDER) - (x.mimeType === FOLDER) || x.name.localeCompare(y.name, 'id', { numeric: true }));
   return { files, errors };
 }
 
@@ -1354,7 +1360,8 @@ async function route(req, env) {
     const id = encodeURIComponent(b.id);
     if (b.id === b.to) throw new HttpError(400, 'Tidak bisa memindah folder ke dirinya sendiri');
     const meta = await gjson(env, a, `/files/${id}?fields=parents`);
-    const q = new URLSearchParams({ addParents: b.to || 'root', removeParents: (meta.parents || []).join(','), fields: 'id' });
+    const q = new URLSearchParams({ addParents: b.to || 'root', fields: 'id' });
+    if (meta.parents?.length) q.set('removeParents', meta.parents.join(',')); // file tanpa folder tidak punya induk lama
     await gjson(env, a, `/files/${id}?${q}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: '{}' });
     return json({ ok: true });
   }

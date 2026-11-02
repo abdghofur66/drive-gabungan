@@ -669,6 +669,7 @@ footer img{width:18px;height:18px}
       <button id="navFiles"><svg class="i"><use href="#i-grid"/></svg>Semua file</button>
       <button id="navShared" data-sp="shared"><svg class="i"><use href="#i-share"/></svg>Dibagikan ke saya</button>
       <button id="navStarred" data-sp="starred"><svg class="i"><use href="#i-star"/></svg>Berbintang</button>
+      <button id="navOrphan" data-sp="orphan"><svg class="i"><use href="#i-fnew"/></svg>Tanpa folder<span class="newtag" data-new="orphan">Baru</span></button>
       <button id="navTrash" data-sp="trash"><svg class="i"><use href="#i-trash"/></svg>Sampah</button>
       <button id="navLinks"><svg class="i"><use href="#i-link"/></svg>Link berbagi<span class="newtag" data-new="links">Baru</span></button>
       <button id="navBackup"><svg class="i"><use href="#i-backup"/></svg>Cadangan<span class="newtag" data-new="backup">Baru</span></button>
@@ -795,7 +796,7 @@ function avatar(a, size = 28, ring = true) {
     : `<span class="avt" style="${st};background:${a.color};font-size:${Math.round(size * 0.45)}px" title="${esc(a.email)}">${esc(a.email[0].toUpperCase())}</span>`;
 }
 // tanda "Baru" untuk fitur baru; hilang setelah fitur dicoba
-const NEWF = ['links', 'backup', 'pins', 'bell', 'search', 'transfer', 'details'];
+const NEWF = ['links', 'backup', 'pins', 'bell', 'search', 'transfer', 'details', 'orphan'];
 const isNew = (k) => NEWF.includes(k) && !store('seen_' + k);
 const newTag = (k) => (isNew(k) ? '<span class="newtag">Baru</span>' : '');
 function seen(k) { if (!isNew(k)) return; store('seen_' + k, 1); document.querySelectorAll(`[data-new="${k}"]`).forEach((x) => x.remove()); }
@@ -963,6 +964,7 @@ function openSpecial(sp) {
   const ok = S.accounts.filter((a) => !a.error);
   if (!ok.length) return toast('Hubungkan akun Google dulu');
   const last = store('acc_' + sp);
+  if (sp === 'orphan') seen('orphan');
   S.special = sp; S.acc = ok.some((a) => a.id == last) ? Number(last) : ok[0].id;
   S.path = []; clearSearch(false); go('files');
 }
@@ -1164,6 +1166,10 @@ async function load() {
     if (my !== seq) return;
     S.files = d.files;
     $('#notes').innerHTML = d.errors.map((x) => `<div class="notice">${esc(x)}</div>`).join('');
+    if (S.special === 'orphan' && !S.q && d.files.length) {
+      const tot = d.files.reduce((n, f) => n + Number(f.size || 0), 0);
+      $('#notes').insertAdjacentHTML('beforeend', `<div class="notice">${d.files.length} file tanpa folder memakai ${fmt(tot)}. Biasanya berasal dari Google Foto atau dari folder yang sudah dihapus. Lewat menu ⋮ Anda bisa memindahkannya ke folder atau menghapusnya untuk melegakan ruang.</div>`);
+    }
     render();
     if (S.found && !S.found.scrolled) { toast('File tidak ditemukan di folder ini'); S.found = null; }
   } catch (e) {
@@ -1179,7 +1185,7 @@ function sorted() {
   return f;
 }
 function renderCrumbs() {
-  const SP = { shared: 'Dibagikan ke saya', starred: 'Berbintang', trash: 'Sampah' };
+  const SP = { shared: 'Dibagikan ke saya', starred: 'Berbintang', trash: 'Sampah', orphan: 'Tanpa folder' };
   const root = S.special ? SP[S.special] : S.acc === 'all' ? 'Semua Drive' : (accOf(S.acc).email || 'Drive').split('@')[0];
   let h = `<button data-i="-1">${esc(root)}</button>`;
   S.path.forEach((f, i) => (h += `<span class="sep">/</span><button data-i="${i}">${esc(f.name)}</button>`));
@@ -1244,14 +1250,12 @@ async function openLocation(f, dashIdx) {
   let chain = [], shared = false, orphan = false;
   try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; orphan = !!d.orphan; } catch (e) { return toast(e.message); }
   if (orphan) {
-    // File tanpa folder (biasanya dari Google Foto): tidak ada lokasi untuk dibuka, tampilkan pratinjaunya
-    dialog({
-      title: 'File ini tidak berada di folder mana pun',
-      desc: `"${f.name}" tersimpan di ${accOf(f.acc).email} tetapi tidak ada di folder mana pun, biasanya karena masuk dari Google Foto. Anda tetap bisa membukanya, memindahkannya ke folder, atau menghapusnya.`,
-      ok: 'Buka file', cancel: 'Tutup',
-      run: async () => { if (dashIdx != null) setTimeout(() => { view = S.dashFiles; viewer(dashIdx); }, 0); },
-    });
-    return;
+    // File tanpa folder (biasanya dari Google Foto): buka menu "Tanpa folder" dan sorot file-nya
+    toast('File ini tidak berada di folder mana pun, ditampilkan di menu Tanpa folder');
+    seen('orphan');
+    S.found = { id: f.id, acc: f.acc, folder: 'orphan', special: 'orphan', scrolled: false };
+    S.special = 'orphan'; S.acc = f.acc; S.path = []; if (S.type) { S.type = ''; renderChips(); }
+    clearSearch(false); return go('files');
   }
   if (shared) {
     S.found = { id: f.id, acc: f.acc, folder: 'shared', special: 'shared', scrolled: false };
@@ -1439,6 +1443,7 @@ function showEmpty() {
       shared: ['share', 'Belum ada yang dibagikan', `File dan folder yang dibagikan orang lain ke ${em} muncul di sini.`],
       starred: ['star', 'Belum ada yang berbintang', `Beri bintang lewat menu ⋮ agar file penting di ${em} mudah ditemukan.`],
       trash: ['trash', 'Sampah kosong', `Item yang dihapus dari ${em} tersimpan di sini sebelum dihapus selamanya.`],
+      orphan: ['fnew', 'Semua file punya folder', `Tidak ada file tanpa folder di ${em}. File dari Google Foto atau yang foldernya sudah dihapus biasanya muncul di sini.`],
     }[S.special];
     e.innerHTML = `<div><div class="art">${ic(E[0])}</div><h3>${E[1]}</h3><p>${E[2]}</p></div>`;
   } else if (S.q) {
