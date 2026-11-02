@@ -422,6 +422,11 @@ body:has(.selbar) .fab{display:none!important}
 .rows .r{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:8px;border-radius:12px;cursor:pointer;text-align:left;width:100%}
 .rows .r:hover{background:var(--sunk)}
 .rows .rw{display:flex;align-items:center;gap:2px}
+.bigchips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.bigchips::-webkit-scrollbar{display:none}
+.bigchips .chip{flex:none;display:inline-flex;align-items:center;gap:6px}
+.bigchips .sw{width:9px;height:9px;border-radius:50%}
+.bigmanage{margin-top:10px;width:100%;justify-content:center}
 .rows .rw .r{flex:1;min-width:0}
 .rows .loc{flex:none;color:var(--ink2)}
 .rows .loc:hover{color:var(--pri)}
@@ -580,6 +585,9 @@ footer img{width:18px;height:18px}
   @keyframes sheet{from{transform:translateY(100%)}}
   .menu.sheet button{padding:14px 12px;font-size:15px}
   .tray{left:12px;right:12px;width:auto;bottom:calc(88px + env(safe-area-inset-bottom))}
+  .dialog .acts{flex-wrap:wrap}
+  .dialog .acts .btn{flex:1 1 auto;justify-content:center;white-space:normal;text-align:center;min-height:44px;height:auto;padding-block:8px}
+  .dialog .acts [data-ok]{flex-basis:100%;order:3}
   .viewer .nav{display:none}
 }
 </style>
@@ -754,7 +762,7 @@ footer img{width:18px;height:18px}
 const $ = (s) => document.querySelector(s);
 const FOLDER = 'application/vnd.google-apps.folder';
 const CHUNK = 8 * 1024 * 1024;
-const S = { f: { content: false, when: '', size: '', owner: '' }, pins: [], special: null, sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
+const S = { f: { content: false, when: '', size: '', owner: '' }, pins: [], special: null, sel: new Set(), selItems: new Map(), page: 'home', dashFiles: [], bigAcc: (() => { try { const v = localStorage.getItem('dg_bigAcc'); return v && v !== 'all' ? Number(v) : 'all'; } catch { return 'all'; } })(), acc: 'all', path: [], files: [], accounts: [], q: '', type: '', sort: 'name',
   view: store('view') || 'grid', state: null };
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
@@ -997,6 +1005,23 @@ $('#navFiles').onclick = () => { S.special = null; S.acc = 'all'; S.path = []; c
 // ---------- beranda / dashboard ----------
 let dashSeq = 0;
 function greet() { const h = new Date().getHours(); return h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 18 ? 'Selamat sore' : 'Selamat malam'; }
+// File terbesar: hanya milik sendiri (yang memakai kuota), bisa dipilah per akun
+function bigCard(d) {
+  const accs = S.accounts.filter((a) => !a.error);
+  if (S.bigAcc !== 'all' && !accs.some((a) => a.id == S.bigAcc)) S.bigAcc = 'all';
+  const pick = d.largest.map((f, i) => ({ f, i: d.recent.length + i })).filter((x) => S.bigAcc === 'all' || x.f.acc == S.bigAcc);
+  const top = pick.slice(0, 8);
+  const maxBig = Math.max(1, ...top.map((x) => Number(x.f.size || 0)));
+  const sumAcc = (id) => d.largest.filter((f) => f.acc == id).reduce((n, f) => n + Number(f.size || 0), 0);
+  const chips = `<div class="bigchips"><button class="chip ${S.bigAcc === 'all' ? 'on' : ''}" data-bigacc="all">Semua akun</button>` +
+    accs.map((a) => `<button class="chip ${S.bigAcc == a.id ? 'on' : ''}" data-bigacc="${a.id}"><span class="sw" style="background:${a.color}"></span>${esc((a.email || '').split('@')[0])}</button>`).join('') + '</div>';
+  const a = S.bigAcc === 'all' ? null : accOf(S.bigAcc);
+  const sub = a ? `${pick.length} file terbesar di ${esc(a.email)} memakai ${fmt(sumAcc(a.id))} dari ${fmt(a.usage || 0)} terpakai.` : 'File milik Anda yang paling memakan kuota. Pilih akun untuk merinci.';
+  const rows = top.map((x) => fileRow(x.f, x.i, fmt(x.f.size), `<div class="bigbar"><i style="width:${(Number(x.f.size || 0) / maxBig) * 100}%;background:${accOf(x.f.acc).color}"></i></div>`)).join('');
+  return `<h3>File terbesar</h3><p class="sub">${sub}</p>${chips}
+    <div class="rows">${rows || '<p class="muted small">Belum ada file.</p>'}</div>
+    ${a && pick.length ? `<button class="btn ghost bigmanage" data-bigmanage="${a.id}">${ic('trash')}Kelola ${pick.length} file terbesar akun ini</button>` : ''}`;
+}
 function fileRow(f, i, meta, bar) {
   const a = accOf(f.acc);
   const th = f.hasThumb ? `<img loading="lazy" alt="" src="/api/thumb?acc=${f.acc}&id=${encodeURIComponent(f.id)}" onerror="this.outerHTML=glyph('${esc(f.mimeType)}')">` : glyph(f.mimeType);
@@ -1045,7 +1070,7 @@ async function loadDash() {
     off += len; return s;
   }).join('');
 
-  const maxBig = Math.max(1, ...d.largest.map((f) => Number(f.size || 0)));
+  S.dashData = d;
   S.dashFiles = [...d.recent, ...d.largest];
 
   d$.innerHTML = `
@@ -1074,8 +1099,7 @@ async function loadDash() {
 
     <div class="card c-list"><h3>Terakhir diubah</h3><p class="sub">Dari semua akun.</p>
       <div class="rows">${d.recent.map((f, i) => fileRow(f, i, ago(f.modifiedTime))).join('') || '<p class="muted small">Belum ada file.</p>'}</div></div>
-    <div class="card c-list"><h3>File terbesar</h3><p class="sub">Kandidat yang paling melegakan jika dipindah atau dihapus.</p>
-      <div class="rows">${d.largest.map((f, i) => fileRow(f, d.recent.length + i, fmt(f.size), `<div class="bigbar"><i style="width:${(Number(f.size || 0) / maxBig) * 100}%;background:${accOf(f.acc).color}"></i></div>`)).join('') || '<p class="muted small">Belum ada file.</p>'}</div></div>
+    <div class="card c-list" id="bigCard">${bigCard(d)}</div>
 
     <div class="card c-tips" id="tips"><h3>Saran merapikan ruang</h3><p class="sub">Menganalisis file di semua akun…</p><div class="sk" style="height:90px"></div></div>
     <div class="card c-act" id="actv"><h3>Aktivitas terbaru</h3><p class="sub">Yang dilakukan lewat Drive Gabungan.</p><div class="sk" style="height:90px"></div></div>
@@ -1100,6 +1124,11 @@ $('#dash').addEventListener('click', (e) => {
   if (t.dataset.open) return openAccount(t.dataset.open);
   if (t.dataset.dc) return disconnect(t.dataset.dc);
   if (t.dataset.re) return (location.href = '/oauth/start');
+  if (t.dataset.bigacc != null) { S.bigAcc = t.dataset.bigacc === 'all' ? 'all' : Number(t.dataset.bigacc); store('bigAcc', S.bigAcc); return ($('#bigCard').innerHTML = bigCard(S.dashData)); }
+  if (t.dataset.bigmanage != null) {
+    const id = Number(t.dataset.bigmanage), a = accOf(id);
+    return reviewList('File terbesar di ' + a.email, 'Centang file, lalu pindahkan ke akun lain yang lebih lega atau buang ke sampah.', [{ files: S.dashData.largest.filter((f) => f.acc == id) }]);
+  }
   if (t.dataset.loc != null) return openLocation(S.dashFiles[Number(t.dataset.loc)], Number(t.dataset.loc));
   if (t.dataset.v != null) { view = S.dashFiles; return viewer(Number(t.dataset.v)); }
   if (t.dataset.a) openAccount(t.dataset.a);

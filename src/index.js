@@ -1137,7 +1137,7 @@ async function route(req, env) {
       try {
         const [r, l] = await Promise.all([
           gjson(env, a, `/files?q=${q}&orderBy=modifiedTime desc&pageSize=8&fields=${F}`),
-          gjson(env, a, `/files?q=${q}&orderBy=quotaBytesUsed desc&pageSize=8&fields=${F}`),
+          gjson(env, a, `/files?q=${encodeURIComponent(`trashed=false and mimeType!='${FOLDER}' and 'me' in owners`)}&orderBy=quotaBytesUsed desc&pageSize=15&fields=${F}`),
         ]);
         const tag = ({ thumbnailLink, ...f }) => ({ ...f, hasThumb: !!thumbnailLink, acc: a.id });
         recent.push(...(r.files || []).map(tag));
@@ -1146,7 +1146,8 @@ async function route(req, env) {
     }));
     recent.sort((x, y) => new Date(y.modifiedTime) - new Date(x.modifiedTime));
     largest.sort((x, y) => Number(y.size || 0) - Number(x.size || 0));
-    return json({ accounts: await quotas(env), recent: recent.slice(0, 8), largest: largest.slice(0, 8), errors });
+    // largest: 15 file terbesar milik sendiri per akun (yang memakai kuota), dipilah di tampilan
+    return json({ accounts: await quotas(env), recent: recent.slice(0, 8), largest, errors });
   }
 
   if (p === '/api/accounts' && m === 'DELETE') {
