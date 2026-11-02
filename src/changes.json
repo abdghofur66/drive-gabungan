@@ -1,0 +1,55 @@
+[
+  {
+    "v": "2026.11.02e",
+    "date": "2026-11-02",
+    "title": "Pembaruan sekali klik",
+    "items": [
+      "Notifikasi muncul saat ada versi baru Drive Gabungan",
+      "Tombol Perbarui sekarang menjalankan pembaruan langsung dari aplikasi",
+      "Cukup atur sekali: nama repo dan token GitHub dengan izin Actions"
+    ]
+  },
+  {
+    "v": "2026.11.02d",
+    "date": "2026-11-02",
+    "title": "Tampilan laptop lebih rapi",
+    "items": [
+      "Kolom pencarian melebar mengikuti ukuran layar, tombol di kanan sejajar",
+      "Persentase kuota besar (TB) tampil <1%, bukan 0%",
+      "Tampilan daftar (list) di laptop kembali rapi, nama file tidak terdorong ke kanan",
+      "Kartu folder: nama lebih lega, foto akun tidak menutupi tulisan",
+      "Scrollbar ikut tema gelap",
+      "Lonceng notifikasi kembali bisa dibuka di laptop"
+    ]
+  },
+  {
+    "v": "2026.11.02c",
+    "date": "2026-11-02",
+    "title": "Dibagikan ke saya lebih lengkap & cepat",
+    "items": [
+      "Semua item yang dibagikan kini muncul, tidak lagi terbatas 300 item",
+      "Dimuat bertahap saat digulir, jadi tampil lebih cepat",
+      "Urutan bawaan: terbaru dibagikan, seperti Google Drive"
+    ]
+  },
+  {
+    "v": "2026.11.02b",
+    "date": "2026-11-02",
+    "title": "File terbesar per akun",
+    "items": [
+      "Hanya file milik Anda yang memakan kuota, file bagikan tidak ikut",
+      "Pilih akun untuk merinci, lalu kelola: pindah akun atau buang ke sampah"
+    ]
+  },
+  {
+    "v": "2026.11.02a",
+    "date": "2026-11-02",
+    "title": "Buka lokasi file & menu Tanpa folder",
+    "items": [
+      "Tombol folder di Beranda membuka tempat file berada dan menyorotnya",
+      "File di folder bagikan dibuka lewat Dibagikan ke saya",
+      "Menu baru Tanpa folder untuk file yang tidak berada di folder mana pun",
+      "Pilihan akun di Semua Drive, tampilan HP lebih rapi"
+    ]
+  }
+]

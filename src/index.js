@@ -1,7 +1,13 @@
 // Drive Gabungan — menggabungkan beberapa akun Google Drive dalam satu penampil.
 // Cloudflare Worker + D1. Satu instance = satu pemilik (self-host).
 // Developed by OutsiderDev — https://outsiderdev.com
-import HTML from './ui.html';
+import UI_HTML from './ui.html';
+import CHANGES from './changes.json';
+// Catatan pembaruan disisipkan ke halaman; versi aplikasi = entri teratas
+const HTML = UI_HTML.replace('__CHANGES__', JSON.stringify(CHANGES).replace(/</g, '\\u003c'));
+const VERSION = CHANGES[0]?.v || '0';
+const UPSTREAM_CHANGES = 'https://raw.githubusercontent.com/abdghofur66/drive-gabungan/main/src/changes.json';
+const GH = (token) => ({ authorization: 'Bearer ' + token, accept: 'application/vnd.github+json', 'user-agent': 'drive-gabungan', 'x-github-api-version': '2022-11-28' });
 import PANDUAN from './panduan.html';
 import TENTANG from './tentang.html';
 import * as ICONS from './icons.js';
@@ -1008,6 +1014,50 @@ async function route(req, env) {
   }
 
   // ----- sematan sidebar -----
+  // ----- pembaruan aplikasi dari repo sumber -----
+  if (p === '/api/update' && m === 'GET') {
+    let cache = JSON.parse((await getSetting(env, 'upd_cache')) || 'null');
+    if (!cache || Date.now() - cache.ts > 6 * 3600e3 || qp('force') === '1') {
+      try {
+        const r = await fetch(UPSTREAM_CHANGES, { headers: { 'user-agent': 'drive-gabungan' }, cf: { cacheTtl: 600 } });
+        if (r.ok) { cache = { ts: Date.now(), list: (await r.json()).slice(0, 20) }; await setSetting(env, 'upd_cache', JSON.stringify(cache)); }
+      } catch (e) { /* offline: pakai cache lama */ }
+    }
+    const list = cache?.list || [];
+    const idx = list.findIndex((c) => c.v === VERSION);
+    const newer = idx < 0 ? list.slice(0, 3) : list.slice(0, idx);
+    const repo = (await getSetting(env, 'upd_repo')) || '';
+    return json({ current: VERSION, available: newer.length > 0 && list.length > 0, newer, repo, hasToken: !!(await getSetting(env, 'upd_token')), running: Number((await getSetting(env, 'upd_running')) || 0) });
+  }
+  if (p === '/api/update/config' && m === 'POST') {
+    const b = await body(req);
+    const repo = String(b.repo || '').trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$|\/$/g, '');
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new HttpError(400, 'Tulis repo dengan format akun/nama-repo, misalnya budi/drive-saya');
+    const token = String(b.token || '').trim() || (await getSetting(env, 'upd_token'));
+    if (!token) throw new HttpError(400, 'Isi token GitHub');
+    const r = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/sinkron-update.yml`, { headers: GH(token) });
+    if (r.status === 401) throw new HttpError(400, 'Token GitHub tidak valid atau sudah kedaluwarsa');
+    if (r.status === 404) throw new HttpError(400, 'Repo atau workflow "Sinkron update" tidak ditemukan. Pastikan nama repo benar dan token diberi akses ke repo itu.');
+    if (!r.ok) throw new HttpError(400, 'GitHub menolak: ' + r.status);
+    await setSetting(env, 'upd_repo', repo);
+    if (b.token) await setSetting(env, 'upd_token', String(b.token).trim());
+    await logAct(env, 'update', 'Mengatur pembaruan sekali klik untuk ' + repo);
+    return json({ ok: true, repo });
+  }
+  if (p === '/api/update/run' && m === 'POST') {
+    const repo = await getSetting(env, 'upd_repo'), token = await getSetting(env, 'upd_token');
+    if (!repo || !token) throw new HttpError(400, 'Atur repo dan token GitHub dulu');
+    const info = await fetch(`https://api.github.com/repos/${repo}`, { headers: GH(token) });
+    if (!info.ok) throw new HttpError(400, 'Tidak bisa membaca repo ' + repo + ' (' + info.status + ')');
+    const ref = (await info.json()).default_branch || 'main';
+    const r = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/sinkron-update.yml/dispatches`, { method: 'POST', headers: { ...GH(token), 'content-type': 'application/json' }, body: JSON.stringify({ ref }) });
+    if (r.status === 403 || r.status === 404) throw new HttpError(400, 'Token belum punya izin Actions: Read and write untuk repo ini');
+    if (!r.ok) throw new HttpError(400, 'Gagal menjalankan pembaruan: ' + r.status);
+    await setSetting(env, 'upd_running', String(Date.now()));
+    await logAct(env, 'update', 'Menjalankan pembaruan aplikasi');
+    return json({ ok: true });
+  }
+
   if (p === '/api/pins') {
     if (m === 'POST') { const b = await body(req); await setSetting(env, 'pins', JSON.stringify((b.pins || []).slice(0, 30))); return json({ ok: true }); }
     return json({ pins: JSON.parse((await getSetting(env, 'pins')) || '[]') });

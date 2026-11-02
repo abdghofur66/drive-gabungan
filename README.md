@@ -46,6 +46,11 @@ Developed by [OutsiderDev](https://outsiderdev.com)
 6. **Audience → Publish app** → status **In production**.
    ⚠️ Jangan biarkan di *Testing*: token kedaluwarsa tiap 7 hari. Tidak perlu mengajukan verifikasi.
 
+### Pembaruan
+- Otomatis setiap Senin lewat GitHub Action **Sinkron update** di repo-mu.
+- Saat ada versi baru, lonceng notifikasi di aplikasi menampilkan **Pembaruan tersedia**. Tombol **Perbarui sekarang** langsung menjalankan sinkron, setelah diatur sekali: isi nama repo (`akun/nama-repo`) dan **fine-grained token** GitHub yang hanya diberi akses ke repo itu dengan izin **Actions: Read and write**.
+- Tanpa token: buka tab **Actions → Sinkron update → Run workflow** di repo-mu.
+
 ### Domain sendiri (opsional)
 Jika domainmu sudah dikelola di Cloudflare:
 1. **Workers & Pages → project-mu → Domains → Add Domain** → pilih domain → isi subdomain (mis. `drive`) → **Add domain**.
