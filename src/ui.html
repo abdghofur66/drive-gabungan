@@ -152,7 +152,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .files.grid .more{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px);opacity:0;transition:opacity .15s}
 .files.grid .it:hover .more,.files.grid .more:focus-visible{opacity:1}
 .files.grid .it.folder .th{aspect-ratio:auto;height:64px;justify-content:start;padding:0 14px;grid-template-columns:auto 1fr;gap:10px}
-.files.grid .it.folder .nm{position:absolute;left:58px;right:40px;top:50%;transform:translateY(-50%);padding:0}
+.files.grid .it.folder .nm{position:absolute;left:68px;right:40px;top:50%;transform:translateY(-50%);padding:0}
 .files.grid .it.folder .sz{display:none}
 .files.grid .it.folder .nm small{display:block;font-size:11.5px;font-weight:500;color:var(--ink2);margin-top:1px}
 .files.grid .sz{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -551,6 +551,8 @@ footer img{width:18px;height:18px}
   .content{padding:0 14px 96px}
   .crumbs{font-size:17px}
   .files.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .files.grid .it.folder{grid-column:1/-1}
+  .files.grid .it.folder .th{height:58px}
   .files.grid .more{opacity:1}
   .files.list .it{grid-template-columns:26px 40px 1fr 36px}
   .files.list .star{display:none}
@@ -749,6 +751,7 @@ const S = { f: { content: false, when: '', size: '', owner: '' }, pins: [], spec
 
 function store(k, v) { try { if (v === undefined) return localStorage.getItem('dg_' + k); localStorage.setItem('dg_' + k, v); } catch (e) { return null; } }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function szl(f) { return Number(f.size) > 0 ? fmt(f.size) : '—'; }
 function fmt(b) {
   if (b == null || isNaN(b)) return '';
   const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; b = Number(b);
@@ -1207,7 +1210,7 @@ function render() {
       <button class="ck" data-ck="${i}" aria-label="Pilih ${esc(f.name)}" aria-pressed="${sel}">${small('check')}</button>
       <div class="th">${th}${dm ? `<span class="dur">${dur(Number(dm))}</span>` : ''}<span class="tag">${avatar(a, S.view === 'list' ? 14 : 20)}</span></div>
       <div class="nm">${esc(f.name)}${isF && S.view === 'grid' ? `<small>${whenL} ${when}</small>` : ''}</div>
-      <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : fmt(f.size)) : `${isF ? 'Folder' : fmt(f.size)} · ${when}`}${sharer ? `<br><span class="own">${small('share')}${esc(sharer.displayName || sharer.emailAddress)}</span>` : ''}</div>
+      <div class="sz">${S.view === 'list' ? (isF ? 'Folder' : szl(f)) : (isF ? 'Folder · ' + when : (Number(f.size) > 0 ? fmt(f.size) + ' · ' : '') + when)}${sharer ? `<br><span class="own">${small('share')}${esc(sharer.displayName || sharer.emailAddress)}</span>` : ''}</div>
       ${S.view === 'list' ? `<div class="dt" title="${whenL}">${when}</div>` : ''}
       ${f.starred && S.special !== 'trash' ? `<span class="star" title="Berbintang">${small('star')}</span>` : ''}
       <button class="icon-btn more" data-m="${i}" aria-label="Aksi untuk ${esc(f.name)}">${ic('dots')}</button>
@@ -2430,6 +2433,7 @@ async function takeShared() {
 }
 
 // ---------- mulai ----------
+if (matchMedia('(max-width:860px)').matches) $('#q').placeholder = 'Cari file';
 async function startApp() {
   $('#authView').classList.add('hidden'); $('#appView').classList.remove('hidden'); $('#fab').classList.remove('hidden');
   S.sort = store('sort') || 'name'; $('#sort').value = S.sort;
