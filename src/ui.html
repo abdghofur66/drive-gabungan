@@ -114,6 +114,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:14px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px)}
 #menuBtn,#moreBtn{display:none}
 .search{position:relative;flex:1;max-width:620px}
+.top #bellBtn{margin-left:auto}
 .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink3)}
 .search input{width:100%;height:48px;border-radius:999px;border:1.5px solid transparent;background:var(--surface);box-shadow:var(--shadow);padding:0 46px 0 48px;outline:none;transition:border-color .15s}
 .search input:focus{border-color:var(--pri)}
@@ -1059,7 +1060,8 @@ async function loadDash() {
   const lim = ok.reduce((s, a) => s + (a.limit || 0), 0);
   const trash = ok.reduce((s, a) => s + (a.trash || 0), 0);
   const free = Math.max(0, lim - use);
-  const pct = lim ? Math.round((use / lim) * 100) : 0;
+  const pctN = lim ? (use / lim) * 100 : 0;
+  const pct = use > 0 && pctN < 1 ? '&lt;1' : Math.round(pctN); // kuota TB: jangan tampil 0% padahal terpakai
   const bad = acc.filter((a) => a.error).length;
 
   if (!acc.length) {
@@ -1153,7 +1155,7 @@ function hiAcc(id) {
   document.querySelectorAll('#dash .legend button').forEach((b) => b.classList.toggle('hi', b.dataset.a == id));
   const mv = $('#dash [data-mv]'), ml = $('#dash [data-ml]'); if (!mv) return;
   if (a) { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0) || 1; mv.textContent = Math.round((a.usage / u) * 100) + '%'; ml.textContent = a.email; }
-  else { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0), l = ok.reduce((s, x) => s + (x.limit || 0), 0); mv.textContent = fmt(u); ml.textContent = l ? Math.round((u / l) * 100) + '% dari ' + fmt(l) : 'terpakai'; }
+  else { const ok = S.accounts.filter((x) => !x.error), u = ok.reduce((s, x) => s + x.usage, 0), l = ok.reduce((s, x) => s + (x.limit || 0), 0); mv.textContent = fmt(u); ml.textContent = l ? (u > 0 && u / l < 0.01 ? '<1' : Math.round((u / l) * 100)) + '% dari ' + fmt(l) : 'terpakai'; }
 }
 $('#dash').addEventListener('pointerover', (e) => { const t = e.target.closest('[data-a]'); if (t && t.closest('.donut,.legend')) hiAcc(t.dataset.a); });
 $('#dash').addEventListener('pointerout', (e) => { if (e.target.closest('.donut,.legend') && !e.relatedTarget?.closest?.('.donut,.legend')) hiAcc(null); });
@@ -2433,6 +2435,10 @@ $('#navLinks').onclick = () => { seen('links'); closeSide(); manageLinks(); };
 // ---------- notifikasi ----------
 // ---------- catatan pembaruan aplikasi (terbaru di atas; tambahkan entri baru setiap rilis) ----------
 const CHANGES = [
+  { v: '2026.11.02d', date: '2026-11-02', title: 'Tampilan laptop lebih rapi', items: [
+    'Tombol notifikasi dan Baru di bagian atas kini rata kanan',
+    'Persentase kuota besar (TB) tampil <1%, bukan 0%',
+  ] },
   { v: '2026.11.02c', date: '2026-11-02', title: 'Dibagikan ke saya lebih lengkap & cepat', items: [
     'Semua item yang dibagikan kini muncul, tidak lagi terbatas 300 item',
     'Dimuat bertahap saat digulir, jadi tampil lebih cepat',
