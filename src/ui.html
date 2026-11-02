@@ -978,6 +978,13 @@ function openSpecial(sp) {
 }
 document.querySelectorAll('.nav [data-sp]').forEach((b) => (b.onclick = () => openSpecial(b.dataset.sp)));
 function specialBar() {
+  // Urutan bawaan per menu: Dibagikan = terbaru dibagikan, Tanpa folder = terbesar, lainnya = pilihan tersimpan
+  const spKey = S.page === 'files' ? (S.special || '') : null;
+  if (spKey !== null && spKey !== S.sortFor) {
+    S.sortFor = spKey;
+    S.sort = spKey === 'shared' ? 'new' : spKey === 'orphan' ? 'big' : (store('sort') || 'name');
+    $('#sort').value = S.sort;
+  }
   const root = S.page === 'files' && !S.path.length;
   const on = root && S.special, allOn = root && !S.special;
   const pick = $('#accPick');
@@ -1208,7 +1215,8 @@ async function load() {
 function sorted() {
   const f = S.q && S.f.size ? S.files.filter((x) => Number(x.size || 0) >= Number(S.f.size) * 1024 * 1024) : [...S.files];
   const isF = (x) => (x.mimeType === FOLDER ? 0 : 1);
-  if (S.sort === 'new') f.sort((a, b) => isF(a) - isF(b) || new Date(b.modifiedTime) - new Date(a.modifiedTime));
+  const t = (x) => new Date((S.special === 'shared' && !S.path.length && x.sharedWithMeTime) || x.modifiedTime);
+  if (S.sort === 'new') f.sort((a, b) => isF(a) - isF(b) || t(b) - t(a));
   else if (S.sort === 'big') f.sort((a, b) => isF(a) - isF(b) || (b.size || 0) - (a.size || 0));
   else f.sort((a, b) => isF(a) - isF(b) || a.name.localeCompare(b.name, 'id', { numeric: true }));
   return f;
@@ -1518,7 +1526,7 @@ function setView(v) {
 }
 $('#vGrid').onclick = () => setView('grid');
 $('#vList').onclick = () => setView('list');
-$('#sort').onchange = () => { S.sort = $('#sort').value; store('sort', S.sort); render(); };
+$('#sort').onchange = () => { S.sort = $('#sort').value; if (!S.special) store('sort', S.sort); render(); };
 
 // ---------- pencarian (tombol X) ----------
 let qt;

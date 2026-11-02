@@ -683,9 +683,10 @@ async function listFiles(env, accId, folder, q, type, opt = {}) {
       const shared = folder === 'shared' && !q;
       const orphan = folder === 'orphan';
       const special = ['shared', 'trash', 'starred'].includes(folder) && !q;
-      for (let i = 0; i < (special ? 1 : orphan ? 10 : 5); i++) {
+      // Dibagikan ke saya bisa berisi ribuan item: ambil sampai 5 halaman, bukan hanya 300 terbaru
+      for (let i = 0; i < (shared ? 5 : special ? 1 : orphan ? 10 : 5); i++) {
         const p = new URLSearchParams({
-          q: query, pageSize: special ? '300' : '1000',
+          q: query, pageSize: special && !shared ? '300' : '1000',
           orderBy: shared ? 'sharedWithMeTime desc' : folder === 'trash' && !q ? 'modifiedTime desc' : orphan ? 'quotaBytesUsed desc' : 'folder,name',
           fields: 'nextPageToken,files(parents,id,name,mimeType,size,createdTime,modifiedTime,sharedWithMeTime,starred,trashed,thumbnailLink,webViewLink,ownedByMe,owners(displayName,emailAddress),sharingUser(displayName,emailAddress),videoMediaMetadata(durationMillis),imageMediaMetadata(width,height))',
         });
