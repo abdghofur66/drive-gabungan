@@ -1098,7 +1098,7 @@ $('#dash').addEventListener('click', (e) => {
   if (t.dataset.open) return openAccount(t.dataset.open);
   if (t.dataset.dc) return disconnect(t.dataset.dc);
   if (t.dataset.re) return (location.href = '/oauth/start');
-  if (t.dataset.loc != null) return openLocation(S.dashFiles[Number(t.dataset.loc)]);
+  if (t.dataset.loc != null) return openLocation(S.dashFiles[Number(t.dataset.loc)], Number(t.dataset.loc));
   if (t.dataset.v != null) { view = S.dashFiles; return viewer(Number(t.dataset.v)); }
   if (t.dataset.a) openAccount(t.dataset.a);
 });
@@ -1238,11 +1238,21 @@ function render() {
 }
 
 // ---------- buka lokasi file (dari beranda) ----------
-async function openLocation(f) {
+async function openLocation(f, dashIdx) {
   if (!f) return;
   toast('Mencari lokasi file…');
-  let chain = [], shared = false;
-  try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; } catch (e) { return toast(e.message); }
+  let chain = [], shared = false, orphan = false;
+  try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; orphan = !!d.orphan; } catch (e) { return toast(e.message); }
+  if (orphan) {
+    // File tanpa folder (biasanya dari Google Foto): tidak ada lokasi untuk dibuka, tampilkan pratinjaunya
+    dialog({
+      title: 'File ini tidak berada di folder mana pun',
+      desc: `"${f.name}" tersimpan di ${accOf(f.acc).email} tetapi tidak ada di folder mana pun, biasanya karena masuk dari Google Foto. Anda tetap bisa membukanya, memindahkannya ke folder, atau menghapusnya.`,
+      ok: 'Buka file', cancel: 'Tutup',
+      run: async () => { if (dashIdx != null) setTimeout(() => { view = S.dashFiles; viewer(dashIdx); }, 0); },
+    });
+    return;
+  }
   if (shared) {
     S.found = { id: f.id, acc: f.acc, folder: 'shared', special: 'shared', scrolled: false };
     S.special = 'shared'; S.acc = f.acc; S.path = []; if (S.type) { S.type = ''; renderChips(); }

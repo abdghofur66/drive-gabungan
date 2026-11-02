@@ -1113,7 +1113,9 @@ async function route(req, env) {
     }
     // File orang lain yang foldernya tidak ada di Drive Saya: tampilkan di "Dibagikan ke saya"
     const shared = f.ownedByMe === false && (!reachedRoot || !f.parents?.length);
-    return json({ path: shared ? [] : path, shared });
+    // Tanpa folder sama sekali (mis. masuk dari Google Foto): tidak tampil di folder mana pun
+    const orphan = !shared && !f.parents?.length;
+    return json({ path: shared ? [] : path, shared, orphan });
   }
 
   if (p === '/api/overview') {
