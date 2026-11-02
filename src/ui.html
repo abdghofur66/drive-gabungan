@@ -140,7 +140,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .notice{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,#f5a524 14%,var(--surface));border:1px solid color-mix(in srgb,#f5a524 40%,transparent);padding:10px 14px;border-radius:var(--r);margin-bottom:12px;font-size:13px}
 
 /* grid */
-.files.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.files.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .files.grid .it{background:var(--surface);border-radius:16px;overflow:hidden;cursor:pointer;position:relative;border:1px solid var(--line);transition:border-color .15s,box-shadow .2s,transform .2s var(--ease)}
 .files.grid .it:hover{border-color:color-mix(in srgb,var(--pri) 45%,var(--line));box-shadow:var(--shadow);transform:translateY(-2px)}
 .files.grid .th{aspect-ratio:4/3;display:grid;place-items:center;background:var(--sunk);position:relative;overflow:hidden}
@@ -152,7 +152,7 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .files.grid .more{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px);opacity:0;transition:opacity .15s}
 .files.grid .it:hover .more,.files.grid .more:focus-visible{opacity:1}
 .files.grid .it.folder .th{aspect-ratio:auto;height:64px;justify-content:start;padding:0 14px;grid-template-columns:auto 1fr;gap:10px}
-.files.grid .it.folder .nm{position:absolute;left:68px;right:40px;top:50%;transform:translateY(-50%);padding:0}
+.files.grid .it.folder .nm{position:absolute;left:58px;right:40px;top:50%;transform:translateY(-50%);padding:0}
 .files.grid .it.folder .sz{display:none}
 .files.grid .it.folder .nm small{display:block;font-size:11.5px;font-weight:500;color:var(--ink2);margin-top:1px}
 .files.grid .sz{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -254,7 +254,10 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .avt{border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-grid;place-items:center;color:#fff;font-weight:800;line-height:1}
 .files .th .tag{background:none!important;box-shadow:none!important;width:auto!important;height:auto!important;display:inline-flex}
 .files.grid .th .tag{left:8px;bottom:8px}
-.files.grid .it.folder .th .tag{margin-left:-14px;margin-top:16px}
+.files.grid .it.folder .th .tag{position:absolute;left:30px;top:50%;margin:6px 0 0;bottom:auto}
+.files.grid .it.folder .star{right:46px;top:8px;transform:none}
+.files.grid .it.folder .star svg{width:11px;height:11px}
+.files.grid .it.folder .nm{right:40px}
 .files.list .th .tag{right:-4px;bottom:-4px}
 .rows .th .tag{display:none}
 .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:11.5px;font-weight:700;padding:2px 6px;border-radius:6px}
@@ -332,7 +335,7 @@ kbd{font:700 12px/1 inherit;border:1px solid var(--line);border-bottom-width:2px
 .modal>.scrim{z-index:0}
 @keyframes dlg{from{opacity:0;transform:translateY(10px)}}
 body:has(.selbar) .fab{display:none!important}
-.files.list .it{display:grid;grid-template-columns:40px 1fr 110px 120px 40px;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid var(--line);cursor:pointer;position:relative;transition:background .12s}
+.files.list .it{display:grid;grid-template-columns:26px 40px minmax(0,1fr) 110px 120px 40px;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid var(--line);cursor:pointer;position:relative;transition:background .12s}
 .files.list .it:first-of-type{border-top:0}
 .files.list .it:hover{background:var(--sunk)}
 .files.list .th{width:40px;height:40px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;overflow:hidden;position:relative}
@@ -508,7 +511,8 @@ body:has(.selbar) .fab{display:none!important}
 .star{position:absolute;right:46px;top:13px;color:#f5a524;display:grid}
 .star svg{fill:#f5a524}
 .files.grid .it:not(.folder) .star{top:auto;bottom:12px;right:12px}
-.files.list .star{position:static}
+.files.list .star{position:absolute;right:58px;top:50%;transform:translateY(-50%)}
+.files.list .it .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dests{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
 .dest{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:var(--r);min-width:0}
 .dest .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0}
@@ -2437,6 +2441,8 @@ const CHANGES = [
   { v: '2026.11.02d', date: '2026-11-02', title: 'Tampilan laptop lebih rapi', items: [
     'Kolom pencarian melebar mengikuti ukuran layar, tombol di kanan sejajar',
     'Persentase kuota besar (TB) tampil <1%, bukan 0%',
+    'Tampilan daftar (list) di laptop kembali rapi, nama file tidak terdorong ke kanan',
+    'Kartu folder: nama lebih lega, foto akun tidak menutupi tulisan',
   ] },
   { v: '2026.11.02c', date: '2026-11-02', title: 'Dibagikan ke saya lebih lengkap & cepat', items: [
     'Semua item yang dibagikan kini muncul, tidak lagi terbatas 300 item',
