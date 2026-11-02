@@ -1247,19 +1247,15 @@ function render() {
 async function openLocation(f, dashIdx) {
   if (!f) return;
   toast('Mencari lokasi file…');
-  let chain = [], shared = false, orphan = false;
-  try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; orphan = !!d.orphan; } catch (e) { return toast(e.message); }
-  if (orphan) {
-    // File tanpa folder (biasanya dari Google Foto): buka menu "Tanpa folder" dan sorot file-nya
-    toast('File ini tidak berada di folder mana pun, ditampilkan di menu Tanpa folder');
-    seen('orphan');
-    S.found = { id: f.id, acc: f.acc, folder: 'orphan', special: 'orphan', scrolled: false };
-    S.special = 'orphan'; S.acc = f.acc; S.path = []; if (S.type) { S.type = ''; renderChips(); }
-    clearSearch(false); return go('files');
-  }
-  if (shared) {
-    S.found = { id: f.id, acc: f.acc, folder: 'shared', special: 'shared', scrolled: false };
-    S.special = 'shared'; S.acc = f.acc; S.path = []; if (S.type) { S.type = ''; renderChips(); }
+  let chain = [], base = 'root';
+  try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; base = d.base || (d.orphan ? 'orphan' : d.shared ? 'shared' : 'root'); } catch (e) { return toast(e.message); }
+  if (base === 'orphan' || base === 'shared') {
+    // orphan: tidak di folder mana pun (mis. dari Google Foto); shared: di folder milik orang lain
+    if (base === 'orphan') { toast('File ini tidak berada di folder mana pun, ditampilkan di menu Tanpa folder'); seen('orphan'); }
+    else toast('Lokasi: Dibagikan ke saya' + (chain.length ? ' / ' + chain.map((c) => c.name).join(' / ') : ''));
+    S.found = { id: f.id, acc: f.acc, folder: chain.length ? chain[chain.length - 1].id : base, special: base, scrolled: false };
+    S.special = base; S.acc = f.acc; S.path = chain.map((c) => ({ id: c.id, name: c.name, acc: f.acc }));
+    if (S.type) { S.type = ''; renderChips(); }
     clearSearch(false); return go('files');
   }
   S.special = null; S.acc = f.acc; S.path = chain.map((c) => ({ id: c.id, name: c.name, acc: f.acc }));
@@ -1272,7 +1268,7 @@ async function openLocation(f, dashIdx) {
 function focusItem() {
   const F = S.found;
   if (!F) return;
-  const here = S.special ? S.special : (cur()?.id || 'root');
+  const here = cur()?.id || S.special || 'root';
   if (S.q || (S.special || null) !== (F.special || null) || here !== F.folder || (!cur() && S.acc != F.acc)) { S.found = null; return; }
   const i = view.findIndex((x) => x.id === F.id && x.acc == F.acc);
   if (i < 0) return;

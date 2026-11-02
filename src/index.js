@@ -1106,22 +1106,26 @@ async function route(req, env) {
 
   // Rantai folder induk sebuah file (untuk "Buka lokasi"), tanpa folder root Drive Saya
   if (p === '/api/path') {
+    // Rantai folder induk sebuah file, dan di mana rantai itu berakar:
+    // base 'root' = Drive Saya, 'shared' = folder yang dibagikan orang lain, 'orphan' = tanpa folder
     const a = await getAcc(env, qp('acc'));
-    const f = await gjson(env, a, `/files/${encodeURIComponent(qp('id'))}?fields=parents,ownedByMe`);
+    const [f, root] = await Promise.all([
+      gjson(env, a, `/files/${encodeURIComponent(qp('id'))}?fields=parents,ownedByMe`),
+      gjson(env, a, '/files/root?fields=id'),
+    ]);
     const path = [];
-    let pid = f.parents?.[0], reachedRoot = !pid;
+    let base = null, pid = f.parents?.[0];
+    if (!pid) base = f.ownedByMe === false ? 'shared' : 'orphan';
     for (let n = 0; pid && n < 25; n++) {
+      if (pid === root.id) { base = 'root'; break; }
       const d = await gjson(env, a, `/files/${encodeURIComponent(pid)}?fields=id,name,parents`).catch(() => null);
-      if (!d) break; // folder milik orang lain yang tidak bisa diakses
-      if (!d.parents?.length) { reachedRoot = true; break; } // root Drive Saya
+      if (!d) { base = 'shared'; break; } // folder induk tidak bisa diakses: mulai dari yang terlihat
       path.unshift({ id: d.id, name: d.name });
+      if (!d.parents?.length) { base = 'shared'; break; } // folder teratas milik orang lain yang dibagikan
       pid = d.parents[0];
     }
-    // File orang lain yang foldernya tidak ada di Drive Saya: tampilkan di "Dibagikan ke saya"
-    const shared = f.ownedByMe === false && (!reachedRoot || !f.parents?.length);
-    // Tanpa folder sama sekali (mis. masuk dari Google Foto): tidak tampil di folder mana pun
-    const orphan = !shared && !f.parents?.length;
-    return json({ path: shared ? [] : path, shared, orphan });
+    if (!base) base = 'root';
+    return json({ path, base, shared: base === 'shared', orphan: base === 'orphan' });
   }
 
   if (p === '/api/overview') {
