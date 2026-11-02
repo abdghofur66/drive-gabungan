@@ -2457,6 +2457,7 @@ const CHANGES = [
     'Tampilan daftar (list) di laptop kembali rapi, nama file tidak terdorong ke kanan',
     'Kartu folder: nama lebih lega, foto akun tidak menutupi tulisan',
     'Scrollbar ikut tema gelap',
+    'Lonceng notifikasi kembali bisa dibuka di laptop',
   ] },
   { v: '2026.11.02c', date: '2026-11-02', title: 'Dibagikan ke saya lebih lengkap & cepat', items: [
     'Semua item yang dibagikan kini muncul, tidak lagi terbatas 300 item',
@@ -2517,6 +2518,7 @@ async function togglePush() {
 }
 $('#bellBtn').onclick = async (e) => {
   e.stopPropagation(); closeMenu(); seen('bell');
+  const btnRect = e.currentTarget.getBoundingClientRect(); // ambil sebelum await: currentTarget jadi null sesudahnya
   const m = document.createElement('div'); m.className = 'menu bellm'; m.onclick = (ev) => ev.stopPropagation();
   const st = await pushState().catch(() => 'unsupported');
   const al = S.alerts || [];
@@ -2531,7 +2533,7 @@ $('#bellBtn').onclick = async (e) => {
   m.querySelector('[data-allupd]').addEventListener('click', () => { closeMenu(); changesDialog(); });
   m.querySelector('[data-push]')?.addEventListener('click', () => { closeMenu(); togglePush().catch((er) => toast(er.message)); });
   if (mobile()) { const sc = document.createElement('div'); sc.className = 'scrim on menu-s'; sc.onclick = closeMenu; document.body.appendChild(sc); m.classList.add('sheet'); document.body.appendChild(m); }
-  else { document.body.appendChild(m); const r = e.currentTarget.getBoundingClientRect(); m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px'; m.style.top = r.bottom + 6 + 'px'; }
+  else { document.body.appendChild(m); const r = btnRect; m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px'; m.style.top = r.bottom + 6 + 'px'; }
   store('seenVer', CHANGES[0].v); bellBadge();
   if (al.some((a) => !a.seen)) { post('/api/alerts', {}).then(() => loadAlerts()); }
 };
