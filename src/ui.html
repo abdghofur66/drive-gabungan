@@ -223,6 +223,12 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .bell{position:relative}
 .badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:99px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
 .bellm{width:340px;max-width:calc(100vw - 16px)}
+.bellm.sheet{width:auto;max-width:none}
+.bellm .allupd{font-size:12.5px;font-weight:700;color:var(--pri);padding:6px 10px 10px;text-align:left}
+.chg{display:grid;gap:14px;max-height:60vh;overflow:auto}
+.chg-i b{display:block;font-size:15px}
+.chg-i small{color:var(--ink3);font-size:12px}
+.chg-i ul{margin:6px 0 0;padding-left:18px;color:var(--ink2);font-size:13.5px;display:grid;gap:3px}
 .bl{max-height:360px;overflow:auto}
 .br{display:flex;gap:10px;padding:10px;border-radius:10px}
 .br.new{background:var(--pri-soft)}
@@ -2425,13 +2431,46 @@ function editLink(l, done) {
 $('#navLinks').onclick = () => { seen('links'); closeSide(); manageLinks(); };
 
 // ---------- notifikasi ----------
+// ---------- catatan pembaruan aplikasi (terbaru di atas; tambahkan entri baru setiap rilis) ----------
+const CHANGES = [
+  { v: '2026.11.02c', date: '2026-11-02', title: 'Dibagikan ke saya lebih lengkap & cepat', items: [
+    'Semua item yang dibagikan kini muncul, tidak lagi terbatas 300 item',
+    'Dimuat bertahap saat digulir, jadi tampil lebih cepat',
+    'Urutan bawaan: terbaru dibagikan, seperti Google Drive',
+  ] },
+  { v: '2026.11.02b', date: '2026-11-02', title: 'File terbesar per akun', items: [
+    'Hanya file milik Anda yang memakan kuota, file bagikan tidak ikut',
+    'Pilih akun untuk merinci, lalu kelola: pindah akun atau buang ke sampah',
+  ] },
+  { v: '2026.11.02a', date: '2026-11-02', title: 'Buka lokasi file & menu Tanpa folder', items: [
+    'Tombol folder di Beranda membuka tempat file berada dan menyorotnya',
+    'File di folder bagikan dibuka lewat Dibagikan ke saya',
+    'Menu baru Tanpa folder untuk file yang tidak berada di folder mana pun',
+    'Pilihan akun di Semua Drive, tampilan HP lebih rapi',
+  ] },
+];
+const updUnseen = () => {
+  const last = store('seenVer');
+  const i = CHANGES.findIndex((c) => c.v === last);
+  return last ? (i < 0 ? CHANGES.length : i) : 1; // pengguna baru: tampilkan pembaruan terakhir saja
+};
+function bellBadge() {
+  const n = (S.alertsUnseen || 0) + updUnseen();
+  $('#bellN').textContent = n > 9 ? '9+' : n;
+  $('#bellN').classList.toggle('hidden', !n);
+}
+function changesDialog() {
+  dialog({
+    title: 'Pembaruan aplikasi', cancel: 'Tutup',
+    body: `<div class="chg">${CHANGES.map((c) => `<div class="chg-i"><b>${esc(c.title)}</b><small>${dshort(c.date)}</small><ul>${c.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`,
+  });
+}
 async function loadAlerts(check) {
   try {
     const d = await api('/api/alerts' + (check ? '?check=1' : ''));
-    S.alerts = d.alerts;
-    $('#bellN').textContent = d.unseen > 9 ? '9+' : d.unseen;
-    $('#bellN').classList.toggle('hidden', !d.unseen);
+    S.alerts = d.alerts; S.alertsUnseen = d.unseen;
   } catch (e) {}
+  bellBadge();
 }
 async function pushState() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
@@ -2457,14 +2496,18 @@ $('#bellBtn').onclick = async (e) => {
   const st = await pushState().catch(() => 'unsupported');
   const al = S.alerts || [];
   const icn = { full: 'bolt', error: 'unlink', backup: 'backup', test: 'bell', login: 'device', fail: 'lock' };
+  const nu = updUnseen(), up = CHANGES.slice(0, Math.max(1, Math.min(nu, 3)));
   m.innerHTML = `<div class="hd"><span>Notifikasi</span></div>
-    <div class="bl">${al.map((a) => `<div class="br ${a.seen ? '' : 'new'}"><span class="ai">${ic(icn[a.kind] || 'info')}</span><div class="n"><b>${esc(a.title)}</b><span>${esc(a.body)}</span><small>${ago(a.ts)}</small></div></div>`).join('') || '<p class="small muted" style="padding:10px">Belum ada notifikasi.</p>'}</div>
+    <div class="bl">${up.map((c, k) => `<div class="br upd ${k < nu ? 'new' : ''}"><span class="ai">${ic('bolt')}</span><div class="n"><b>Pembaruan: ${esc(c.title)}</b><span>${c.items.map(esc).join(' · ')}</span><small>${dshort(c.date)}</small></div></div>`).join('')}
+    <button class="allupd" data-allupd>Lihat semua pembaruan</button>${al.map((a) => `<div class="br ${a.seen ? '' : 'new'}"><span class="ai">${ic(icn[a.kind] || 'info')}</span><div class="n"><b>${esc(a.title)}</b><span>${esc(a.body)}</span><small>${ago(a.ts)}</small></div></div>`).join('') || '<p class="small muted" style="padding:10px">Belum ada notifikasi.</p>'}</div>
     ${st === 'unsupported' ? '<p class="small muted" style="padding:8px 10px">Pasang sebagai aplikasi agar notifikasi bisa muncul di perangkat ini.</p>'
       : st === 'denied' ? '<p class="small muted" style="padding:8px 10px">Notifikasi diblokir di browser ini.</p>'
       : `<button data-push>${ic('bell')}${st === 'on' ? 'Matikan notifikasi di perangkat ini' : 'Aktifkan notifikasi di perangkat ini'}</button>`}`;
+  m.querySelector('[data-allupd]').addEventListener('click', () => { closeMenu(); changesDialog(); });
   m.querySelector('[data-push]')?.addEventListener('click', () => { closeMenu(); togglePush().catch((er) => toast(er.message)); });
   if (mobile()) { const sc = document.createElement('div'); sc.className = 'scrim on menu-s'; sc.onclick = closeMenu; document.body.appendChild(sc); m.classList.add('sheet'); document.body.appendChild(m); }
   else { document.body.appendChild(m); const r = e.currentTarget.getBoundingClientRect(); m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px'; m.style.top = r.bottom + 6 + 'px'; }
+  store('seenVer', CHANGES[0].v); bellBadge();
   if (al.some((a) => !a.seen)) { post('/api/alerts', {}).then(() => loadAlerts()); }
 };
 
