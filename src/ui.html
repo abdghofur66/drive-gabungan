@@ -426,6 +426,7 @@ body:has(.selbar) .fab{display:none!important}
 .rows .loc{flex:none;color:var(--ink2)}
 .rows .loc:hover{color:var(--pri)}
 .it.flash{animation:flash 2.2s var(--ease)}
+.files .it.found{outline:3px solid var(--pri);outline-offset:-1px;background:color-mix(in srgb,var(--pri) 8%,var(--surface))}
 @keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--pri);border-color:var(--pri)}100%{box-shadow:0 0 0 0 transparent}}
 .rows .th{width:38px;height:38px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;overflow:hidden;position:relative}
 .rows .th img{width:100%;height:100%;object-fit:cover}
@@ -1239,20 +1240,34 @@ function render() {
 async function openLocation(f) {
   if (!f) return;
   toast('Membuka lokasi…');
-  let chain = [];
-  try { chain = (await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`)).path || []; } catch (e) { return toast(e.message); }
+  let chain = [], shared = false;
+  try { const d = await api(`/api/path?acc=${f.acc}&id=${encodeURIComponent(f.id)}`); chain = d.path || []; shared = !!d.shared; } catch (e) { return toast(e.message); }
+  if (shared) {
+    S.found = { id: f.id, acc: f.acc, folder: 'shared', special: 'shared', scrolled: false };
+    S.special = 'shared'; S.acc = f.acc; S.path = []; if (S.type) { S.type = ''; renderChips(); }
+    clearSearch(false); return go('files');
+  }
   S.special = null; S.acc = f.acc; S.path = chain.map((c) => ({ id: c.id, name: c.name, acc: f.acc }));
-  S.focus = f.id; clearSearch(false); go('files');
+  // Sorotan bertahan selama berada di folder ini; filter jenis direset agar file pasti terlihat
+  S.found = { id: f.id, acc: f.acc, folder: chain.length ? chain[chain.length - 1].id : 'root', scrolled: false };
+  if (S.type) { S.type = ''; renderChips(); }
+  clearSearch(false); go('files');
 }
 function focusItem() {
-  if (!S.focus) return;
-  const i = view.findIndex((x) => x.id === S.focus);
-  S.focus = null;
+  const F = S.found;
+  if (!F) return;
+  const here = S.special ? S.special : (cur()?.id || 'root');
+  if (S.q || (S.special || null) !== (F.special || null) || here !== F.folder || (!cur() && S.acc != F.acc)) { S.found = null; return; }
+  const i = view.findIndex((x) => x.id === F.id && x.acc == F.acc);
   if (i < 0) return;
   const el = $(`#files .it[data-i="${i}"]`);
   if (!el) return;
-  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2400);
+  el.classList.add('found');
+  if (!F.scrolled) {
+    F.scrolled = true;
+    el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2400);
+    requestAnimationFrame(() => setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 120));
+  }
 }
 
 // ---------- pilih banyak ----------

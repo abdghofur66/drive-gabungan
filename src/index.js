@@ -1101,16 +1101,19 @@ async function route(req, env) {
   // Rantai folder induk sebuah file (untuk "Buka lokasi"), tanpa folder root Drive Saya
   if (p === '/api/path') {
     const a = await getAcc(env, qp('acc'));
-    const f = await gjson(env, a, `/files/${encodeURIComponent(qp('id'))}?fields=parents`);
+    const f = await gjson(env, a, `/files/${encodeURIComponent(qp('id'))}?fields=parents,ownedByMe`);
     const path = [];
-    let pid = f.parents?.[0];
+    let pid = f.parents?.[0], reachedRoot = !pid;
     for (let n = 0; pid && n < 25; n++) {
       const d = await gjson(env, a, `/files/${encodeURIComponent(pid)}?fields=id,name,parents`).catch(() => null);
-      if (!d || !d.parents?.length) break; // root Drive Saya, atau folder yang tidak bisa diakses
+      if (!d) break; // folder milik orang lain yang tidak bisa diakses
+      if (!d.parents?.length) { reachedRoot = true; break; } // root Drive Saya
       path.unshift({ id: d.id, name: d.name });
       pid = d.parents[0];
     }
-    return json({ path });
+    // File orang lain yang foldernya tidak ada di Drive Saya: tampilkan di "Dibagikan ke saya"
+    const shared = f.ownedByMe === false && (!reachedRoot || !f.parents?.length);
+    return json({ path: shared ? [] : path, shared });
   }
 
   if (p === '/api/overview') {
