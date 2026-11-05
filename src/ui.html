@@ -237,6 +237,17 @@ main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:99px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 0 2px var(--bg)}
 .bellm{width:340px;max-width:calc(100vw - 16px)}
 .bellm.sheet{width:auto;max-width:none}
+#busy{position:fixed;left:0;right:0;top:0;height:3px;z-index:200;overflow:hidden;opacity:0;background:color-mix(in srgb,var(--pri) 22%,transparent);transition:opacity .2s;pointer-events:none}
+#busy.on{opacity:1}
+#busy::before{content:"";position:absolute;top:0;bottom:0;left:0;width:35%;border-radius:3px;background:linear-gradient(90deg,transparent,var(--pri),#38d39a,transparent);animation:busyrun 1.1s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes busyrun{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+body.is-busy{cursor:progress}
+body.is-busy .top .search svg.i{animation:busypulse 1s ease-in-out infinite}
+@keyframes busypulse{50%{opacity:.35}}
+.btn.loading{pointer-events:none;opacity:.85}
+.btn.loading::before{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#busy::before{animation:none;width:100%;opacity:.6}.btn.loading::before{animation:none}}
 .bellm .allupd{font-size:12.5px;font-weight:700;color:var(--pri);padding:6px 10px 10px;text-align:left}
 .chg{display:grid;gap:14px;max-height:60vh;overflow:auto}
 .chg-i b{display:block;font-size:15px}
@@ -618,6 +629,7 @@ footer img{width:18px;height:18px}
 </head>
 <body>
 
+<div id="busy" role="progressbar" aria-label="Memuat"></div>
 <svg width="0" height="0" style="position:absolute">
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.92A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17.5 18H7z"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
@@ -833,8 +845,22 @@ const isNew = (k) => NEWF.includes(k) && !store('seen_' + k);
 const newTag = (k) => (isNew(k) ? '<span class="newtag">Baru</span>' : '');
 function seen(k) { if (!isNew(k)) return; store('seen_' + k, 1); document.querySelectorAll(`[data-new="${k}"]`).forEach((x) => x.remove()); }
 const dur = (ms) => { if (!ms) return ''; const t = Math.round(ms / 1000), h = Math.floor(t / 3600), m2 = Math.floor((t % 3600) / 60), s2 = String(t % 60).padStart(2, '0'); return h ? `${h}:${String(m2).padStart(2, '0')}:${s2}` : `${m2}:${s2}`; };
+// Indikator memuat: garis berjalan di atas layar selama ada permintaan ke server
+let busyN = 0, busyT = null;
+function busy(on) {
+  busyN = Math.max(0, busyN + (on ? 1 : -1));
+  const el = $('#busy'); if (!el) return;
+  clearTimeout(busyT);
+  if (busyN) busyT = setTimeout(() => { el.classList.add('on'); document.body.classList.add('is-busy'); }, 120); // hindari kedip untuk respons cepat
+  else { el.classList.remove('on'); document.body.classList.remove('is-busy'); }
+}
 async function api(path, opt = {}) {
-  const r = await fetch(path, { credentials: 'same-origin', ...opt });
+  const { quiet, ...o } = opt;
+  if (!quiet) busy(true);
+  let r;
+  try { r = await fetch(path, { credentials: 'same-origin', ...o }); }
+  catch (e) { throw new Error('Tidak ada koneksi. Periksa internet lalu coba lagi.'); }
+  finally { if (!quiet) busy(false); }
   const d = await r.json().catch(() => ({}));
   if (r.status === 401 && !path.includes('login')) { showAuth(); throw new Error(d.error || 'Silakan masuk lagi'); }
   if (!r.ok) throw new Error(d.error || 'Terjadi kesalahan (' + r.status + ')');
@@ -1701,8 +1727,8 @@ function dialog({ title, desc, body = '', ok, run, danger, after, cancel }) {
   md.querySelector('.scrim').onclick = close;
   md.querySelector('form').onsubmit = async (e) => {
     e.preventDefault(); const b = md.querySelector('[data-ok]'); if (!b) return;
-    b.disabled = true;
-    try { await run(md.querySelector('.body')); close(); } catch (err) { md.querySelector('[data-err]').textContent = err.message; b.disabled = false; }
+    b.disabled = true; b.classList.add('loading');
+    try { await run(md.querySelector('.body')); close(); } catch (err) { md.querySelector('[data-err]').textContent = err.message; b.disabled = false; b.classList.remove('loading'); }
   };
   document.addEventListener('keydown', key);
   document.body.appendChild(md);
@@ -2469,7 +2495,7 @@ function changesDialog() {
 }
 async function loadAlerts(check) {
   try {
-    const d = await api('/api/alerts' + (check ? '?check=1' : ''));
+    const d = await api('/api/alerts' + (check ? '?check=1' : ''), { quiet: true });
     S.alerts = d.alerts; S.alertsUnseen = d.unseen;
   } catch (e) {}
   bellBadge();
