@@ -240,11 +240,17 @@ async function checkAlerts(env) {
     const key = 'al_' + a.id;
     const last = JSON.parse((await getSetting(env, key)) || '{}');
     const now = Date.now();
-    if (a.error) {
-      if (!last.err || now - last.err > 3 * 864e5) { await addAlert(env, 'error', 'Akses akun terputus', `${a.email} perlu dihubungkan ulang.`, '/'); last.err = now; }
+    // Hanya peringatkan bila izin benar-benar dicabut/kedaluwarsa (bukan gangguan sesaat Google/jaringan),
+    // dan setelah gagal 2 kali berturut-turut (±20 menit) agar tidak ada alarm palsu.
+    const revoked = a.error && /invalid_grant|invalid_client|unauthorized_client/.test(a.error);
+    if (a.error && !revoked) { await setSetting(env, key, JSON.stringify(last)); continue; }
+    if (revoked) {
+      last.fails = (last.fails || 0) + 1;
+      if (last.fails >= 2 && (!last.err || now - last.err > 3 * 864e5)) { await addAlert(env, 'error', 'Akses akun terputus', `${a.email} perlu dihubungkan ulang.`, '/'); last.err = now; }
     } else if (a.limit && a.usage / a.limit >= 0.9) {
       if (!last.full || now - last.full > 3 * 864e5) { await addAlert(env, 'full', 'Akun hampir penuh', `${a.email} sudah terpakai ${Math.round((a.usage / a.limit) * 100)}%.`, '/'); last.full = now; }
-    } else { delete last.full; delete last.err; }
+    } else { delete last.full; delete last.err; delete last.fails; }
+    if (!a.error) delete last.fails;
     await setSetting(env, key, JSON.stringify(last));
   }
 }

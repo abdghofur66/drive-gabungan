@@ -1,5 +1,14 @@
 [
   {
+    "v": "2026.11.06a",
+    "date": "2026-11-06",
+    "title": "Peringatan akun lebih akurat",
+    "items": [
+      "Notifikasi Akses akun terputus hanya muncul bila izin akun benar-benar dicabut atau kedaluwarsa",
+      "Gangguan sesaat dari Google atau jaringan tidak lagi memicu peringatan"
+    ]
+  },
+  {
     "v": "2026.11.05a",
     "date": "2026-11-05",
     "title": "Animasi memuat",
