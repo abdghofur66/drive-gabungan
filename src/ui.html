@@ -449,7 +449,10 @@ body:has(.selbar) .fab{display:none!important}
 .brk .bar2{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--sunk);gap:2px}
 .brk .bar2 i{display:block;height:100%;transition:flex-grow .6s var(--ease)}
 .brk .bar2 i.dot{flex:none;width:12px;border-radius:99px}
-.brk .bd{font-size:12px;color:var(--ink3);margin-top:5px}
+.brk .bd{font-size:12px;color:var(--ink3);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.brk .bd span{display:inline-flex;align-items:center;gap:5px}
+.brk .bd i{width:8px;height:8px;border-radius:50%;display:inline-block}
+:root{--c-drive:#4f86ff;--c-mail:#f5a524;--c-trash:#ef5a5a}
 .brk-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin-top:16px}
 .brk-key span{display:inline-flex;align-items:center;gap:6px}
 .brk-key i{width:10px;height:10px;border-radius:3px;display:inline-block}
@@ -1154,11 +1157,11 @@ async function loadDash() {
         const other = Math.max(0, a.usage - a.drive - a.trash), cap = a.limit || a.usage || 1;
         return `<div class="row"><div class="t"><b>${esc(a.email)}</b><span>${fmt(a.usage)}${a.limit ? ' / ' + fmt(a.limit) : ''}</span></div>
           <div class="bar2">${a.usage / cap < 0.02
-            ? `<i class="dot" style="background:${a.color}" title="Terpakai ${fmt(a.usage)} dari ${fmt(cap)}"></i>`
-            : `<i style="flex-grow:${a.drive / cap};background:${a.color}" title="Drive: ${fmt(a.drive)}"></i><i style="flex-grow:${other / cap};background:${a.color};opacity:.45" title="Gmail & Foto: ${fmt(other)}"></i><i style="flex-grow:${a.trash / cap};background:var(--danger);opacity:.7" title="Sampah: ${fmt(a.trash)}"></i><i style="flex-grow:${Math.max(0, cap - a.usage) / cap}"></i>`}</div>
-          <div class="bd">${[['Drive', a.drive], ['Gmail & Foto', other], ['Sampah', a.trash]].filter((x) => x[1] > 0).map((x) => `${x[0]} ${fmt(x[1])}`).join(' · ') || 'Kosong'}</div></div>`;
+            ? `<i class="dot" style="background:${a.drive >= other ? 'var(--c-drive)' : 'var(--c-mail)'}" title="Terpakai ${fmt(a.usage)} dari ${fmt(cap)}"></i>`
+            : `<i style="flex-grow:${a.drive / cap};background:var(--c-drive)" title="Drive: ${fmt(a.drive)}"></i><i style="flex-grow:${other / cap};background:var(--c-mail)" title="Gmail & Foto: ${fmt(other)}"></i><i style="flex-grow:${a.trash / cap};background:var(--c-trash)" title="Sampah: ${fmt(a.trash)}"></i><i style="flex-grow:${Math.max(0, cap - a.usage) / cap}"></i>`}</div>
+          <div class="bd">${[['Drive', a.drive, '--c-drive'], ['Gmail & Foto', other, '--c-mail'], ['Sampah', a.trash, '--c-trash']].filter((x) => x[1] > 0).map((x) => `<span><i style="background:var(${x[2]})"></i>${x[0]} ${fmt(x[1])}</span>`).join('') || 'Kosong'}</div></div>`;
       }).join('')}</div>
-      <div class="brk-key"><span><i style="background:var(--ink2)"></i>Drive</span><span><i style="background:var(--ink2);opacity:.45"></i>Gmail &amp; Foto</span><span><i style="background:var(--danger);opacity:.7"></i>Sampah</span></div></div>
+      <div class="brk-key"><span><i style="background:var(--c-drive)"></i>Drive</span><span><i style="background:var(--c-mail)"></i>Gmail &amp; Foto</span><span><i style="background:var(--c-trash)"></i>Sampah</span></div></div>
 
     <div class="card c-list"><h3>Terakhir diubah</h3><p class="sub">Dari semua akun.</p>
       <div class="rows">${d.recent.map((f, i) => fileRow(f, i, ago(f.modifiedTime))).join('') || '<p class="muted small">Belum ada file.</p>'}</div></div>
