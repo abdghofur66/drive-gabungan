@@ -734,7 +734,7 @@ async function route(req, env) {
   if (p === '/manifest.webmanifest') {
     return new Response(JSON.stringify({
       name: 'Drive Gabungan', short_name: 'Drive Gabungan', id: '/', start_url: '/', scope: '/',
-      display: 'standalone', background_color: '#0d1322', theme_color: '#2f6bff', lang: 'id',
+      display: 'standalone', background_color: '#0d1322', theme_color: '#0d1322', lang: 'id',
       description: 'Gabungkan beberapa akun Google Drive dalam satu tampilan.',
       icons: [
         { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
