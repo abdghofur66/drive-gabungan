@@ -1,5 +1,14 @@
 [
   {
+    "v": "2026.11.09a",
+    "date": "2026-11-09",
+    "title": "Angka ruang akun lebih tepat",
+    "items": [
+      "Akun berkapasitas TB yang sudah terisi kini tampil <1%, bukan 0%",
+      "Bar pemakaian tetap terlihat walau isinya sangat kecil dibanding kapasitas"
+    ]
+  },
+  {
     "v": "2026.11.06a",
     "date": "2026-11-06",
     "title": "Peringatan akun lebih akurat",
