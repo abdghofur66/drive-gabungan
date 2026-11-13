@@ -884,7 +884,10 @@ async function route(req, env) {
 
   if (p === '/oauth/callback') {
     const back = (msg) => Response.redirect(url.origin + '/?msg=' + encodeURIComponent(msg), 302);
-    if (qp('error')) return back('Login Google dibatalkan');
+    // Kegagalan dijelaskan dengan bahasa awam + langkah perbaikan (ditampilkan sebagai dialog)
+    const fail = (msg) => Response.redirect(url.origin + '/?err=' + encodeURIComponent(msg), 302);
+    if (qp('error') === 'access_denied') return fail('Google menolak atau login dibatalkan. Jika tadi muncul tulisan "aplikasi sedang diuji" atau Error 403, buka Google Cloud → Google Auth Platform → Audience, lalu klik Publish app sampai statusnya In production. Setelah itu coba lagi.');
+    if (qp('error')) return fail('Login Google gagal (' + qp('error') + '). Coba lagi, dan pastikan memilih akun yang benar.');
     const st = await getSetting(env, 'oauth_state');
     if (!st || st !== qp('state')) return back('State OAuth tidak cocok, ulangi');
     await setSetting(env, 'oauth_state', '');
@@ -897,14 +900,26 @@ async function route(req, env) {
       }),
     });
     const tk = await r.json();
-    if (!r.ok) return back('Gagal tukar token: ' + (tk.error_description || tk.error));
-    if (!tk.scope || !tk.scope.includes('auth/drive')) return back('Izin Google Drive tidak dicentang. Ulangi dan centang akses Drive.');
+    if (!r.ok) {
+      const why = {
+        invalid_client: 'Client ID atau Client Secret salah. Salin ulang keduanya dari Google Cloud → Google Auth Platform → Clients (tanpa spasi), lalu tempel lagi lewat menu ⋮ → Keamanan → Pengaturan Google.',
+        unauthorized_client: 'Client ID ini bukan tipe "Web application". Buat client baru dengan tipe Web application, lalu tempel ID dan Secret-nya.',
+        redirect_uri_mismatch: 'Alamat redirect belum terdaftar. Salin Redirect URI dari aplikasi, tempel di Google Cloud → Clients → Authorized redirect URIs, Save, tunggu 5 menit, lalu coba lagi.',
+        invalid_grant: 'Kode login sudah kedaluwarsa. Klik Hubungkan akun Google sekali lagi.',
+      }[tk.error];
+      return fail(why || 'Google menolak koneksi: ' + (tk.error_description || tk.error) + '. Periksa kembali langkah Siapkan Google Cloud di panduan.');
+    }
+    if (!tk.scope || !tk.scope.includes('auth/drive')) return fail('Izin Google Drive tidak dicentang. Klik Hubungkan akun Google lagi, lalu centang kotak akses Google Drive di layar persetujuan. Jika kotaknya tidak ada, tambahkan scope .../auth/drive di Google Cloud → Data Access.');
     const about = await (await fetch('https://www.googleapis.com/drive/v3/about?fields=user', { headers: { authorization: 'Bearer ' + tk.access_token } })).json();
+    if (about.error) {
+      const disabled = /has not been used|is disabled|accessNotConfigured|SERVICE_DISABLED/i.test(JSON.stringify(about.error));
+      return fail(disabled ? 'Google Drive API belum diaktifkan. Buka Google Cloud → APIs & Services → Library → Google Drive API → Enable, tunggu 1–2 menit, lalu coba lagi.' : 'Google Drive menolak: ' + (about.error.message || 'tidak diketahui'));
+    }
     const email = about.user?.emailAddress;
-    if (!email) return back('Tidak bisa membaca email akun');
+    if (!email) return fail('Email akun tidak terbaca. Coba hubungkan lagi.');
     const ex = await env.DB.prepare('SELECT id, refresh_token FROM accounts WHERE email=?').bind(email).first();
     const refresh = tk.refresh_token || ex?.refresh_token;
-    if (!refresh) return back('Google tidak memberi refresh token, ulangi');
+    if (!refresh) return fail('Google tidak memberi izin jangka panjang. Buka myaccount.google.com/permissions, hapus akses aplikasi ini, lalu hubungkan lagi.');
     const exp = Date.now() + tk.expires_in * 1000;
     if (ex) {
       await env.DB.prepare('UPDATE accounts SET refresh_token=?, access_token=?, token_exp=?, name=? WHERE id=?')

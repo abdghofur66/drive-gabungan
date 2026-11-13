@@ -73,6 +73,12 @@ footer a{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:va
 footer a:hover{color:var(--pri);text-decoration:none}
 footer img{width:18px;height:18px}
 @media (max-width:560px){section.step{grid-template-columns:1fr}.num{margin-bottom:8px}.body{grid-column:1}}
+.trouble{margin:18px 0;padding:16px 18px;border-radius:14px;border:1px solid var(--line);background:var(--card,transparent)}
+.trouble h3{margin:0 0 10px;font-size:16px}
+.trouble table{width:100%;border-collapse:collapse;font-size:14px}
+.trouble th,.trouble td{text-align:left;vertical-align:top;padding:8px 6px;border-top:1px solid var(--line)}
+.trouble th{font-size:12px;color:var(--ink2);border-top:0}
+@media (max-width:600px){.trouble tr{display:grid}.trouble th:nth-child(2){display:none}.trouble td:first-child{border-bottom:0;padding-bottom:0}}
 </style>
 </head>
 <body>
@@ -215,6 +221,20 @@ footer img{width:18px;height:18px}
           <div class="m-acc"><s style="background:#17a36b"></s>kerja@gmail.com</div>
           <div class="m-acc"><s style="background:#f5a524"></s>arsip@gmail.com</div>
         </div>
+      </div>
+      <div class="trouble" id="gagal">
+        <h3>Kalau akun gagal tersambung</h3>
+        <table>
+          <tr><th>Yang muncul</th><th>Cara memperbaiki</th></tr>
+          <tr><td><b>Error 400: redirect_uri_mismatch</b></td><td>Di aplikasi, klik <b>Salin</b> pada Redirect URI. Tempel di Google Cloud → <b>Clients</b> → client-mu → <b>Authorized redirect URIs</b> → Save. Tunggu 5 menit. Alamat harus sama persis dengan yang dibuka di browser.</td></tr>
+          <tr><td><b>Error 403: access_denied</b> / "aplikasi sedang diuji"</td><td>Google Auth Platform → <b>Audience</b> → <b>Publish app</b> sampai statusnya <b>In production</b>.</td></tr>
+          <tr><td>Tombol <b>Publish app</b> tidak bisa diklik</td><td>Lengkapi <b>Branding</b>: home page, privacy policy, terms of service (isi semuanya dengan alamat aplikasimu) → Save.</td></tr>
+          <tr><td>Buntu di "Google belum memverifikasi aplikasi ini"</td><td>Klik tulisan kecil <b>Lanjutan</b> di kiri bawah, lalu <b>Buka … (tidak aman)</b>. Ini wajar untuk aplikasi pribadi.</td></tr>
+          <tr><td>"Client ID atau Client Secret salah"</td><td>Salin ulang keduanya dari <b>Clients</b> tanpa spasi, lalu tempel lagi lewat menu ⋮ → <b>Keamanan</b> → <b>Pengaturan Google</b> di aplikasi.</td></tr>
+          <tr><td>"Google Drive API belum diaktifkan"</td><td>APIs &amp; Services → Library → <b>Google Drive API</b> → <b>Enable</b>.</td></tr>
+          <tr><td>"Izin Google Drive tidak dicentang"</td><td>Ulangi, lalu centang kotak akses Google Drive. Jika tidak ada, tambahkan scope <code>.../auth/drive</code> di <b>Data Access</b>.</td></tr>
+        </table>
+        <p class="cap">Aplikasi kini juga menampilkan penjelasan seperti di atas saat penyambungan gagal.</p>
       </div>
       <div class="tip ok">Selesai. Buka alamat aplikasimu dari perangkat mana saja dan masuk dengan password pemilik. Di HP, pilih <b>Tambahkan ke layar utama</b> agar terasa seperti aplikasi.</div>
     </div>

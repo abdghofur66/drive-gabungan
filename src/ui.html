@@ -2278,10 +2278,13 @@ function security() {
       <div class="sh-sec"><b>${ic('clock')} Riwayat masuk <span class="newtag">Baru</span></b><p class="small muted">Termasuk percobaan gagal. Kamu diberi tahu bila ada login dari perangkat baru atau banyak password salah.</p>
         <div class="sh-list">${logins.map(loginRow).join('') || '<p class="small muted">Belum ada catatan.</p>'}</div>
         <button type="button" class="btn ghost" data-allog>Lihat semua riwayat</button></div>
+      <div class="sh-sec"><b>${ic('cloud')} Pengaturan Google</b><p class="small muted">Client ID, Client Secret, dan Redirect URI dari Google Cloud. Ubah di sini bila akun gagal tersambung karena ID atau Secret salah.</p>
+        <button type="button" class="btn ghost" data-gcfg>Ubah Client ID &amp; Secret</button></div>
       <div class="sh-sec"><b>${ic('key')} Ganti password</b>
         <input class="field sm" type="password" data-o placeholder="Password lama"><input class="field sm" type="password" data-n placeholder="Password baru (min. 8)">
         <button type="button" class="btn ghost" data-pw>Ganti password</button></div>`;
     b.querySelector('[data-allog]').onclick = loginHistory;
+    b.querySelector('[data-gcfg]').onclick = () => { closeMenu?.(); googleSetup(); };
     b.querySelector('[data-lock]').onchange = (e) => { store('lock_min', e.target.value); armLock(); toast(e.target.value === '0' ? 'Kunci otomatis dimatikan' : 'Kunci otomatis aktif'); };
     b.querySelector('[data-addpk]')?.addEventListener('click', () => addPasskey().then(draw));
     b.querySelectorAll('[data-pk]').forEach((x) => (x.onclick = async () => { await api('/api/passkeys?id=' + encodeURIComponent(x.dataset.pk), { method: 'DELETE' }); toast('Passkey dihapus'); draw(); }));
@@ -2661,6 +2664,11 @@ async function startApp() {
 (async () => {
   const msg = new URLSearchParams(location.search).get('msg');
   if (msg) { setTimeout(() => toast(msg), 300); history.replaceState(null, '', '/'); }
+  const err = new URLSearchParams(location.search).get('err');
+  if (err) {
+    history.replaceState(null, '', '/');
+    setTimeout(() => dialog({ title: 'Akun belum tersambung', desc: err, ok: 'Buka panduan', cancel: 'Tutup', run: async () => { window.open('/panduan#gagal', '_blank'); } }), 600);
+  }
   try {
     const st = await api('/api/state');
     if (!st.setup) showAuth('setup'); else if (!st.loggedIn) showAuth(); else startApp();

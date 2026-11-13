@@ -1,5 +1,14 @@
 [
   {
+    "v": "2026.11.13a",
+    "date": "2026-11-13",
+    "title": "Bantuan saat akun gagal tersambung",
+    "items": [
+      "Saat Google menolak koneksi, aplikasi menjelaskan penyebabnya dengan bahasa sederhana beserta cara memperbaikinya",
+      "Panduan punya bagian baru: Kalau akun gagal tersambung"
+    ]
+  },
+  {
     "v": "2026.11.09a",
     "date": "2026-11-09",
     "title": "Angka ruang akun lebih tepat",
